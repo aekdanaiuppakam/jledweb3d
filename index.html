@@ -259,6 +259,9 @@
         <h2 class="text-sm font-bold tracking-wide text-white uppercase">แผงควบคุมและสเปกจอ JLED</h2>
       </div>
       <div class="flex items-center gap-1.5">
+        <button id="open-pitch-lab-btn" type="button" title="ห้องทดลองเปรียบเทียบเม็ดพิกเซล (Pitch Comparison Lab)" class="text-[11px] text-emerald-300 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-emerald-500/40 hover:border-emerald-400">
+          <span>🔬</span> Pitch Lab
+        </button>
         <button id="open-mockup-btn" type="button" title="ทาบภาพหน้างานจริง (Photo Mockup)" class="text-[11px] text-amber-300 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-amber-500/40 hover:border-amber-400">
           <span>📷</span> ทาบภาพจริง
         </button>
@@ -935,6 +938,73 @@
     </div>
   </div>
 
+  <!-- ================= PIXEL PITCH COMPARISON LAB MODAL (PHASE 06) ================= -->
+  <div id="pitch-lab-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-5">
+    <div class="glass-panel max-w-5xl w-full rounded-2xl border border-emerald-500/40 overflow-hidden shadow-2xl flex flex-col max-h-[94vh]">
+      <!-- Header -->
+      <div class="px-5 py-3.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🔬</span>
+          <div>
+            <h3 class="text-base font-bold text-white leading-tight">ห้องทดลองเปรียบเทียบเม็ดพิกเซล (Pixel Pitch Comparison Lab)</h3>
+            <p class="text-[11px] text-slate-400">เปรียบเทียบภาพเสมือนจริงของ 2 ความละเอียดแบบแบ่งครึ่งหน้าจอ (Split View) พร้อมตารางสเปกเชิงวิศวกรรม</p>
+          </div>
+        </div>
+        <button id="close-pitch-lab-btn" type="button" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold">
+          ✕
+        </button>
+      </div>
+
+      <!-- Pitch Lab Body -->
+      <div class="p-4 overflow-y-auto space-y-4 flex-1">
+        <!-- Selectors & Loupe Zoom Controls Bar -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs">
+          <div>
+            <label class="block text-slate-400 text-[11px] font-bold text-cyan-300 mb-1">ฝั่งซ้าย (Model A):</label>
+            <select id="lab-select-a" class="w-full bg-slate-900 border border-slate-700 text-slate-100 text-xs rounded-lg p-2 outline-none focus:border-[#00E5FF]"></select>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 text-[11px] font-bold text-orange-400 mb-1">ฝั่งขวา (Model B):</label>
+            <select id="lab-select-b" class="w-full bg-slate-900 border border-slate-700 text-slate-100 text-xs rounded-lg p-2 outline-none focus:border-[#FF6B00]"></select>
+          </div>
+
+          <div class="flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <label for="lab-zoom-slider" class="text-slate-400 text-[11px]">กำลังขยายเม็ดไฟ:</label>
+              <span id="lab-zoom-val" class="font-mono text-emerald-400 font-bold">3x Zoom</span>
+            </div>
+            <input id="lab-zoom-slider" type="range" min="1" max="8" step="0.5" value="3" class="orange-slider" />
+            <div class="flex justify-between text-[9px] text-slate-500 font-mono">
+              <span>1x (ภาพรวม)</span>
+              <span>4x</span>
+              <span>8x (ส่องเม็ดไฟ)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Split Screen Canvas -->
+        <div class="relative w-full h-[280px] sm:h-[340px] rounded-xl overflow-hidden border border-slate-800 bg-black select-none shadow-inner" id="lab-canvas-container">
+          <canvas id="lab-split-canvas" class="w-full h-full block cursor-ew-resize"></canvas>
+          <div id="lab-badge-left" class="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur border border-cyan-500/50 text-cyan-300 font-mono text-xs font-bold pointer-events-none">
+            Model A
+          </div>
+          <div id="lab-badge-right" class="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur border border-orange-500/50 text-orange-400 font-mono text-xs font-bold pointer-events-none">
+            Model B
+          </div>
+          <div class="absolute bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-slate-900/90 border border-slate-700 text-[10px] text-slate-400 pointer-events-none">
+            ↔ ลากเส้นตรงกลางเพื่อเลื่อนเปรียบเทียบ
+          </div>
+        </div>
+
+        <!-- Real-Time Metrics Comparison Table -->
+        <div id="lab-comparison-table-container" class="rounded-xl border border-slate-800 overflow-hidden">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= QUOTATION & SPEC SUMMARY MODAL ================= -->
   <div id="quote-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
     <div class="glass-panel max-w-lg w-full rounded-2xl border border-[#00E5FF]/40 overflow-hidden shadow-2xl">
@@ -988,6 +1058,7 @@
     import { calculateScreenSpecs } from './src/core/calculation-engine.js';
     import { calculateDimensionCoordinates } from './src/core/measurements.js';
     import { getDefaultCornerPins, renderWarpedCanvas } from './src/core/perspective-engine.js';
+    import { comparePixelPitches } from './src/core/pitch-comparison.js';
     import { globalStateStore } from './src/core/state.js';
     import { disposeHierarchy, globalMediaTracker } from './src/core/disposal.js';
 
@@ -2904,6 +2975,288 @@
         a.href = exportCanvas.toDataURL('image/png');
         a.download = `jled_mockup_${new Date().toISOString().slice(0, 10)}.png`;
         a.click();
+      });
+
+      // ================= PHASE 06: PIXEL PITCH COMPARISON LAB =================
+      const pitchLabModal = document.getElementById('pitch-lab-modal');
+      const labSelectA = document.getElementById('lab-select-a');
+      const labSelectB = document.getElementById('lab-select-b');
+      const labZoomSlider = document.getElementById('lab-zoom-slider');
+      const labZoomVal = document.getElementById('lab-zoom-val');
+      const labSplitCanvas = document.getElementById('lab-split-canvas');
+      const labSplitCtx = labSplitCanvas.getContext('2d');
+      const labBadgeLeft = document.getElementById('lab-badge-left');
+      const labBadgeRight = document.getElementById('lab-badge-right');
+      const labTableContainer = document.getElementById('lab-comparison-table-container');
+
+      let labSplitRatio = 0.5;
+      let isLabDragging = false;
+      let isLabOpen = false;
+
+      function populateLabSelects() {
+        const products = defaultCatalog.getAllProducts();
+        labSelectA.innerHTML = '';
+        labSelectB.innerHTML = '';
+        const currentId = globalStateStore.getState().productId;
+
+        products.forEach((p, idx) => {
+          const optA = document.createElement('option');
+          optA.value = p.id;
+          optA.textContent = `${p.displayName} (P${p.actualPixelPitchMm} | ${p.environment})`;
+          if (p.id === currentId || (idx === 0 && !currentId)) optA.selected = true;
+          labSelectA.appendChild(optA);
+
+          const optB = document.createElement('option');
+          optB.value = p.id;
+          optB.textContent = `${p.displayName} (P${p.actualPixelPitchMm} | ${p.environment})`;
+          if (idx === (products.length > 2 ? 2 : 1)) optB.selected = true;
+          labSelectB.appendChild(optB);
+        });
+      }
+
+      function renderLabComparison() {
+        if (!isLabOpen || !labSplitCanvas) return;
+        const cw = labSplitCanvas.parentElement.clientWidth || 800;
+        const ch = labSplitCanvas.parentElement.clientHeight || 340;
+
+        if (labSplitCanvas.width !== cw || labSplitCanvas.height !== ch) {
+          labSplitCanvas.width = cw;
+          labSplitCanvas.height = ch;
+        }
+
+        const prodA = defaultCatalog.getProductById(labSelectA.value);
+        const prodB = defaultCatalog.getProductById(labSelectB.value);
+        if (!prodA || !prodB) return;
+
+        const pitchA = prodA.actualPixelPitchMm;
+        const pitchB = prodB.actualPixelPitchMm;
+        const zoom = parseFloat(labZoomSlider.value);
+
+        labBadgeLeft.textContent = `A: ${prodA.displayName} (P${pitchA})`;
+        labBadgeRight.textContent = `B: ${prodB.displayName} (P${pitchB})`;
+
+        const splitX = cw * labSplitRatio;
+
+        // Draw left side (Pitch A)
+        labSplitCtx.save();
+        labSplitCtx.beginPath();
+        labSplitCtx.rect(0, 0, splitX, ch);
+        labSplitCtx.clip();
+        drawSimulatedMatrix(labSplitCtx, screenCanvas, pitchA, zoom, cw, ch);
+        labSplitCtx.restore();
+
+        // Draw right side (Pitch B)
+        labSplitCtx.save();
+        labSplitCtx.beginPath();
+        labSplitCtx.rect(splitX, 0, cw - splitX, ch);
+        labSplitCtx.clip();
+        drawSimulatedMatrix(labSplitCtx, screenCanvas, pitchB, zoom, cw, ch);
+        labSplitCtx.restore();
+
+        // Draw vertical split divider line
+        labSplitCtx.save();
+        labSplitCtx.strokeStyle = '#FFFFFF';
+        labSplitCtx.lineWidth = 3;
+        labSplitCtx.beginPath();
+        labSplitCtx.moveTo(splitX, 0);
+        labSplitCtx.lineTo(splitX, ch);
+        labSplitCtx.stroke();
+
+        // Center split handle circle
+        labSplitCtx.fillStyle = '#00E5FF';
+        labSplitCtx.beginPath();
+        labSplitCtx.arc(splitX, ch / 2, 14, 0, Math.PI * 2);
+        labSplitCtx.fill();
+        labSplitCtx.strokeStyle = '#060911';
+        labSplitCtx.lineWidth = 2;
+        labSplitCtx.stroke();
+
+        labSplitCtx.fillStyle = '#060911';
+        labSplitCtx.font = 'bold 12px sans-serif';
+        labSplitCtx.textAlign = 'center';
+        labSplitCtx.textBaseline = 'middle';
+        labSplitCtx.fillText('↔', splitX, ch / 2);
+        labSplitCtx.restore();
+
+        renderLabTable(prodA, prodB);
+      }
+
+      function drawSimulatedMatrix(ctx, srcCanvas, pitchMm, zoom, width, height) {
+        ctx.fillStyle = '#05070d';
+        ctx.fillRect(0, 0, width, height);
+
+        const dotStep = Math.max(3, pitchMm * 2.2 * (zoom / 2));
+        const dotRadius = Math.max(1, dotStep * 0.42);
+
+        const cols = Math.ceil(width / dotStep);
+        const rows = Math.ceil(height / dotStep);
+
+        const sampleW = Math.max(1, cols);
+        const sampleH = Math.max(1, rows);
+
+        const tempC = document.createElement('canvas');
+        tempC.width = sampleW;
+        tempC.height = sampleH;
+        const tCtx = tempC.getContext('2d');
+        tCtx.drawImage(srcCanvas, 0, 0, sampleW, sampleH);
+        const imgData = tCtx.getImageData(0, 0, sampleW, sampleH).data;
+
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const idx = (r * sampleW + c) * 4;
+            const red = imgData[idx];
+            const green = imgData[idx + 1];
+            const blue = imgData[idx + 2];
+
+            if (red + green + blue > 15) {
+              ctx.fillStyle = `rgb(${red},${green},${blue})`;
+              ctx.beginPath();
+              ctx.arc(c * dotStep + dotStep / 2, r * dotStep + dotStep / 2, dotRadius, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+        }
+      }
+
+      function renderLabTable(prodA, prodB) {
+        const state = globalStateStore.getState();
+        const data = comparePixelPitches({
+          requestedWidthMm: state.requestedWidthMm,
+          requestedHeightMm: state.requestedHeightMm,
+          pitchList: [prodA.id, prodB.id],
+          viewingDistanceM: state.viewingDistanceM
+        });
+
+        const [dA, dB] = data;
+        let html = `
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-950 text-slate-300 font-bold border-b border-slate-800">
+              <tr>
+                <th class="p-3 w-1/3">รายการเปรียบเทียบเชิงวิศวกรรม</th>
+                <th class="p-3 w-1/3 text-cyan-300">
+                  <div class="flex items-center justify-between">
+                    <span>${dA.productName} (P${dA.pitchMm})</span>
+                    <button type="button" data-apply="${dA.productId}" class="apply-pitch-btn text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-[#00E5FF] hover:bg-cyan-500/40">✓ เลือกใช้รุ่นนี้</button>
+                  </div>
+                </th>
+                <th class="p-3 w-1/3 text-orange-400">
+                  <div class="flex items-center justify-between">
+                    <span>${dB.productName} (P${dB.pitchMm})</span>
+                    <button type="button" data-apply="${dB.productId}" class="apply-pitch-btn text-[10px] px-2 py-0.5 rounded bg-orange-500/20 text-[#FF6B00] hover:bg-orange-500/40">✓ เลือกใช้รุ่นนี้</button>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/80">
+              <tr class="hover:bg-slate-900/60">
+                <td class="p-2.5 font-medium text-slate-400">ขนาดประกอบได้จริง</td>
+                <td class="p-2.5 font-mono text-slate-200">${dA.actualWidthM.toFixed(2)} × ${dA.actualHeightM.toFixed(2)} ม. (${dA.actualAreaSqm.toFixed(2)} ตร.ม.)</td>
+                <td class="p-2.5 font-mono text-slate-200">${dB.actualWidthM.toFixed(2)} × ${dB.actualHeightM.toFixed(2)} ม. (${dB.actualAreaSqm.toFixed(2)} ตร.ม.)</td>
+              </tr>
+              <tr class="hover:bg-slate-900/60">
+                <td class="p-2.5 font-medium text-slate-400">จำนวนตู้ Cabinet ทั้งหมด</td>
+                <td class="p-2.5 font-mono text-slate-200">${dA.totalCabinets} ตู้</td>
+                <td class="p-2.5 font-mono text-slate-200">${dB.totalCabinets} ตู้</td>
+              </tr>
+              <tr class="hover:bg-slate-900/60">
+                <td class="p-2.5 font-medium text-slate-400">ความละเอียดรวม (Resolution)</td>
+                <td class="p-2.5 font-mono text-[#00E5FF] font-bold">${dA.resolutionWidth.toLocaleString()} × ${dA.resolutionHeight.toLocaleString()} px (${dA.qualityTier})</td>
+                <td class="p-2.5 font-mono text-[#FF6B00] font-bold">${dB.resolutionWidth.toLocaleString()} × ${dB.resolutionHeight.toLocaleString()} px (${dB.qualityTier})</td>
+              </tr>
+              <tr class="hover:bg-slate-900/60">
+                <td class="p-2.5 font-medium text-slate-400">ความหนาแน่นพิกเซล (Density)</td>
+                <td class="p-2.5 font-mono text-slate-200">${dA.pixelsPerSqm.toLocaleString()} จุด/ตร.ม.</td>
+                <td class="p-2.5 font-mono text-slate-200">${dB.pixelsPerSqm.toLocaleString()} จุด/ตร.ม.</td>
+              </tr>
+              <tr class="hover:bg-slate-900/60">
+                <td class="p-2.5 font-medium text-slate-400">ระยะยืนดูที่แนะนำ (Optimal Distance)</td>
+                <td class="p-2.5 font-mono ${dA.isOptimalAtDistance ? 'text-emerald-400' : 'text-amber-400'} font-semibold">≥ ${dA.optimalDistanceM.toFixed(1)} ม. ${dA.isOptimalAtDistance ? '✓ เหมาะสม' : '⚠️ ใกล้ไป'}</td>
+                <td class="p-2.5 font-mono ${dB.isOptimalAtDistance ? 'text-emerald-400' : 'text-amber-400'} font-semibold">≥ ${dB.optimalDistanceM.toFixed(1)} ม. ${dB.isOptimalAtDistance ? '✓ เหมาะสม' : '⚠️ ใกล้ไป'}</td>
+              </tr>
+              <tr class="hover:bg-slate-900/60">
+                <td class="p-2.5 font-medium text-slate-400">กินไฟสูงสุด / กระแสไฟโดยประมาณ</td>
+                <td class="p-2.5 font-mono text-slate-200">${dA.powerMaxKw != null ? `${dA.powerMaxKw} kW (~${dA.estimatedAmps220V} A)` : 'รอยืนยัน'}</td>
+                <td class="p-2.5 font-mono text-slate-200">${dB.powerMaxKw != null ? `${dB.powerMaxKw} kW (~${dB.estimatedAmps220V} A)` : 'รอยืนยัน'}</td>
+              </tr>
+            </tbody>
+          </table>
+        `;
+
+        labTableContainer.innerHTML = html;
+
+        labTableContainer.querySelectorAll('.apply-pitch-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const chosenId = btn.getAttribute('data-apply');
+            globalStateStore.update({ productId: chosenId });
+            pitchLabModal.classList.add('hidden');
+            pitchLabModal.classList.remove('flex');
+            isLabOpen = false;
+          });
+        });
+      }
+
+      function updateLabSplit(e) {
+        const rect = labSplitCanvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const ratio = (clientX - rect.left) / rect.width;
+        labSplitRatio = Math.max(0.08, Math.min(0.92, ratio));
+        renderLabComparison();
+      }
+
+      labSplitCanvas.addEventListener('mousedown', (e) => {
+        isLabDragging = true;
+        updateLabSplit(e);
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (isLabDragging && isLabOpen) updateLabSplit(e);
+      });
+
+      window.addEventListener('mouseup', () => {
+        isLabDragging = false;
+      });
+
+      labSplitCanvas.addEventListener('touchstart', (e) => {
+        isLabDragging = true;
+        updateLabSplit(e);
+      }, { passive: true });
+
+      labSplitCanvas.addEventListener('touchmove', (e) => {
+        if (isLabDragging && isLabOpen) updateLabSplit(e);
+      }, { passive: true });
+
+      labSplitCanvas.addEventListener('touchend', () => {
+        isLabDragging = false;
+      });
+
+      labSelectA.addEventListener('change', renderLabComparison);
+      labSelectB.addEventListener('change', renderLabComparison);
+
+      labZoomSlider.addEventListener('input', (e) => {
+        labZoomVal.textContent = `${e.target.value}x Zoom`;
+        renderLabComparison();
+      });
+
+      document.getElementById('open-pitch-lab-btn').addEventListener('click', () => {
+        isLabOpen = true;
+        populateLabSelects();
+        renderLabComparison();
+        pitchLabModal.classList.remove('hidden');
+        pitchLabModal.classList.add('flex');
+      });
+
+      document.getElementById('close-pitch-lab-btn').addEventListener('click', () => {
+        isLabOpen = false;
+        pitchLabModal.classList.add('hidden');
+        pitchLabModal.classList.remove('flex');
+      });
+
+      pitchLabModal.addEventListener('click', (e) => {
+        if (e.target === pitchLabModal) {
+          isLabOpen = false;
+          pitchLabModal.classList.add('hidden');
+          pitchLabModal.classList.remove('flex');
+        }
       });
 
       // Quotation Modal
