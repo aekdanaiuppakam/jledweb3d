@@ -333,6 +333,30 @@ export function calculateScreenSpecs(params) {
     orientation,
     suggestions,
     isOutdoor: product.environment === 'outdoor',
-    warnings
+    warnings,
+
+    // Backward-compatible and cross-module aliases (Lead CRM, Project Store, Snapshot & Proposals)
+    buildableWidthMm: actualWidthMm,
+    buildableHeightMm: actualHeightMm,
+    buildableWidthM: actualWidthM,
+    buildableHeightM: actualHeightM,
+    totalAreaM2: actualAreaSqm,
+    cabinetCount: totalCabinets,
+    cabinetColumns: countX,
+    cabinetRows: countY,
+    cabinetWidthMm: cabW,
+    cabinetHeightMm: cabH,
+    resolutionX: resolutionWidth,
+    resolutionY: resolutionHeight,
+    resolutionTier: { name: qualityBadge?.label || '' },
+    aspectRatioFormatted: `${aspectRatio.numericRatio}:1 (${aspectRatio.label})`,
+    aspectRatioDiffPercent: targetAspectKey
+      ? +(Math.abs(aspectRatio.numericRatio - (targetAspectKey === '16:9' ? (16 / 9) : targetAspectKey === '21:9' ? (21 / 9) : (9 / 16))) / (targetAspectKey === '16:9' ? (16 / 9) : targetAspectKey === '21:9' ? (21 / 9) : (9 / 16)) * 100).toFixed(1)
+      : 0,
+    estimatedMaxPowerKw: powerMaxKw,
+    estimatedTypicalPowerKw: powerAvgKw,
+    estimatedWeightKg: totalWeightKg,
+    estimatedWeightWithStructureKg: totalWeightKg != null ? Math.round(totalWeightKg * 1.35) : null,
+    optimalViewingDistanceM: distanceMetrics.optimalDistanceM
   };
 }

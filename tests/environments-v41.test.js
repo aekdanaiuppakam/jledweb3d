@@ -67,6 +67,67 @@ describe('JLED v4.1: 3D Environments & Visual Atmosphere Suite', () => {
     assert.equal(camManager.isBooting, false);
   });
 
+  it('CinematicCameraManager handles First-Person Walk Mode with room collision and waypoints', () => {
+    const mockCamera = {
+      position: {
+        x: 0, y: 2.2, z: 6,
+        set(x, y, z) { this.x = x; this.y = y; this.z = z; },
+        clone() { return { x: this.x, y: this.y, z: this.z, lerpVectors: () => {} }; },
+        lerpVectors() {}
+      },
+      getWorldDirection(v) { v.x = 0; v.y = 0; v.z = -1; return v; },
+      lookAt() {}
+    };
+
+    const mockControls = {
+      enabled: true,
+      target: {
+        x: 0, y: 2.2, z: 0,
+        set(x, y, z) { this.x = x; this.y = y; this.z = z; },
+        clone() { return { x: this.x, y: this.y, z: this.z, lerpVectors: () => {} }; },
+        copy(v) { this.x = v.x; this.y = v.y; this.z = v.z; return this; },
+        addScaledVector() { return this; },
+        lerpVectors() {}
+      },
+      update() {}
+    };
+
+    const camManager = new CinematicCameraManager(mockCamera, mockControls);
+    camManager.setRoomBounds({ minX: -6, maxX: 6, minY: 0, maxY: 4, minZ: -1, maxZ: 12 });
+
+    // 1. Enable Walk Mode
+    let walkChanged = false;
+    camManager.onWalkModeChange = (active) => { walkChanged = active; };
+    const enabled = camManager.toggleWalkMode(true);
+
+    assert.equal(enabled, true);
+    assert.equal(camManager.isWalkModeActive, true);
+    assert.equal(mockControls.enabled, false);
+    assert.equal(mockCamera.position.y, camManager.walkEyeHeight);
+    assert.equal(walkChanged, true);
+
+    // 2. Simulate Forward Key Press
+    camManager.setKey('forward', true);
+    assert.equal(camManager.walkKeys.forward, true);
+
+    // Update frame
+    const now = performance.now();
+    camManager.update(now + 100);
+
+    // Position Z should have moved forward (towards -Z / screen)
+    assert.ok(mockCamera.position.z <= 6.0);
+
+    // 3. Waypoint Navigation
+    camManager.walkToWaypoint('vip', [0, 2.2, 0]);
+    assert.equal(camManager.isWalkModeActive, true);
+    assert.equal(camManager.isAnimating, true);
+
+    // 4. Disable Walk Mode
+    camManager.toggleWalkMode(false);
+    assert.equal(camManager.isWalkModeActive, false);
+    assert.equal(mockControls.enabled, true);
+  });
+
   it('StateStore defaults include v4.1 visual properties with reactive notification', () => {
     const store = new StateStore();
     const st = store.getState();

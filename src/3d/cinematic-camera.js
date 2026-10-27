@@ -48,6 +48,26 @@ export class CinematicCameraManager {
         if (e.matches) this.isShowcaseActive = false;
       });
     }
+
+    // ================= First-Person Walk Mode =================
+    this.isWalkModeActive = false;
+    this.walkEyeHeight = 1.68; // standard human eye level in metres
+    this.walkSpeed = 3.6; // m/s
+    this.sprintMultiplier = 1.85;
+    this.walkYaw = 0; // horizontal angle in radians
+    this.walkPitch = 0; // vertical angle in radians (-82 deg to +82 deg)
+    this.walkKeys = { forward: false, backward: false, left: false, right: false, sprint: false };
+    this.walkBobTimer = 0;
+    this.walkHeadBob = 0;
+    this.walkVelocity = { x: 0, z: 0 };
+    this.lastWalkTime = 0;
+    this.walkDomElement = null;
+    this.isPointerLocked = false;
+    this.isMouseDown = false;
+    this.lastMouseX = 0;
+    this.lastMouseY = 0;
+    this.onWalkModeChange = null;
+    this._listenersAttached = false;
   }
 
   /** Optional room envelope, in metres, used by preset and interactive cameras. */
@@ -153,7 +173,7 @@ export class CinematicCameraManager {
    * Uses cubic ease-in-out for smooth cinematic motion.
    */
   glideTo(targetCam, targetLookAt, durationMs = 900) {
-    if (!this.camera || !this.controls || typeof THREE === 'undefined') return;
+    if (!this.camera || !this.controls) return;
 
     const safeCamera = this.clampPosition(targetCam);
 
@@ -168,10 +188,14 @@ export class CinematicCameraManager {
     this.isAnimating = true;
     this.animStartTime = performance.now();
     this.animDuration = durationMs;
-    this.startCamPos = this.camera.position.clone();
-    this.targetCamPos = new THREE.Vector3(...safeCamera);
-    this.startTargetPos = this.controls.target.clone();
-    this.targetTargetPos = new THREE.Vector3(...targetLookAt);
+    this.startCamPos = this.camera.position.clone ? this.camera.position.clone() : { ...this.camera.position };
+    this.targetCamPos = typeof THREE !== 'undefined'
+      ? new THREE.Vector3(...safeCamera)
+      : { x: safeCamera[0], y: safeCamera[1], z: safeCamera[2] };
+    this.startTargetPos = this.controls.target.clone ? this.controls.target.clone() : { ...this.controls.target };
+    this.targetTargetPos = typeof THREE !== 'undefined'
+      ? new THREE.Vector3(...targetLookAt)
+      : { x: targetLookAt[0], y: targetLookAt[1], z: targetLookAt[2] };
   }
 
   toggleShowcase(enable = null) {
@@ -184,6 +208,261 @@ export class CinematicCameraManager {
     return this.isShowcaseActive;
   }
 
+  clampWalkPosition() {
+    if (!this.camera || !this.camera.position) return;
+    const p = this.camera.position;
+    if (this.roomBounds) {
+      const b = this.roomBounds;
+      const inset = 0.4;
+      p.x = Math.max(b.minX + inset, Math.min(b.maxX - inset, p.x));
+      p.z = Math.max(b.minZ + inset, Math.min(b.maxZ - inset, p.z));
+    }
+    p.y = this.walkEyeHeight + (this.walkHeadBob || 0);
+  }
+
+  setKey(key, value) {
+    if (this.walkKeys[key] !== undefined) {
+      this.walkKeys[key] = !!value;
+    }
+  }
+
+  toggleWalkMode(enable = null, domElement = null) {
+    this.isWalkModeActive = enable !== null ? enable : !this.isWalkModeActive;
+    if (domElement) this.walkDomElement = domElement;
+
+    if (this.isWalkModeActive) {
+      this.isShowcaseActive = false;
+      this.isAnimating = false;
+      if (this.controls) this.controls.enabled = false;
+
+      // Initialize orientation and eye level from current camera
+      if (this.camera) {
+        if (typeof THREE !== 'undefined') {
+          const dir = new THREE.Vector3();
+          this.camera.getWorldDirection(dir);
+          this.walkYaw = Math.atan2(-dir.x, -dir.z);
+          this.walkPitch = Math.asin(Math.max(-0.98, Math.min(0.98, dir.y)));
+        }
+        this.camera.position.y = this.walkEyeHeight;
+        this.clampWalkPosition();
+      }
+
+      this.setupWalkInput(domElement || this.walkDomElement);
+    } else {
+      if (this.controls) {
+        this.controls.enabled = true;
+        if (this.camera && typeof THREE !== 'undefined') {
+          const dir = new THREE.Vector3();
+          this.camera.getWorldDirection(dir);
+          this.controls.target.copy(this.camera.position).addScaledVector(dir, 3.5);
+          this.controls.update();
+        }
+      }
+      this.teardownWalkInput();
+    }
+
+    if (typeof this.onWalkModeChange === 'function') {
+      this.onWalkModeChange(this.isWalkModeActive);
+    }
+    return this.isWalkModeActive;
+  }
+
+  setupWalkInput(domElement) {
+    if (typeof window === 'undefined' || this._listenersAttached) return;
+    this.walkDomElement = domElement || this.walkDomElement;
+
+    this._onKeyDown = (e) => {
+      if (!this.isWalkModeActive) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName)) return;
+      switch (e.code) {
+        case 'KeyW':
+        case 'ArrowUp':
+          this.walkKeys.forward = true;
+          break;
+        case 'KeyS':
+        case 'ArrowDown':
+          this.walkKeys.backward = true;
+          break;
+        case 'KeyA':
+        case 'ArrowLeft':
+          this.walkKeys.left = true;
+          break;
+        case 'KeyD':
+        case 'ArrowRight':
+          this.walkKeys.right = true;
+          break;
+        case 'ShiftLeft':
+        case 'ShiftRight':
+          this.walkKeys.sprint = true;
+          break;
+        case 'Escape':
+          this.toggleWalkMode(false);
+          break;
+      }
+    };
+
+    this._onKeyUp = (e) => {
+      switch (e.code) {
+        case 'KeyW':
+        case 'ArrowUp':
+          this.walkKeys.forward = false;
+          break;
+        case 'KeyS':
+        case 'ArrowDown':
+          this.walkKeys.backward = false;
+          break;
+        case 'KeyA':
+        case 'ArrowLeft':
+          this.walkKeys.left = false;
+          break;
+        case 'KeyD':
+        case 'ArrowRight':
+          this.walkKeys.right = false;
+          break;
+        case 'ShiftLeft':
+        case 'ShiftRight':
+          this.walkKeys.sprint = false;
+          break;
+      }
+    };
+
+    this._onMouseDown = (e) => {
+      if (!this.isWalkModeActive) return;
+      this.isMouseDown = true;
+      this.lastMouseX = e.clientX;
+      this.lastMouseY = e.clientY;
+      if (e.target === this.walkDomElement && this.walkDomElement?.requestPointerLock) {
+        // Optional pointer lock on primary click
+        try {
+          this.walkDomElement.requestPointerLock();
+        } catch (_) {}
+      }
+    };
+
+    this._onMouseMove = (e) => {
+      if (!this.isWalkModeActive) return;
+      let dx = 0;
+      let dy = 0;
+      if (document.pointerLockElement === this.walkDomElement) {
+        dx = e.movementX || 0;
+        dy = e.movementY || 0;
+      } else if (this.isMouseDown) {
+        dx = e.clientX - this.lastMouseX;
+        dy = e.clientY - this.lastMouseY;
+        this.lastMouseX = e.clientX;
+        this.lastMouseY = e.clientY;
+      }
+
+      if (dx !== 0 || dy !== 0) {
+        const sens = 0.0024;
+        this.walkYaw -= dx * sens;
+        this.walkPitch = Math.max(-1.42, Math.min(1.42, this.walkPitch - dy * sens));
+      }
+    };
+
+    this._onMouseUp = () => {
+      this.isMouseDown = false;
+    };
+
+    this._onTouchStart = (e) => {
+      if (!this.isWalkModeActive || !e.touches || !e.touches[0]) return;
+      this.lastMouseX = e.touches[0].clientX;
+      this.lastMouseY = e.touches[0].clientY;
+    };
+
+    this._onTouchMove = (e) => {
+      if (!this.isWalkModeActive || !e.touches || !e.touches[0]) return;
+      const dx = e.touches[0].clientX - this.lastMouseX;
+      const dy = e.touches[0].clientY - this.lastMouseY;
+      this.lastMouseX = e.touches[0].clientX;
+      this.lastMouseY = e.touches[0].clientY;
+
+      const sens = 0.0035;
+      this.walkYaw -= dx * sens;
+      this.walkPitch = Math.max(-1.42, Math.min(1.42, this.walkPitch - dy * sens));
+    };
+
+    window.addEventListener('keydown', this._onKeyDown);
+    window.addEventListener('keyup', this._onKeyUp);
+    window.addEventListener('mouseup', this._onMouseUp);
+
+    const el = this.walkDomElement || window;
+    el.addEventListener('mousedown', this._onMouseDown);
+    window.addEventListener('mousemove', this._onMouseMove);
+    el.addEventListener('touchstart', this._onTouchStart, { passive: true });
+    el.addEventListener('touchmove', this._onTouchMove, { passive: true });
+
+    this._listenersAttached = true;
+  }
+
+  teardownWalkInput() {
+    if (typeof window === 'undefined' || !this._listenersAttached) return;
+    window.removeEventListener('keydown', this._onKeyDown);
+    window.removeEventListener('keyup', this._onKeyUp);
+    window.removeEventListener('mouseup', this._onMouseUp);
+    window.removeEventListener('mousemove', this._onMouseMove);
+
+    const el = this.walkDomElement || window;
+    if (el) {
+      el.removeEventListener('mousedown', this._onMouseDown);
+      el.removeEventListener('touchstart', this._onTouchStart);
+      el.removeEventListener('touchmove', this._onTouchMove);
+    }
+    if (typeof document !== 'undefined' && document.exitPointerLock && document.pointerLockElement) {
+      try { document.exitPointerLock(); } catch (_) {}
+    }
+    this._listenersAttached = false;
+    this.isMouseDown = false;
+    this.walkKeys = { forward: false, backward: false, left: false, right: false, sprint: false };
+  }
+
+  walkToWaypoint(waypointId, center = [0, 2.2, 0]) {
+    if (!this.isWalkModeActive) {
+      this.toggleWalkMode(true);
+    }
+    const [cx, cy, cz] = center;
+    const b = this.roomBounds;
+    const maxZ = b ? b.maxZ - 0.8 : cz + 9;
+    const minZ = b ? Math.max(b.minZ + 1.2, cz + 1.8) : cz + 2.5;
+    const maxX = b ? b.maxX - 0.8 : cx + 4;
+    const minX = b ? b.minX + 0.8 : cx - 4;
+
+    let targetPos;
+    switch (waypointId) {
+      case 'vip':
+      case 'front_row':
+        targetPos = [cx, this.walkEyeHeight, cz + 3.2];
+        break;
+      case 'center':
+      case 'middle':
+        targetPos = [cx, this.walkEyeHeight, (minZ + maxZ) / 2];
+        break;
+      case 'back':
+      case 'rear':
+        targetPos = [cx, this.walkEyeHeight, maxZ];
+        break;
+      case 'left_angle':
+        targetPos = [minX * 0.65, this.walkEyeHeight, cz + 3.8];
+        break;
+      case 'right_angle':
+        targetPos = [maxX * 0.65, this.walkEyeHeight, cz + 3.8];
+        break;
+      default:
+        targetPos = [cx, this.walkEyeHeight, cz + 4.5];
+        break;
+    }
+
+    // Look at center of screen
+    const dx = cx - targetPos[0];
+    const dy = cy - targetPos[1];
+    const dz = cz - targetPos[2];
+    const distXZ = Math.hypot(dx, dz);
+    this.walkYaw = Math.atan2(-dx, -dz);
+    this.walkPitch = Math.atan2(dy, Math.max(0.1, distXZ));
+
+    this.glideTo(targetPos, [cx, cy, cz], 850);
+  }
+
   triggerPowerOn() {
     this.isBooting = true;
     this.bootProgress = 0.0;
@@ -191,23 +470,84 @@ export class CinematicCameraManager {
   }
 
   update(now = performance.now()) {
-    // 1. Update Camera Glide Animation
+    // 1. Update Camera Glide Animation (supports both Orbit and Walk mode transitions)
     if (this.isAnimating && this.startCamPos && this.targetCamPos) {
       const elapsed = now - this.animStartTime;
       const t = Math.min(1.0, elapsed / this.animDuration);
-      // Smooth cubic ease-in-out
       const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
       this.camera.position.lerpVectors(this.startCamPos, this.targetCamPos, ease);
-      this.controls.target.lerpVectors(this.startTargetPos, this.targetTargetPos, ease);
-      this.controls.update();
+      if (this.controls && this.startTargetPos && this.targetTargetPos) {
+        this.controls.target.lerpVectors(this.startTargetPos, this.targetTargetPos, ease);
+        this.controls.update();
+      }
 
       if (t >= 1.0) {
         this.isAnimating = false;
       }
     }
 
-    // 2. Showcase Continuous Orbit Animation
+    // 2. First-Person Walk Mode Physics & Movement
+    if (this.isWalkModeActive && this.camera) {
+      const last = this.lastWalkTime || now;
+      const dt = Math.min(0.1, Math.max(0.001, (now - last) / 1000));
+      this.lastWalkTime = now;
+
+      if (!this.isAnimating) {
+        let forward = 0;
+        let strafe = 0;
+        if (this.walkKeys.forward) forward += 1;
+        if (this.walkKeys.backward) forward -= 1;
+        if (this.walkKeys.left) strafe -= 1;
+        if (this.walkKeys.right) strafe += 1;
+
+        const sinY = Math.sin(this.walkYaw);
+        const cosY = Math.cos(this.walkYaw);
+
+        if (forward !== 0 || strafe !== 0) {
+          const len = Math.hypot(forward, strafe);
+          forward /= len;
+          strafe /= len;
+          const speed = this.walkSpeed * (this.walkKeys.sprint ? this.sprintMultiplier : 1.0);
+          const targetVelX = (-sinY * forward + cosY * strafe) * speed;
+          const targetVelZ = (-cosY * forward - sinY * strafe) * speed;
+
+          this.walkVelocity.x += (targetVelX - this.walkVelocity.x) * Math.min(1.0, dt * 10);
+          this.walkVelocity.z += (targetVelZ - this.walkVelocity.z) * Math.min(1.0, dt * 10);
+
+          if (!this.prefersReducedMotion) {
+            this.walkBobTimer += dt * (this.walkKeys.sprint ? 14 : 9);
+            this.walkHeadBob = Math.sin(this.walkBobTimer) * 0.022;
+          }
+        } else {
+          this.walkVelocity.x *= Math.max(0, 1 - dt * 10);
+          this.walkVelocity.z *= Math.max(0, 1 - dt * 10);
+          this.walkHeadBob *= Math.max(0, 1 - dt * 10);
+        }
+
+        this.camera.position.x += this.walkVelocity.x * dt;
+        this.camera.position.z += this.walkVelocity.z * dt;
+        this.camera.position.y = this.walkEyeHeight + this.walkHeadBob;
+        this.clampWalkPosition();
+
+        if (typeof THREE !== 'undefined') {
+          const cosP = Math.cos(this.walkPitch);
+          const sinP = Math.sin(this.walkPitch);
+          const dirX = -sinY * cosP;
+          const dirY = sinP;
+          const dirZ = -cosY * cosP;
+
+          const lookTarget = new THREE.Vector3(
+            this.camera.position.x + dirX * 5,
+            this.camera.position.y + dirY * 5,
+            this.camera.position.z + dirZ * 5
+          );
+          this.camera.lookAt(lookTarget);
+        }
+      }
+    }
+
+    // 3. Showcase Continuous Orbit Animation
     if (this.isShowcaseActive && !this.isAnimating && !this.prefersReducedMotion) {
       const angle = (now * 0.001 * this.orbitSpeed) % (Math.PI * 2);
       const target = this.controls.target;

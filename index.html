@@ -443,6 +443,11 @@
             <span>🎬</span> <span id="showcase-btn-txt">โชว์รูม 360°</span>
           </button>
           <div class="w-px h-4 bg-slate-700/80"></div>
+          <!-- First-Person Walk Mode Toggle -->
+          <button id="toggle-walk-mode-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 border border-slate-700 hover:border-[#00E5FF]/60 hover:text-[#00E5FF] transition flex items-center gap-1.5" title="โหมดเดินสำรวจเสมือนจริง (W, A, S, D + เมาส์)">
+            <span>🚶‍♂️</span> <span id="walk-mode-btn-txt">เดินสำรวจ</span>
+          </button>
+          <div class="w-px h-4 bg-slate-700/80"></div>
           <!-- Visual Quality Preset -->
           <div class="flex items-center gap-1 text-[11px]">
             <span class="text-slate-400">กราฟิก:</span>
@@ -495,6 +500,58 @@
       <p id="loupe-caption" class="text-[10px] text-slate-400 text-center leading-tight">
         จำลองความถี่เม็ดไฟที่ระยะ <span class="text-white font-semibold">5.0m</span>
       </p>
+    </div>
+
+    <!-- Walk Mode Subtle Crosshair (Active only in Walk Mode) -->
+    <div id="walk-crosshair" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none select-none text-[#00E5FF]/70 text-lg font-light">
+      +
+    </div>
+
+    <!-- Walk Mode Floating Control HUD -->
+    <div id="walk-hud-panel" class="hidden absolute bottom-16 sm:bottom-14 left-1/2 -translate-x-1/2 z-30 pointer-events-auto transition-all duration-300">
+      <div class="glass-panel px-4 py-2.5 rounded-2xl flex flex-col sm:flex-row items-center gap-3 border border-[#00E5FF]/40 shadow-2xl bg-slate-950/95 backdrop-blur-md">
+        <!-- Controls Hint -->
+        <div class="flex items-center gap-2 text-xs">
+          <span class="flex items-center justify-center w-6 h-6 rounded-full bg-[#00E5FF]/20 text-[#00E5FF] font-bold text-sm">🚶</span>
+          <div>
+            <div class="font-bold text-[#00E5FF] text-[11px] flex items-center gap-1.5">
+              <span>โหมดเดินสำรวจเสมือนจริง (Walk Mode)</span>
+              <span class="px-1.5 py-0.2 rounded text-[9px] bg-slate-800 text-slate-300 font-mono">W A S D</span>
+            </div>
+            <p class="text-[10px] text-slate-400">กด W,A,S,D เดิน • ลากเมาส์หันมุมมอง • Shift วิ่ง</p>
+          </div>
+        </div>
+
+        <div class="hidden sm:block w-px h-6 bg-slate-800"></div>
+
+        <!-- Waypoint Shortcuts -->
+        <div class="flex items-center gap-1 text-[11px]">
+          <span class="text-[10px] text-slate-400 mr-0.5">จุดชมวิว:</span>
+          <button type="button" data-walk-waypoint="vip" class="walk-waypoint-btn px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 hover:border-[#00E5FF] hover:text-[#00E5FF] transition text-[10px] font-medium" title="ยืนตำแหน่งเก้าอี้ VIP / แถวหน้า">💺 VIP</button>
+          <button type="button" data-walk-waypoint="center" class="walk-waypoint-btn px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 hover:border-[#00E5FF] hover:text-[#00E5FF] transition text-[10px] font-medium" title="ยืนตำแหน่งกึ่งกลางห้อง">🎯 กลางห้อง</button>
+          <button type="button" data-walk-waypoint="back" class="walk-waypoint-btn px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 hover:border-[#00E5FF] hover:text-[#00E5FF] transition text-[10px] font-medium" title="ยืนตำแหน่งแถวหลังสุด">🚪 หลังสุด</button>
+          <button type="button" data-walk-waypoint="left_angle" class="walk-waypoint-btn px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 hover:border-[#00E5FF] hover:text-[#00E5FF] transition text-[10px] font-medium" title="ยืนเฉียง 45 องศา">📐 มุม 45°</button>
+        </div>
+
+        <div class="hidden sm:block w-px h-6 bg-slate-800"></div>
+
+        <!-- Virtual Touch D-Pad for Mobile / Mouse click navigation -->
+        <div class="flex items-center gap-1 bg-slate-900/80 p-1 rounded-lg border border-slate-800">
+          <button type="button" id="walk-pad-left" class="w-6 h-6 flex items-center justify-center rounded bg-slate-800 hover:bg-slate-700 active:bg-[#00E5FF] active:text-slate-950 text-slate-200 text-xs font-bold transition select-none" title="เลื่อนซ้าย (A)">◀</button>
+          <div class="flex flex-col gap-1">
+            <button type="button" id="walk-pad-up" class="w-6 h-6 flex items-center justify-center rounded bg-slate-800 hover:bg-slate-700 active:bg-[#00E5FF] active:text-slate-950 text-slate-200 text-xs font-bold transition select-none" title="เดินหน้า (W)">▲</button>
+            <button type="button" id="walk-pad-down" class="w-6 h-6 flex items-center justify-center rounded bg-slate-800 hover:bg-slate-700 active:bg-[#00E5FF] active:text-slate-950 text-slate-200 text-xs font-bold transition select-none" title="ถอยหลัง (S)">▼</button>
+          </div>
+          <button type="button" id="walk-pad-right" class="w-6 h-6 flex items-center justify-center rounded bg-slate-800 hover:bg-slate-700 active:bg-[#00E5FF] active:text-slate-950 text-slate-200 text-xs font-bold transition select-none" title="เลื่อนขวา (D)">▶</button>
+        </div>
+
+        <div class="w-px h-6 bg-slate-800"></div>
+
+        <!-- Exit Walk Mode Button -->
+        <button id="exit-walk-mode-btn" type="button" class="px-2.5 py-1 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/40 text-[11px] font-bold transition flex items-center gap-1 whitespace-nowrap" title="กลับสู่โหมดหมุนรอบ (Orbit)">
+          <span>✕</span> ออกโหมดเดิน
+        </button>
+      </div>
     </div>
 
     <!-- Bottom Status & Camera Control Bar -->
@@ -2538,6 +2595,7 @@
         const presetAliases = { angle45: 'hero', topDown: 'technical', closeup: 'detail' };
         const preset = angleMode === 'maintain' ? activeCameraPreset : (presetAliases[angleMode] || angleMode);
 
+        if (cameraManager.isWalkModeActive) cameraManager.toggleWalkMode(false);
         cameraManager.toggleShowcase(false);
         if (preset) {
           activeCameraPreset = preset;
@@ -3071,6 +3129,7 @@
           : getSceneFramingDistance({ defaultDistanceM: def.defaultViewingDistanceM,
             widthM: specs.actualWidthM, heightM: specs.actualHeightM });
 
+        if (cameraManager.isWalkModeActive) cameraManager.toggleWalkMode(false);
         cameraManager.triggerPowerOn();
         activeCameraPreset = null;
         updateCameraButtonState(activeCameraPreset);
@@ -3161,22 +3220,116 @@
         });
       }
 
-      // v4.1 Fullscreen Viewport Button
+      // v4.1 Fullscreen Viewport Button (Fixed target wrapper)
       const fsBtn = document.getElementById('fullscreen-viewport-btn');
       if (fsBtn) {
         fsBtn.addEventListener('click', () => {
-          const wrapper = document.getElementById('canvas-wrapper');
+          const wrapper = document.getElementById('viewport-wrapper');
+          if (!wrapper) return;
           if (!document.fullscreenElement) {
             if (wrapper.requestFullscreen) {
-              wrapper.requestFullscreen();
+              wrapper.requestFullscreen().catch(() => {});
             }
           } else {
             if (document.exitFullscreen) {
-              document.exitFullscreen();
+              document.exitFullscreen().catch(() => {});
             }
           }
         });
+
+        document.addEventListener('fullscreenchange', () => {
+          const isFs = !!document.fullscreenElement;
+          fsBtn.innerHTML = isFs ? '<span>🗗</span> ย่อจอ' : '<span>⛶</span> เต็มจอ';
+          setTimeout(() => {
+            window.dispatchEvent(new Event('resize'));
+          }, 80);
+        });
       }
+
+      // ================= First-Person Walk Mode UI Wiring =================
+      const walkBtn = document.getElementById('toggle-walk-mode-btn');
+      const walkBtnTxt = document.getElementById('walk-mode-btn-txt');
+      const walkHud = document.getElementById('walk-hud-panel');
+      const walkCrosshair = document.getElementById('walk-crosshair');
+      const exitWalkBtn = document.getElementById('exit-walk-mode-btn');
+
+      function updateWalkModeUI(active) {
+        if (walkBtn) {
+          if (active) {
+            walkBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF] shadow-[0_0_12px_rgba(0,229,255,0.4)] transition flex items-center gap-1.5';
+            if (walkBtnTxt) walkBtnTxt.textContent = 'หยุดเดิน';
+          } else {
+            walkBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 border border-slate-700 hover:border-[#00E5FF]/60 hover:text-[#00E5FF] transition flex items-center gap-1.5';
+            if (walkBtnTxt) walkBtnTxt.textContent = 'เดินสำรวจ';
+          }
+        }
+        if (walkHud) walkHud.classList.toggle('hidden', !active);
+        if (walkCrosshair) walkCrosshair.classList.toggle('hidden', !active);
+        if (active) {
+          activeCameraPreset = null;
+          updateCameraButtonState(null);
+          if (cameraManager.isShowcaseActive) {
+            cameraManager.toggleShowcase(false);
+            if (showcaseBtn) showcaseBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 border border-slate-700 hover:border-[#00E5FF]/60 hover:text-[#00E5FF] transition flex items-center gap-1.5';
+            if (showcaseTxt) showcaseTxt.textContent = 'โชว์รูม 360°';
+          }
+        }
+      }
+
+      if (cameraManager) {
+        cameraManager.onWalkModeChange = updateWalkModeUI;
+      }
+
+      if (walkBtn) {
+        walkBtn.addEventListener('click', () => {
+          if (!cameraManager) return;
+          cameraManager.toggleWalkMode(null, renderer.domElement);
+        });
+      }
+
+      if (exitWalkBtn) {
+        exitWalkBtn.addEventListener('click', () => {
+          if (!cameraManager) return;
+          cameraManager.toggleWalkMode(false);
+        });
+      }
+
+      // Waypoint vantage buttons in Walk HUD
+      document.querySelectorAll('.walk-waypoint-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const waypoint = btn.getAttribute('data-walk-waypoint');
+          const st = globalStateStore.getState();
+          const posX = (st.positionXMm || 0) / 1000;
+          const posZ = (st.positionZMm || 0) / 1000;
+          cameraManager.walkToWaypoint(waypoint, [posX, screenCenterY, posZ]);
+        });
+      });
+
+      // Virtual D-pad for mobile / touch / mouse
+      const padKeys = {
+        'walk-pad-up': 'forward',
+        'walk-pad-down': 'backward',
+        'walk-pad-left': 'left',
+        'walk-pad-right': 'right'
+      };
+      Object.entries(padKeys).forEach(([btnId, keyName]) => {
+        const el = document.getElementById(btnId);
+        if (el) {
+          const startPress = (e) => {
+            e.preventDefault();
+            cameraManager.setKey(keyName, true);
+          };
+          const endPress = (e) => {
+            e.preventDefault();
+            cameraManager.setKey(keyName, false);
+          };
+          el.addEventListener('mousedown', startPress);
+          el.addEventListener('mouseup', endPress);
+          el.addEventListener('mouseleave', endPress);
+          el.addEventListener('touchstart', startPress, { passive: false });
+          el.addEventListener('touchend', endPress, { passive: false });
+        }
+      });
 
       // v4.1 Screen Content Brightness Slider
       const screenBrightnessSlider = document.getElementById('screen-brightness-slider');
@@ -3453,6 +3606,10 @@
       });
 
       document.getElementById('reset-default-btn').addEventListener('click', () => {
+        if (!confirm('คุณต้องการรีเซ็ตการตั้งค่าจอและสภาพแวดล้อมทั้งหมดกลับเป็นค่าเริ่มต้นหรือไม่?')) {
+          return;
+        }
+        try { localStorage.removeItem('jled_design_studio_state'); } catch (_) {}
         globalMediaTracker.detachVideo(customVideoEl);
         globalMediaTracker.cleanupAll();
         fileNameLabel.classList.add('hidden');
@@ -4332,7 +4489,7 @@
         ctx.font = 'bold 12px Kanit, Inter, sans-serif';
         const wM = (sp.buildableWidthMm / 1000).toFixed(2);
         const hM = (sp.buildableHeightMm / 1000).toFixed(2);
-        ctx.fillText(`${prod?.name || st.productId} (P${st.pitchMm}) • ${wM}m x ${hM}m • ${sp.cabinetCount} Cabinets • ${sp.resolutionX}x${sp.resolutionY}px`, 20, srcCanvas.height + 50);
+        ctx.fillText(`${prod?.displayName || prod?.name || st.productId} (P${st.pitchMm}) • ${wM}m x ${hM}m • ${sp.cabinetCount} Cabinets • ${sp.resolutionX}x${sp.resolutionY}px`, 20, srcCanvas.height + 50);
 
         ctx.fillStyle = '#94a3b8';
         ctx.font = '11px Kanit, Inter, sans-serif';
@@ -4494,7 +4651,7 @@
         const dimsEl = document.getElementById('quote-spec-dims');
         const cabsEl = document.getElementById('quote-spec-cabs');
 
-        if (titleEl) titleEl.textContent = `${prod?.name || st.productId} (P${st.pitchMm})`;
+        if (titleEl) titleEl.textContent = `${prod?.displayName || prod?.name || st.productId} (P${st.pitchMm})`;
         if (dimsEl) dimsEl.textContent = `${(sp.buildableWidthMm/1000).toFixed(2)} x ${(sp.buildableHeightMm/1000).toFixed(2)} m`;
         if (cabsEl) cabsEl.textContent = `${sp.cabinetCount} ตู้ (${sp.cabinetColumns}x${sp.cabinetRows})`;
 
@@ -4644,11 +4801,12 @@
         }
       });
 
-      // 8. Reactive State Subscription
+      // 8. Reactive State Subscription & Auto-Save
       let prevEnvKey = '';
       let prevLightingKey = '';
       let prevScreenKey = '';
       let prevFrameKey = '';
+      let autoSaveTimeout = null;
 
       globalStateStore.subscribe((state, specs, compatibility) => {
         const canonicalScene = getCanonicalSceneId(state.sceneType);
@@ -4680,9 +4838,56 @@
         buildMeasurements(state, specs);
         buildHumanModel(state, specs);
         updateDOM(state, specs, compatibility);
+
+        // Auto-save serializable studio configuration to LocalStorage
+        if (typeof localStorage !== 'undefined') {
+          if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+          autoSaveTimeout = setTimeout(() => {
+            try {
+              const toSave = {
+                sceneType: state.sceneType,
+                mountType: state.mountType,
+                shapeType: state.shapeType,
+                productId: state.productId,
+                pitchMm: state.pitchMm,
+                requestedWidthMm: state.requestedWidthMm,
+                requestedHeightMm: state.requestedHeightMm,
+                layoutPolicy: state.layoutPolicy,
+                orientation: state.orientation,
+                targetAspectKey: state.targetAspectKey,
+                viewingDistanceM: state.viewingDistanceM,
+                elevationMm: state.elevationMm,
+                positionXMm: state.positionXMm,
+                positionZMm: state.positionZMm,
+                rotationYDeg: state.rotationYDeg,
+                showHuman: state.showHuman,
+                showGrid: state.showGrid,
+                showMeasurements: state.showMeasurements,
+                mode: state.mode,
+                mediaFitMode: state.mediaFitMode,
+                contentType: state.contentType === 'custom-image' || state.contentType === 'custom-video' ? 'tech' : state.contentType,
+                lightingPreset: state.lightingPreset,
+                visualQuality: state.visualQuality
+              };
+              localStorage.setItem('jled_design_studio_state', JSON.stringify(toSave));
+            } catch (_) {}
+          }, 350);
+        }
       });
 
       // 9. Initial Build & Animation Loop
+      // Restore auto-saved state if available
+      try {
+        if (typeof localStorage !== 'undefined') {
+          const savedRaw = localStorage.getItem('jled_design_studio_state');
+          if (savedRaw) {
+            const savedState = JSON.parse(savedRaw);
+            if (savedState && typeof savedState === 'object') {
+              globalStateStore.update(savedState);
+            }
+          }
+        }
+      } catch (_) {}
       renderSkuOptions('all');
       const initialState = globalStateStore.getState();
       const initialSpecs = globalStateStore.getSpecs();
