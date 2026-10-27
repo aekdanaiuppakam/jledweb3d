@@ -163,7 +163,7 @@
         <div>
           <div class="flex items-center gap-2">
             <h1 class="font-bold text-sm sm:text-base tracking-wide text-white leading-none">JLED DESIGN STUDIO</h1>
-            <span class="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30">PRO v4.0</span>
+            <span class="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30">PRO v4.1</span>
           </div>
           <p class="text-[11px] text-slate-400 leading-tight mt-0.5">ระบบจำลองการติดตั้งจอ LED และคำนวณสเปกเชิงวิศวกรรมแม่นยำ</p>
         </div>
@@ -171,6 +171,43 @@
         <div class="flex items-center rounded-xl bg-slate-900/90 p-0.5 border border-slate-700/80 text-[11px] ml-2">
           <button id="mode-customer-btn" type="button" class="px-2 py-1 rounded-lg font-semibold transition text-slate-400 hover:text-white">👤 ลูกค้า</button>
           <button id="mode-sales-btn" type="button" class="px-2 py-1 rounded-lg font-semibold transition bg-[#00E5FF] text-slate-950 font-bold">🛠️ วิศวกร</button>
+        </div>
+      </div>
+
+      <!-- Viewport Floating Studio Toolbar: Lighting, Showcase 360°, Quality, Fullscreen (v4.1) -->
+      <div class="hidden md:flex absolute top-3 left-1/2 -translate-x-1/2 z-20 items-center pointer-events-auto">
+        <div class="glass-panel px-3 py-1.5 rounded-xl flex items-center gap-2 border border-slate-700/80 shadow-2xl text-xs">
+          <!-- Lighting Preset Selector -->
+          <div class="flex items-center gap-1">
+            <span class="text-[11px] text-slate-400 font-medium">💡 แสง:</span>
+            <div class="flex items-center rounded-lg bg-slate-900/90 p-0.5 border border-slate-800">
+              <button type="button" data-lighting="daylight" class="lighting-preset-btn px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="กลางวัน (Daylight)">☀️ กลางวัน</button>
+              <button type="button" data-lighting="sunset" class="lighting-preset-btn px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="อัสดง (Sunset)">🌅 อัสดง</button>
+              <button type="button" data-lighting="night" class="lighting-preset-btn px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="กลางคืน (Night)">🌙 กลางคืน</button>
+              <button type="button" data-lighting="warm" class="lighting-preset-btn px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="วอร์ม 3000K (Warm)">🕯️ วอร์ม</button>
+              <button type="button" data-lighting="cool" class="lighting-preset-btn active px-2 py-0.5 rounded text-[10px] font-semibold bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/40 transition" title="คูลไวท์ 5000K (Cool)">💡 คูล</button>
+            </div>
+          </div>
+          <div class="w-px h-4 bg-slate-700/80"></div>
+          <!-- Showcase 360 Auto-Orbit Toggle -->
+          <button id="toggle-showcase-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 border border-slate-700 hover:border-[#00E5FF]/60 hover:text-[#00E5FF] transition flex items-center gap-1.5" title="หมุนกล้องชมรอบทิศทาง 360°">
+            <span>🎬</span> <span id="showcase-btn-txt">โชว์รูม 360°</span>
+          </button>
+          <div class="w-px h-4 bg-slate-700/80"></div>
+          <!-- Visual Quality Preset -->
+          <div class="flex items-center gap-1 text-[11px]">
+            <span class="text-slate-400">กราฟิก:</span>
+            <select id="visual-quality-select" class="bg-slate-900/90 border border-slate-700 text-cyan-400 rounded-lg px-2 py-0.5 text-[11px] font-medium focus:outline-none cursor-pointer">
+              <option value="high">สูง (High)</option>
+              <option value="medium">กลาง (Med)</option>
+              <option value="low">ประหยัด (Eco)</option>
+            </select>
+          </div>
+          <div class="w-px h-4 bg-slate-700/80"></div>
+          <!-- Fullscreen Button -->
+          <button id="fullscreen-viewport-btn" type="button" class="px-2 py-1 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1" title="ขยายมุมมองเต็มหน้าจอ">
+            <span>⛶</span> เต็มจอ
+          </button>
         </div>
       </div>
 
@@ -291,38 +328,123 @@
     <!-- Scrollable Controls & Spec Body -->
     <div class="flex-1 overflow-y-auto px-4 py-3 space-y-4">
 
-      <!-- SECTION 1: SCENE & INSTALLATION -->
+      <!-- SECTION 1: SCENE & INSTALLATION (v4.1: 12 Interactive 3D Environments) -->
       <div class="glass-card rounded-xl p-3.5 space-y-3">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold uppercase tracking-wider text-[#00E5FF] flex items-center gap-1.5">
             <span>🏢</span> 1. สถานที่และรูปแบบการติดตั้ง
           </h3>
-          <span id="env-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Indoor</span>
+          <span id="env-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Indoor Pro</span>
         </div>
 
-        <!-- 3 Scene Switcher Buttons -->
+        <!-- Category Filter Tabs: All, Indoor, Outdoor, Event -->
         <div>
-          <label class="block text-[11px] text-slate-400 mb-1.5">เลือกสถานที่จำลอง (Scene Environment):</label>
-          <div class="grid grid-cols-3 gap-1.5">
-            <button type="button" data-scene="boardroom" class="scene-btn option-btn active p-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-left transition flex flex-col justify-between">
-              <span class="text-base">💼</span>
-              <div class="mt-1">
-                <div class="text-xs font-semibold leading-tight">ห้องประชุม</div>
-                <div class="text-[10px] text-slate-400">Boardroom</div>
+          <label class="block text-[11px] text-slate-400 mb-1.5">เลือกสถานที่จำลอง 3D (12 Realistic Environments):</label>
+          <div class="flex items-center gap-1 p-0.5 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px] mb-2">
+            <button type="button" data-scene-filter="all" class="scene-filter-tab flex-1 py-1 rounded font-semibold text-center transition bg-[#00E5FF] text-slate-950">🌐 ทั้งหมด (12)</button>
+            <button type="button" data-scene-filter="indoor" class="scene-filter-tab flex-1 py-1 rounded font-semibold text-center transition text-slate-400 hover:text-white">🏢 ในอาคาร (4)</button>
+            <button type="button" data-scene-filter="outdoor" class="scene-filter-tab flex-1 py-1 rounded font-semibold text-center transition text-slate-400 hover:text-white">🌆 นอกอาคาร (4)</button>
+            <button type="button" data-scene-filter="event" class="scene-filter-tab flex-1 py-1 rounded font-semibold text-center transition text-slate-400 hover:text-white">🎪 อีเวนต์ (4)</button>
+          </div>
+
+          <!-- 12 Scene Cards Grid -->
+          <div id="scene-cards-container" class="grid grid-cols-2 gap-1.5 max-h-56 overflow-y-auto pr-1">
+            <!-- 1. Boardroom -->
+            <button type="button" data-scene="boardroom" data-category="indoor" class="scene-card scene-btn active p-2 rounded-xl border border-[#00E5FF] bg-[#00E5FF]/10 text-left transition flex items-center gap-2 group hover:border-[#00E5FF]">
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">💼</span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-[#00E5FF] truncate">ห้องประชุมบอร์ดรูม</div>
+                <div class="text-[9px] text-cyan-300 truncate">Executive Boardroom</div>
               </div>
             </button>
-            <button type="button" data-scene="exhibition" class="scene-btn option-btn p-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-left transition flex flex-col justify-between">
-              <span class="text-base">✨</span>
-              <div class="mt-1">
-                <div class="text-xs font-semibold leading-tight">บูธ / โถงห้าง</div>
-                <div class="text-[10px] text-slate-400">Exhibition Mall</div>
+            <!-- 2. Auditorium -->
+            <button type="button" data-scene="auditorium" data-category="indoor" class="scene-card scene-btn p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-left transition flex items-center gap-2 group hover:border-slate-700">
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">🎓</span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">หอประชุมโรงเรียน</div>
+                <div class="text-[9px] text-slate-400 truncate">School Auditorium</div>
               </div>
             </button>
-            <button type="button" data-scene="outdoor" class="scene-btn option-btn p-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-left transition flex flex-col justify-between">
-              <span class="text-base">🌆</span>
-              <div class="mt-1">
-                <div class="text-xs font-semibold leading-tight">ป้ายริมถนน</div>
-                <div class="text-[10px] text-slate-400">Outdoor Night</div>
+            <!-- 3. Ballroom -->
+            <button type="button" data-scene="ballroom" data-category="indoor" class="scene-card scene-btn p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-left transition flex items-center gap-2 group hover:border-slate-700">
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">👑</span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">ห้องบอลรูมโรงแรมหรู</div>
+                <div class="text-[9px] text-slate-400 truncate">Hotel Ballroom</div>
+              </div>
+            </button>
+            <!-- 4. Mall Atrium -->
+            <button type="button" data-scene="mall-atrium" data-category="indoor" class="scene-card scene-btn p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-left transition flex items-center gap-2 group hover:border-slate-700">
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">🛍️</span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">โถงเอเทรียมห้าง</div>
+                <div class="text-[9px] text-slate-400 truncate">Shopping Mall Atrium</div>
+              </div>
+            </button>
+
+            <!-- 5. Roadside Billboard -->
+            <button type="button" data-scene="billboard" data-category="outdoor" class="scene-card scene-btn p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-left transition flex items-center gap-2 group hover:border-slate-700">
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">🛣️</span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">ป้ายบิลบอร์ดริมถนน</div>
+                <div class="text-[9px] text-slate-400 truncate">Roadside Billboard</div>
+              </div>
+            </button>
+            <!-- 6. School Entrance -->
+            <button type="button" data-scene="school-entrance" data-category="outdoor" class="scene-card scene-btn p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-left transition flex items-center gap-2 group hover:border-slate-700">
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">🏫</span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">ซุ้มทางเข้าโรงเรียน</div>
+                <div class="text-[9px] text-slate-400 truncate">School Entrance</div>
+              </div>
+            </button>
+            <!-- 7. Government Civic Plaza -->
+            <button type="button" data-scene="gov-building" data-category="outdoor" class="scene-card scene-btn p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-left transition flex items-center gap-2 group hover:border-slate-700">
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">🏛️</span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">อาคารหน่วยงานรัฐ</div>
+                <div class="text-[9px] text-slate-400 truncate">Gov Building Plaza</div>
+              </div>
+            </button>
+            <!-- 8. Commercial Building Facade -->
+            <button type="button" data-scene="building-facade" data-category="outdoor" class="scene-card scene-btn p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-left transition flex items-center gap-2 group hover:border-slate-700">
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">🏙️</span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">ฟาซาดกระจกตึกสูง</div>
+                <div class="text-[9px] text-slate-400 truncate">Building Facade</div>
+              </div>
+            </button>
+
+            <!-- 9. Concert Stage -->
+            <button type="button" data-scene="concert-stage" data-category="event" class="scene-card scene-btn p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-left transition flex items-center gap-2 group hover:border-slate-700">
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">🎸</span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">เวทีคอนเสิร์ต</div>
+                <div class="text-[9px] text-slate-400 truncate">Concert Stage Grid</div>
+              </div>
+            </button>
+            <!-- 10. Exhibition Booth -->
+            <button type="button" data-scene="exhibition-booth" data-category="event" class="scene-card scene-btn p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-left transition flex items-center gap-2 group hover:border-slate-700">
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">🎪</span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">บูธนิทรรศการ / เอ็กซ์โป</div>
+                <div class="text-[9px] text-slate-400 truncate">Exhibition Booth</div>
+              </div>
+            </button>
+            <!-- 11. Retail Store -->
+            <button type="button" data-scene="retail-store" data-category="event" class="scene-card scene-btn p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-left transition flex items-center gap-2 group hover:border-slate-700">
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">👗</span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">ร้านค้าปลีกแฟชั่น</div>
+                <div class="text-[9px] text-slate-400 truncate">Retail Store Glass</div>
+              </div>
+            </button>
+            <!-- 12. Corporate Lobby -->
+            <button type="button" data-scene="corporate-lobby" data-category="event" class="scene-card scene-btn p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-left transition flex items-center gap-2 group hover:border-slate-700">
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">🏢</span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">ล็อบบี้สำนักงานใหญ่</div>
+                <div class="text-[9px] text-slate-400 truncate">HQ Lobby & Kiosk</div>
               </div>
             </button>
           </div>
@@ -758,6 +880,25 @@
             <button type="button" data-pattern="green" class="pattern-btn py-0.5 px-1 rounded bg-emerald-950/60 border border-emerald-800/80 hover:border-emerald-500 text-emerald-300 transition text-center">🟢 เม็ดเขียว</button>
             <button type="button" data-pattern="blue" class="pattern-btn py-0.5 px-1 rounded bg-blue-950/60 border border-blue-800/80 hover:border-blue-500 text-blue-300 transition text-center">🔵 เม็ดน้ำเงิน</button>
           </div>
+        </div>
+
+        <!-- Screen Content Brightness Preview (v4.1) -->
+        <div class="pt-2 border-t border-slate-800/80">
+          <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+            <span class="flex items-center gap-1.5">
+              <span>🔆</span> ปรับความสว่างภาพจำลอง (Screen Brightness):
+            </span>
+            <span class="font-mono text-cyan-300 font-bold"><span id="screen-brightness-val">100</span>%</span>
+          </div>
+          <input id="screen-brightness-slider" type="range" min="50" max="150" step="5" value="100" class="w-full accent-cyan-400 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer" />
+          <div class="flex justify-between text-[9px] text-slate-500 mt-0.5">
+            <span>หรี่ 50%</span>
+            <span>ปกติ 100%</span>
+            <span>สว่าง 150%</span>
+          </div>
+          <p class="text-[9px] text-slate-500 mt-1 italic">
+            * จำลองความสว่างสำหรับดูตัวอย่างเท่านั้น — สเปกความสว่างจริงของจอ LED อิงตาม Nits ของรุ่นสินค้า
+          </p>
         </div>
       </div>
 
@@ -1250,7 +1391,7 @@
 
   <!-- ================= APPLICATION SCRIPT ================= -->
   <script type="module">
-    import { DEFAULTS, SCENE_DEFINITIONS, MOUNT_DEFINITIONS, BOUNDS, formatM } from './src/core/constants.js';
+    import { DEFAULTS, SCENE_DEFINITIONS, LIGHTING_PRESETS, MOUNT_DEFINITIONS, BOUNDS, formatM } from './src/core/constants.js';
     import { defaultCatalog, PRODUCT_STATUS, checkCompatibility } from './src/core/product-catalog.js';
     import { calculateScreenSpecs } from './src/core/calculation-engine.js';
     import { calculateDimensionCoordinates } from './src/core/measurements.js';
@@ -1262,6 +1403,9 @@
     import { validateLeadContact, generateCrmPayload, generateLineMessage, buildLineDeepLink } from './src/core/lead-crm.js';
     import { globalStateStore } from './src/core/state.js';
     import { disposeHierarchy, globalMediaTracker } from './src/core/disposal.js';
+    import { LightingSystem } from './src/3d/lighting-system.js';
+    import { CinematicCameraManager } from './src/3d/cinematic-camera.js';
+    import { buildEnvironment as buildModularEnvironment, getCanonicalSceneId } from './src/3d/environment-builder.js';
 
     (function() {
       // 1. WebGL Support Verification
@@ -1364,6 +1508,11 @@
 
       const screenFloorBounceLight = new THREE.SpotLight(0x00aaff, 1.8, 25, Math.PI / 2.2, 0.7, 1.5);
       scene.add(screenFloorBounceLight, screenFloorBounceLight.target);
+
+      const lightingSystem = new LightingSystem(scene, renderer);
+      lightingSystem.initLights(ambientLight, dirLight);
+
+      const cameraManager = new CinematicCameraManager(camera, controls);
 
       let screenCenterY = 2.4;
 
@@ -1590,7 +1739,7 @@
         sourceCtx.restore();
       }
 
-      function updateLEDMatrixTexture(timeSec, state, specs) {
+      function updateLEDMatrixTexture(timeSec, state, specs, bootProgress = 1.0) {
         drawSourceContent(timeSec, state, specs);
 
         const cw = screenCanvas.width;
@@ -1694,6 +1843,31 @@
               }
             }
           }
+        }
+
+        // Screen Content Brightness Preview & Boot Scanline Sequence (v4.1)
+        const brightness = state.screenBrightness != null ? state.screenBrightness : 100;
+        if (brightness < 100) {
+          const dimAlpha = ((100 - brightness) / 100) * 0.75;
+          screenCtx.fillStyle = `rgba(0, 0, 0, ${dimAlpha})`;
+          screenCtx.fillRect(0, 0, cw, ch);
+        } else if (brightness > 100) {
+          const brightAlpha = ((brightness - 100) / 100) * 0.35;
+          screenCtx.save();
+          screenCtx.globalCompositeOperation = 'screen';
+          screenCtx.fillStyle = `rgba(255, 255, 255, ${brightAlpha})`;
+          screenCtx.fillRect(0, 0, cw, ch);
+          screenCtx.restore();
+        }
+
+        // Power-On Boot Sequence Effect
+        if (bootProgress < 1.0) {
+          const wipeY = ch * bootProgress;
+          screenCtx.fillStyle = '#010204';
+          screenCtx.fillRect(0, wipeY, cw, ch - wipeY);
+
+          screenCtx.fillStyle = '#00E5FF';
+          screenCtx.fillRect(0, Math.max(0, wipeY - 3), cw, 3);
         }
 
         screenTexture.needsUpdate = true;
@@ -1966,140 +2140,7 @@
       }
 
       function buildEnvironment(state, specs) {
-        disposeHierarchy(environmentGroup, { sharedResources });
-
-        if (state.sceneType === 'boardroom') {
-          scene.background = new THREE.Color(0x080d1a);
-          scene.fog = new THREE.FogExp2(0x080d1a, 0.016);
-          ambientLight.intensity = 0.5;
-          dirLight.intensity = 0.55;
-
-          const floor = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.25, metalness: 0.2 }));
-          floor.rotation.x = -Math.PI / 2;
-          floor.receiveShadow = true;
-          environmentGroup.add(floor);
-
-          const wall = new THREE.Mesh(new THREE.BoxGeometry(28, 12, 0.3), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6, metalness: 0.1 }));
-          wall.position.set(0, 6, -0.32);
-          wall.receiveShadow = true;
-          environmentGroup.add(wall);
-
-          const slatMat = new THREE.MeshStandardMaterial({ color: 0x3b2618, roughness: 0.5 });
-          for (let s = -12; s <= 12; s += 0.4) {
-            if (Math.abs(s) < 3.5) continue;
-            const slat = new THREE.Mesh(new THREE.BoxGeometry(0.15, 10, 0.08), slatMat);
-            slat.position.set(s, 5, -0.15);
-            environmentGroup.add(slat);
-          }
-
-          const tableTop = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.08, 6.2), new THREE.MeshStandardMaterial({ color: 0x271911, roughness: 0.2, metalness: 0.15 }));
-          tableTop.position.set(0, 0.76, 5.5);
-          tableTop.castShadow = true;
-          tableTop.receiveShadow = true;
-          environmentGroup.add(tableTop);
-
-          const legMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.7, roughness: 0.3 });
-          [3.4, 7.6].forEach((lz) => {
-            const leg = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.74, 0.35), legMat);
-            leg.position.set(0, 0.37, lz);
-            environmentGroup.add(leg);
-          });
-
-          const chairMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
-          for (let cz = 3.2; cz <= 7.8; cz += 1.15) {
-            [-1.38, 1.38].forEach((cx) => {
-              const chairGroup = new THREE.Group();
-              const seat = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.07, 0.52), chairMat);
-              seat.position.y = 0.48;
-              const back = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.58, 0.5), chairMat);
-              back.position.set(cx < 0 ? -0.22 : 0.22, 0.78, 0);
-              const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.46, 8), legMat);
-              post.position.y = 0.23;
-              chairGroup.add(seat, back, post);
-              chairGroup.position.set(cx, 0, cz);
-              environmentGroup.add(chairGroup);
-            });
-          }
-        } else if (state.sceneType === 'exhibition') {
-          scene.background = new THREE.Color(0x090d16);
-          scene.fog = new THREE.FogExp2(0x090d16, 0.012);
-          ambientLight.intensity = 0.55;
-          dirLight.intensity = 0.75;
-
-          const floor = new THREE.Mesh(new THREE.PlaneGeometry(70, 70), new THREE.MeshStandardMaterial({ color: 0x182234, roughness: 0.18, metalness: 0.35 }));
-          floor.rotation.x = -Math.PI / 2;
-          floor.receiveShadow = true;
-          environmentGroup.add(floor);
-
-          const grid = new THREE.GridHelper(60, 60, 0x00e5ff, 0x1e293b);
-          grid.position.y = 0.01;
-          grid.material.opacity = 0.25;
-          grid.material.transparent = true;
-          environmentGroup.add(grid);
-
-          const stageW = Math.max(8, specs.actualWidthM + 3);
-          const stage = new THREE.Mesh(new THREE.BoxGeometry(stageW, 0.3, 3.6), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3, metalness: 0.4 }));
-          stage.position.set(0, 0.15, 0.5);
-          stage.receiveShadow = true;
-          environmentGroup.add(stage);
-
-          const strip = new THREE.Mesh(new THREE.BoxGeometry(stageW + 0.02, 0.04, 0.04), new THREE.MeshBasicMaterial({ color: 0x00e5ff }));
-          strip.position.set(0, 0.28, 2.31);
-          environmentGroup.add(strip);
-
-          const backW = Math.max(10, specs.actualWidthM + 2.5);
-          const backH = Math.max(6, specs.actualHeightM + 2.5);
-          const backWall = new THREE.Mesh(new THREE.BoxGeometry(backW, backH, 0.25), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 }));
-          backWall.position.set(0, backH / 2, -0.35);
-          environmentGroup.add(backWall);
-
-          const counter = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.05, 0.7), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 }));
-          counter.position.set(stageW / 2 - 1.2, 0.82, 1.5);
-          environmentGroup.add(counter);
-        } else if (state.sceneType === 'outdoor') {
-          scene.background = new THREE.Color(0x03060c);
-          scene.fog = new THREE.FogExp2(0x03060c, 0.01);
-          ambientLight.intensity = 0.28;
-          dirLight.intensity = 0.35;
-
-          const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0x0b0f17, roughness: 0.7, metalness: 0.1 }));
-          ground.rotation.x = -Math.PI / 2;
-          ground.receiveShadow = true;
-          environmentGroup.add(ground);
-
-          const roadLineMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
-          for (let rx = -35; rx <= 35; rx += 5) {
-            const dash = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.18), roadLineMat);
-            dash.rotation.x = -Math.PI / 2;
-            dash.position.set(rx, 0.02, 10);
-            environmentGroup.add(dash);
-          }
-
-          const bldgW = Math.max(16, specs.actualWidthM + 6);
-          const bldgH = Math.max(14, specs.actualHeightM + 6);
-          const bldg = new THREE.Mesh(new THREE.BoxGeometry(bldgW, bldgH, 4), new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.65, metalness: 0.3 }));
-          bldg.position.set(0, bldgH / 2, -2.35);
-          environmentGroup.add(bldg);
-
-          const winMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
-          for (let wy = 2.5; wy < bldgH - 1.5; wy += 2.2) {
-            for (let wx = -bldgW / 2 + 1.5; wx <= bldgW / 2 - 1.5; wx += 2.4) {
-              if (Math.abs(wx) < specs.actualWidthM / 2 + 0.8 && wy < specs.actualHeightM + 3) continue;
-              const win = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.3), winMat);
-              win.position.set(wx, wy, -0.33);
-              environmentGroup.add(win);
-            }
-          }
-
-          const poleMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8 });
-          [-10, 10].forEach((px) => {
-            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 7.5, 8), poleMat);
-            pole.position.set(px, 3.75, 6);
-            const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 12), new THREE.MeshBasicMaterial({ color: 0xffedd5 }));
-            lamp.position.set(px, 7.6, 6);
-            environmentGroup.add(pole, lamp);
-          });
-        }
+        buildModularEnvironment(environmentGroup, state, specs, lightingSystem, sharedResources);
       }
 
       function buildHumanModel(state, specs) {
@@ -2161,7 +2202,7 @@
         humanGroup.position.set(humanX, baseStageOffset, humanZ);
       }
 
-      function syncCameraToViewingDistance(angleMode = 'maintain') {
+      function syncCameraToViewingDistance(angleMode = 'maintain', duration = 750) {
         isInternalCameraSync = true;
         if (syncTimeout) clearTimeout(syncTimeout);
 
@@ -2170,18 +2211,19 @@
         const targetY = screenCenterY;
         const posX = (state.positionXMm || 0) / 1000;
         const posZ = (state.positionZMm || 0) / 1000;
-        controls.target.set(posX, targetY, posZ);
+        const targetLookAt = [posX, targetY, posZ];
 
+        let targetCam;
         if (angleMode === 'angle45') {
-          camera.position.set(posX + d * 0.65, targetY + d * 0.18, posZ + d * 0.76);
+          targetCam = [posX + d * 0.65, targetY + d * 0.18, posZ + d * 0.76];
         } else if (angleMode === 'humanEye') {
-          camera.position.set(posX, 1.65, posZ + d);
+          targetCam = [posX, 1.65, posZ + d];
         } else if (angleMode === 'topDown') {
-          camera.position.set(posX, targetY + d * 1.25, posZ + 0.05);
+          targetCam = [posX, targetY + d * 1.25, posZ + 0.05];
         } else if (angleMode === 'side') {
-          camera.position.set(posX + d * 1.1, targetY, posZ);
+          targetCam = [posX + d * 1.1, targetY, posZ];
         } else if (angleMode === 'front') {
-          camera.position.set(posX, targetY, posZ + d);
+          targetCam = [posX, targetY, posZ + d];
         } else {
           // 'maintain': preserve current camera viewing direction vector and scale to distance d
           const dir = camera.position.clone().sub(controls.target);
@@ -2190,13 +2232,23 @@
           } else {
             dir.normalize();
           }
-          camera.position.copy(controls.target).addScaledVector(dir, d);
+          const endPos = controls.target.clone().addScaledVector(dir, d);
+          targetCam = [endPos.x, endPos.y, endPos.z];
         }
-        controls.update();
 
-        syncTimeout = setTimeout(() => {
-          isInternalCameraSync = false;
-        }, 120);
+        if (cameraManager && angleMode !== 'maintain' && duration > 0) {
+          cameraManager.glideTo(targetCam, targetLookAt, duration);
+          syncTimeout = setTimeout(() => {
+            isInternalCameraSync = false;
+          }, duration + 50);
+        } else {
+          controls.target.set(...targetLookAt);
+          camera.position.set(...targetCam);
+          controls.update();
+          syncTimeout = setTimeout(() => {
+            isInternalCameraSync = false;
+          }, 120);
+        }
       }
 
       // 6. UI Synchronizer & Dynamic Catalog
@@ -2593,11 +2645,52 @@
           btn.classList.toggle('ring-2', isActive);
           btn.classList.toggle('ring-cyan-400', isActive);
         });
+
+        // ================= v4.1: SCENE CARDS & LIGHTING PRESETS =================
+        const canonicalScene = getCanonicalSceneId(state.sceneType);
+        document.querySelectorAll('.scene-card').forEach((c) => {
+          const match = c.getAttribute('data-scene') === canonicalScene || c.getAttribute('data-scene') === state.sceneType;
+          c.classList.toggle('active', match);
+          if (match) {
+            c.classList.add('border-[#00E5FF]', 'bg-[#00E5FF]/10');
+            c.classList.remove('border-slate-800', 'bg-slate-900/60');
+            const titleEl = c.querySelector('div div:first-child');
+            if (titleEl) titleEl.className = 'text-xs font-bold text-[#00E5FF] truncate';
+          } else {
+            c.classList.remove('border-[#00E5FF]', 'bg-[#00E5FF]/10');
+            c.classList.add('border-slate-800', 'bg-slate-900/60');
+            const titleEl = c.querySelector('div div:first-child');
+            if (titleEl) titleEl.className = 'text-xs font-bold text-white truncate';
+          }
+        });
+
+        // Sync lighting preset pills
+        const activeLight = state.lightingPreset || 'cool';
+        document.querySelectorAll('.lighting-preset-btn').forEach((btn) => {
+          const isActive = btn.getAttribute('data-lighting') === activeLight;
+          btn.classList.toggle('active', isActive);
+          if (isActive) {
+            btn.className = 'lighting-preset-btn active px-2 py-0.5 rounded text-[10px] font-semibold bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/40 transition';
+          } else {
+            btn.className = 'lighting-preset-btn px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition';
+          }
+        });
+
+        // Sync Screen Brightness Slider
+        const brightness = state.screenBrightness != null ? state.screenBrightness : 100;
+        const bSlider = document.getElementById('screen-brightness-slider');
+        const bVal = document.getElementById('screen-brightness-val');
+        if (bSlider && parseInt(bSlider.value, 10) !== brightness) {
+          bSlider.value = brightness;
+        }
+        if (bVal) {
+          bVal.textContent = brightness;
+        }
       }
 
       function generateQuotationText(state, specs) {
         const product = globalStateStore.getProduct();
-        const sceneDef = SCENE_DEFINITIONS[state.sceneType];
+        const sceneDef = SCENE_DEFINITIONS[state.sceneType] || SCENE_DEFINITIONS[getCanonicalSceneId(state.sceneType)];
         const mountDef = MOUNT_DEFINITIONS[state.mountType];
         const pSizeM = (product ? product.cabinetWidthMm / 1000 : 0.5).toFixed(2);
         const policyLabels = {
@@ -2607,7 +2700,7 @@
         };
 
         return [
-          `📋 ใบสรุปสเปกจอ LED แบรนด์ JLED (JLED Design Studio v4.0)`,
+          `📋 ใบสรุปสเปกจอ LED แบรนด์ JLED (JLED Design Studio v4.1)`,
           `==========================================`,
           `• รหัสรุ่นสินค้า: ${product ? product.displayName : 'JLED Pro'} [${specs.productStatus === PRODUCT_STATUS.VERIFIED ? 'Verified' : 'Demo Profile'}]`,
           `• Series: ${product ? product.series || 'J-Standard' : 'J-Standard'} | Datasheet: ${product ? product.datasheetRef || 'JLED-STD' : 'JLED-STD'}`,
@@ -2631,14 +2724,132 @@
       }
 
       // 7. Event Listeners Wire-up
-      document.querySelectorAll('.scene-btn').forEach((btn) => {
+      function transitionToScene(sceneId) {
+        const canonicalId = getCanonicalSceneId(sceneId);
+        const def = SCENE_DEFINITIONS[canonicalId] || SCENE_DEFINITIONS[sceneId] || SCENE_DEFINITIONS.boardroom;
+
+        if (cameraManager) {
+          cameraManager.triggerPowerOn();
+          if (def.camera && def.camera.pos && def.camera.target) {
+            cameraManager.glideTo(def.camera.pos, def.camera.target, 900);
+          }
+        }
+
+        globalStateStore.update({
+          sceneType: canonicalId,
+          mountType: def.recommendedMount || 'wall',
+          elevationMm: Math.round((def.defaultElevationM || 1.0) * 1000),
+          viewingDistanceM: def.defaultViewingDistanceM || 5.0,
+          lightingPreset: def.defaultLighting || 'cool'
+        });
+      }
+
+      document.querySelectorAll('.scene-card, .scene-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.scene-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          const sceneType = btn.getAttribute('data-scene');
-          globalStateStore.update({ sceneType });
+          const sceneId = btn.getAttribute('data-scene');
+          if (sceneId) transitionToScene(sceneId);
         });
       });
+
+      // v4.1 Category Filter Tabs (All, Indoor, Outdoor, Event)
+      document.querySelectorAll('.scene-filter-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          const filter = tab.getAttribute('data-scene-filter');
+          document.querySelectorAll('.scene-filter-tab').forEach(t => {
+            const active = t.getAttribute('data-scene-filter') === filter;
+            t.className = active
+              ? 'scene-filter-tab flex-1 py-1 rounded font-semibold text-center transition bg-[#00E5FF] text-slate-950'
+              : 'scene-filter-tab flex-1 py-1 rounded font-semibold text-center transition text-slate-400 hover:text-white';
+          });
+          document.querySelectorAll('.scene-card').forEach(card => {
+            const cat = card.getAttribute('data-category');
+            if (filter === 'all' || cat === filter) {
+              card.classList.remove('hidden');
+            } else {
+              card.classList.add('hidden');
+            }
+          });
+        });
+      });
+
+      // v4.1 Lighting Preset Buttons
+      document.querySelectorAll('.lighting-preset-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const presetId = btn.getAttribute('data-lighting');
+          if (lightingSystem) {
+            lightingSystem.applyPreset(presetId);
+          }
+          globalStateStore.update({ lightingPreset: presetId });
+        });
+      });
+
+      // v4.1 Showcase 360 Auto-Orbit Button
+      const showcaseBtn = document.getElementById('toggle-showcase-btn');
+      const showcaseTxt = document.getElementById('showcase-btn-txt');
+      if (showcaseBtn) {
+        showcaseBtn.addEventListener('click', () => {
+          if (!cameraManager) return;
+          const active = cameraManager.toggleShowcase();
+          globalStateStore.update({ showcaseOrbit: active });
+          if (active) {
+            showcaseBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF] shadow-[0_0_12px_rgba(0,229,255,0.4)] transition flex items-center gap-1.5';
+            if (showcaseTxt) showcaseTxt.textContent = 'หยุดหมุน 360°';
+          } else {
+            showcaseBtn.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-900/90 text-slate-300 border border-slate-700 hover:border-[#00E5FF]/60 hover:text-[#00E5FF] transition flex items-center gap-1.5';
+            if (showcaseTxt) showcaseTxt.textContent = 'โชว์รูม 360°';
+          }
+        });
+      }
+
+      // v4.1 Visual Quality Preset Selector
+      const qualitySelect = document.getElementById('visual-quality-select');
+      if (qualitySelect) {
+        qualitySelect.addEventListener('change', (e) => {
+          const quality = e.target.value;
+          if (quality === 'low') {
+            renderer.setPixelRatio(0.85);
+            renderer.shadowMap.enabled = false;
+          } else if (quality === 'medium') {
+            renderer.setPixelRatio(1.0);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFShadowMap;
+          } else {
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+          }
+          renderer.setSize(container.clientWidth, container.clientHeight);
+          globalStateStore.update({ visualQuality: quality });
+        });
+      }
+
+      // v4.1 Fullscreen Viewport Button
+      const fsBtn = document.getElementById('fullscreen-viewport-btn');
+      if (fsBtn) {
+        fsBtn.addEventListener('click', () => {
+          const wrapper = document.getElementById('canvas-wrapper');
+          if (!document.fullscreenElement) {
+            if (wrapper.requestFullscreen) {
+              wrapper.requestFullscreen();
+            }
+          } else {
+            if (document.exitFullscreen) {
+              document.exitFullscreen();
+            }
+          }
+        });
+      }
+
+      // v4.1 Screen Content Brightness Slider
+      const screenBrightnessSlider = document.getElementById('screen-brightness-slider');
+      const screenBrightnessVal = document.getElementById('screen-brightness-val');
+      if (screenBrightnessSlider) {
+        screenBrightnessSlider.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10) || 100;
+          if (screenBrightnessVal) screenBrightnessVal.textContent = val;
+          globalStateStore.update({ screenBrightness: val });
+        });
+      }
 
       document.querySelectorAll('.mount-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -2831,15 +3042,15 @@
         }
       });
 
-      document.getElementById('cam-front-btn').addEventListener('click', () => syncCameraToViewingDistance('front'));
-      document.getElementById('cam-angle-btn').addEventListener('click', () => syncCameraToViewingDistance('angle45'));
-      document.getElementById('cam-human-btn').addEventListener('click', () => syncCameraToViewingDistance('humanEye'));
-      document.getElementById('cam-top-btn').addEventListener('click', () => syncCameraToViewingDistance('topDown'));
-      document.getElementById('cam-side-btn').addEventListener('click', () => syncCameraToViewingDistance('side'));
+      document.getElementById('cam-front-btn').addEventListener('click', () => syncCameraToViewingDistance('front', 750));
+      document.getElementById('cam-angle-btn').addEventListener('click', () => syncCameraToViewingDistance('angle45', 750));
+      document.getElementById('cam-human-btn').addEventListener('click', () => syncCameraToViewingDistance('humanEye', 750));
+      document.getElementById('cam-top-btn').addEventListener('click', () => syncCameraToViewingDistance('topDown', 750));
+      document.getElementById('cam-side-btn').addEventListener('click', () => syncCameraToViewingDistance('side', 750));
       document.getElementById('cam-closeup-btn').addEventListener('click', () => {
         distanceSlider.value = 1.2;
         globalStateStore.update({ viewingDistanceM: 1.2 });
-        syncCameraToViewingDistance('front');
+        syncCameraToViewingDistance('front', 750);
       });
 
       // Phase 04: Spatial Controls Event Listeners
@@ -2915,7 +3126,10 @@
         widthSlider.value = st.requestedWidthMm / 1000;
         heightSlider.value = st.requestedHeightMm / 1000;
 
-        document.querySelectorAll('.scene-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-scene') === 'boardroom'));
+        document.querySelectorAll('.scene-card, .scene-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-scene') === 'boardroom'));
+        document.querySelectorAll('.lighting-preset-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-lighting') === 'cool'));
+        if (lightingSystem) lightingSystem.applyPreset('cool');
+        if (cameraManager) cameraManager.toggleShowcase(false);
         document.querySelectorAll('.mount-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-mount') === 'wall'));
         document.querySelectorAll('.pitch-btn').forEach(b => b.classList.toggle('active', parseFloat(b.getAttribute('data-pitch')) === 2.5));
         document.querySelectorAll('.content-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-content') === 'tech'));
@@ -4083,15 +4297,33 @@
         }
       });
 
+      document.addEventListener('fullscreenchange', () => {
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        if (w > 0 && h > 0) {
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setSize(w, h);
+        }
+      });
+
       // 8. Reactive State Subscription
       let prevEnvKey = '';
+      let prevLightingKey = '';
       let prevScreenKey = '';
 
       globalStateStore.subscribe((state, specs, compatibility) => {
-        const envKey = `${state.sceneType}`;
+        const canonicalScene = getCanonicalSceneId(state.sceneType);
+        const envKey = `${canonicalScene}`;
         if (envKey !== prevEnvKey) {
           buildEnvironment(state, specs);
           prevEnvKey = envKey;
+          prevLightingKey = state.lightingPreset;
+        } else if (state.lightingPreset !== prevLightingKey) {
+          if (lightingSystem) {
+            lightingSystem.applyPreset(state.lightingPreset);
+          }
+          prevLightingKey = state.lightingPreset;
         }
 
         const screenKey = `${state.productId}_${specs.actualWidthM}_${specs.actualHeightM}_${state.mountType}_${state.shapeType}_${state.elevationMm}_${state.positionXMm}_${state.positionZMm}_${state.rotationYDeg}`;
@@ -4114,7 +4346,7 @@
       buildScreenAndMount(initialState, initialSpecs);
       buildMeasurements(initialState, initialSpecs);
       buildHumanModel(initialState, initialSpecs);
-      syncCameraToViewingDistance('front');
+      syncCameraToViewingDistance('front', 0);
       updateDOM(initialState, initialSpecs, initialCompat);
 
       let startTime = performance.now();
@@ -4123,11 +4355,18 @@
 
         if (!isTabVisible) return;
 
+        const camInfo = cameraManager ? cameraManager.update(now) : { bootProgress: 1.0 };
         const elapsedSec = (now - startTime) / 1000;
         const state = globalStateStore.getState();
         const specs = globalStateStore.getSpecs();
 
-        updateLEDMatrixTexture(elapsedSec, state, specs);
+        // Modulate point/bounce light by bootProgress and screenBrightness
+        const boot = camInfo.bootProgress != null ? camInfo.bootProgress : 1.0;
+        const brightnessMult = ((state.screenBrightness != null ? state.screenBrightness : 100) / 100) * boot;
+        screenGlowLight.intensity = 1.6 * brightnessMult;
+        screenFloorBounceLight.intensity = 1.8 * brightnessMult;
+
+        updateLEDMatrixTexture(elapsedSec, state, specs, boot);
         controls.update();
         renderer.render(scene, camera);
       }

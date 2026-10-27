@@ -127,9 +127,12 @@ export function checkCompatibility(product, { sceneType, mountType }) {
   }
 
   // 1. Environment Compatibility Check
-  if (sceneType === 'outdoor' && product.environment === PRODUCT_ENVIRONMENT.INDOOR) {
+  const isOutdoorScene = ['outdoor', 'billboard', 'school-entrance', 'gov-building', 'building-facade'].includes(sceneType);
+  const isCloseIndoorScene = ['boardroom', 'corporate-lobby', 'retail-store'].includes(sceneType);
+
+  if (isOutdoorScene && product.environment === PRODUCT_ENVIRONMENT.INDOOR) {
     errors.push(`ข้อควรระวังสำคัญ: รุ่น ${product.displayName} ออกแบบสำหรับใช้ในอาคาร (Indoor) ไม่มีมาตรฐานกันน้ำ IP65 ไม่สามารถติดตั้งริมถนน/กลางแจ้งได้`);
-  } else if (sceneType === 'boardroom' && product.environment === PRODUCT_ENVIRONMENT.OUTDOOR) {
+  } else if (isCloseIndoorScene && product.environment === PRODUCT_ENVIRONMENT.OUTDOOR) {
     warnings.push(`ข้อแนะนำ: รุ่น ${product.displayName} มีความสว่างสูงมาก (${product.brightnessNits || 6000} Nits) และเม็ดพิกเซลห่าง เหมาะสำหรับภายนอกอาคารมากกว่าห้องประชุม`);
   }
 

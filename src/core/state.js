@@ -49,6 +49,11 @@ export class StateStore {
       cameraSeparated: false,
       shapeType: 'flat', // 'flat' | 'curved' | 'l-shape-inner' | 'l-shape-outer' | 'cube'
       mode: 'sales', // 'customer' | 'sales'
+      lightingPreset: defaultScene?.defaultLighting || 'cool', // 'daylight' | 'sunset' | 'night' | 'warm' | 'cool'
+      showcaseOrbit: false,
+      visualQuality: 'high', // 'high' | 'medium' | 'low'
+      screenBrightness: 1.0, // 0.5 to 1.5
+      sceneCategoryFilter: 'all', // 'all' | 'indoor' | 'outdoor' | 'event'
       ...overrides
     };
   }

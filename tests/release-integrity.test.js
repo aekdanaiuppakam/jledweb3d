@@ -21,10 +21,16 @@ describe('Release & Module Integrity Test Suite (Phase 12)', () => {
     'src/core/media-pipeline.js',
     'src/core/disposal.js',
     'src/core/project-store.js',
-    'src/core/lead-crm.js'
+    'src/core/lead-crm.js',
+    'src/3d/lighting-system.js',
+    'src/3d/cinematic-camera.js',
+    'src/3d/environment-builder.js',
+    'src/3d/environments/indoor.js',
+    'src/3d/environments/outdoor.js',
+    'src/3d/environments/event.js'
   ];
 
-  it('verifies that all 12 core architecture modules exist and are non-empty', () => {
+  it('verifies that all architecture and 3D modules exist and are non-empty', () => {
     for (const mod of allModules) {
       const fullPath = path.join(ROOT_DIR, mod);
       assert.ok(fs.existsSync(fullPath), `Module missing: ${mod}`);
