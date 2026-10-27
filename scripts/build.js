@@ -39,6 +39,7 @@ const requiredFiles = [
   'src/core/perspective-engine.js',
   'src/core/pitch-comparison.js',
   'src/core/shape-engine.js',
+  'src/core/media-pipeline.js',
   'src/core/disposal.js',
   'docs/AUDIT_AND_ARCHITECTURE.md',
   'backup/jled_3d_screen_simulator_configurator_led_v3.5_original.html'

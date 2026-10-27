@@ -38,6 +38,8 @@ export class StateStore {
       customImage: null,
       customVideoUrl: null,
       customVideoReady: false,
+      mediaFitMode: 'fit', // 'fit' | 'cover' | 'stretch'
+      testPattern: null, // null | 'colorbars' | 'grid' | 'grayscale' | 'white' | 'red' | 'green' | 'blue'
       cameraPreset: 'front',
       elevationMm: Math.round((defaultScene?.defaultElevationM || 0.95) * 1000),
       positionXMm: 0,

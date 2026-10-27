@@ -721,6 +721,38 @@
           </button>
           <p id="uploaded-file-name" class="text-[10px] text-slate-400 text-center mt-1 hidden"></p>
         </div>
+
+        <!-- Aspect Ratio Fit Modes (Phase 09) -->
+        <div class="pt-2 border-t border-slate-800/80">
+          <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+            <span>การปรับสัดส่วนภาพ (Aspect Fit Mode):</span>
+            <span id="fit-mode-label" class="font-mono text-cyan-300">พอดีจอ (Fit)</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 text-xs">
+            <button type="button" data-fit="fit" class="fit-btn active py-1 rounded bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/40 font-semibold transition text-center">📐 พอดี (Fit)</button>
+            <button type="button" data-fit="cover" class="fit-btn py-1 rounded bg-slate-900 border border-slate-700 text-slate-300 font-semibold transition text-center">🖼️ เต็มจอ (Cover)</button>
+            <button type="button" data-fit="stretch" class="fit-btn py-1 rounded bg-slate-900 border border-slate-700 text-slate-300 font-semibold transition text-center">↔️ ยืดภาพ (Stretch)</button>
+          </div>
+        </div>
+
+        <!-- Calibration Test Patterns (Phase 09) -->
+        <div class="pt-2 border-t border-slate-800/80">
+          <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+            <span>ภาพทดสอบมาตรฐาน (Calibration Patterns):</span>
+            <span class="text-[9px] text-slate-500">สำหรับเช็คสี/เม็ดพิกเซล</span>
+          </div>
+          <div class="grid grid-cols-4 gap-1 text-[10px]">
+            <button type="button" data-pattern="colorbars" class="pattern-btn py-1 px-1 rounded bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-200 transition text-center">📺 Color Bars</button>
+            <button type="button" data-pattern="grid" class="pattern-btn py-1 px-1 rounded bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-200 transition text-center">▦ Grid 32px</button>
+            <button type="button" data-pattern="grayscale" class="pattern-btn py-1 px-1 rounded bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-200 transition text-center">🏁 Grayscale</button>
+            <button type="button" data-pattern="white" class="pattern-btn py-1 px-1 rounded bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-200 transition text-center">⚪ ขาว 100%</button>
+          </div>
+          <div class="grid grid-cols-3 gap-1 text-[10px] mt-1">
+            <button type="button" data-pattern="red" class="pattern-btn py-0.5 px-1 rounded bg-red-950/60 border border-red-800/80 hover:border-red-500 text-red-300 transition text-center">🔴 เม็ดแดง</button>
+            <button type="button" data-pattern="green" class="pattern-btn py-0.5 px-1 rounded bg-emerald-950/60 border border-emerald-800/80 hover:border-emerald-500 text-emerald-300 transition text-center">🟢 เม็ดเขียว</button>
+            <button type="button" data-pattern="blue" class="pattern-btn py-0.5 px-1 rounded bg-blue-950/60 border border-blue-800/80 hover:border-blue-500 text-blue-300 transition text-center">🔵 เม็ดน้ำเงิน</button>
+          </div>
+        </div>
       </div>
 
       <!-- SECTION 5: LIVE SPEC DASHBOARD -->
@@ -1090,6 +1122,7 @@
     import { getDefaultCornerPins, renderWarpedCanvas } from './src/core/perspective-engine.js';
     import { comparePixelPitches } from './src/core/pitch-comparison.js';
     import { SHAPE_TYPES, validateShapeCompatibility, calculateLCornerParameters, calculateCurveParameters } from './src/core/shape-engine.js';
+    import { calculateMediaTransform, drawTestPattern, FIT_MODES, TEST_PATTERNS } from './src/core/media-pipeline.js';
     import { globalStateStore } from './src/core/state.js';
     import { disposeHierarchy, globalMediaTracker } from './src/core/disposal.js';
 
@@ -1190,13 +1223,31 @@
         const h = sourceCanvas.height;
         sourceCtx.save();
 
-        if (state.contentType === 'custom-image' && state.customImage) {
+        if (state.testPattern) {
+          drawTestPattern(sourceCtx, w, h, state.testPattern);
+        } else if (state.contentType === 'custom-image' && state.customImage) {
           sourceCtx.fillStyle = '#000';
           sourceCtx.fillRect(0, 0, w, h);
-          sourceCtx.drawImage(state.customImage, 0, 0, w, h);
+          const t = calculateMediaTransform({
+            mediaWidth: state.customImage.width,
+            mediaHeight: state.customImage.height,
+            targetWidth: w,
+            targetHeight: h,
+            fitMode: state.mediaFitMode || 'fit'
+          });
+          sourceCtx.drawImage(state.customImage, t.sx, t.sy, t.sw, t.sh, t.dx, t.dy, t.dw, t.dh);
         } else if (state.contentType === 'custom-video' && state.customVideoReady) {
           const vid = document.getElementById('custom-video-el');
-          sourceCtx.drawImage(vid, 0, 0, w, h);
+          sourceCtx.fillStyle = '#000';
+          sourceCtx.fillRect(0, 0, w, h);
+          const t = calculateMediaTransform({
+            mediaWidth: vid.videoWidth || 1920,
+            mediaHeight: vid.videoHeight || 1080,
+            targetWidth: w,
+            targetHeight: h,
+            fitMode: state.mediaFitMode || 'fit'
+          });
+          sourceCtx.drawImage(vid, t.sx, t.sy, t.sw, t.sh, t.dx, t.dy, t.dw, t.dh);
         } else if (state.contentType === 'tech') {
           const grad = sourceCtx.createLinearGradient(0, 0, w, h);
           grad.addColorStop(0, '#040B1E');
@@ -2352,6 +2403,24 @@
             el.classList.remove('hidden');
           }
         });
+
+        // ================= PHASE 09: MEDIA FIT MODE & CALIBRATION PATTERNS =================
+        const currentFit = state.mediaFitMode || 'fit';
+        const fitLabels = { fit: 'พอดีจอ (Fit)', cover: 'เต็มจอ (Cover)', stretch: 'ยืดภาพ (Stretch)' };
+        const fitLabelEl = document.getElementById('fit-mode-label');
+        if (fitLabelEl) fitLabelEl.textContent = fitLabels[currentFit] || currentFit;
+
+        document.querySelectorAll('.fit-btn').forEach(btn => {
+          const isActive = btn.getAttribute('data-fit') === currentFit;
+          btn.className = isActive ? 'fit-btn active py-1 rounded bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/40 font-semibold transition text-center' : 'fit-btn py-1 rounded bg-slate-900 border border-slate-700 text-slate-300 font-semibold transition text-center';
+        });
+
+        const currentPattern = state.testPattern;
+        document.querySelectorAll('.pattern-btn').forEach(btn => {
+          const isActive = btn.getAttribute('data-pattern') === currentPattern;
+          btn.classList.toggle('ring-2', isActive);
+          btn.classList.toggle('ring-cyan-400', isActive);
+        });
       }
 
       function generateQuotationText(state, specs) {
@@ -2505,6 +2574,26 @@
           const contentType = btn.getAttribute('data-content');
           globalStateStore.update({ contentType });
           document.getElementById('media-status-tag').textContent = 'Live Canvas';
+        });
+      });
+
+      // Phase 09: Fit Mode Event Listeners
+      document.querySelectorAll('.fit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const fitMode = btn.getAttribute('data-fit');
+          globalStateStore.update({ mediaFitMode: fitMode });
+        });
+      });
+
+      // Phase 09: Test Pattern Event Listeners
+      document.querySelectorAll('.pattern-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const pattern = btn.getAttribute('data-pattern');
+          const current = globalStateStore.getState().testPattern;
+          globalStateStore.update({
+            testPattern: current === pattern ? null : pattern
+          });
+          document.getElementById('media-status-tag').textContent = current === pattern ? 'Live Canvas' : `Pattern: ${pattern}`;
         });
       });
 
