@@ -167,6 +167,11 @@
           </div>
           <p class="text-[11px] text-slate-400 leading-tight mt-0.5">ระบบจำลองการติดตั้งจอ LED และคำนวณสเปกเชิงวิศวกรรมแม่นยำ</p>
         </div>
+        <!-- Mode Switcher Pill (Phase 08) -->
+        <div class="flex items-center rounded-xl bg-slate-900/90 p-0.5 border border-slate-700/80 text-[11px] ml-2">
+          <button id="mode-customer-btn" type="button" class="px-2 py-1 rounded-lg font-semibold transition text-slate-400 hover:text-white">👤 ลูกค้า</button>
+          <button id="mode-sales-btn" type="button" class="px-2 py-1 rounded-lg font-semibold transition bg-[#00E5FF] text-slate-950 font-bold">🛠️ วิศวกร</button>
+        </div>
       </div>
 
       <!-- Viewing Distance Live Status Pill -->
@@ -268,7 +273,7 @@
         <button id="open-compare-btn" type="button" title="เปรียบเทียบสเปกรุ่น" class="text-[11px] text-cyan-300 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-cyan-500/30 hover:border-cyan-400">
           <span>⚖️</span> เทียบรุ่น
         </button>
-        <button id="open-catalog-btn" type="button" title="จัดการ Product Catalog JSON" class="text-[11px] text-slate-300 hover:text-[#00E5FF] transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-slate-800 hover:border-[#00E5FF]/50">
+        <button id="open-catalog-btn" type="button" title="จัดการ Product Catalog JSON" class="engineer-only text-[11px] text-slate-300 hover:text-[#00E5FF] transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-slate-800 hover:border-[#00E5FF]/50">
           <span>⚙️</span> Catalog
         </button>
         <button id="reset-default-btn" type="button" title="รีเซ็ตค่าเริ่มต้น" class="text-[11px] text-slate-400 hover:text-[#00E5FF] transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-slate-800">
@@ -643,7 +648,7 @@
         </div>
 
         <!-- 2D Cabinet Grid Mini-Blueprint (Phase 03) -->
-        <div class="p-2.5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-1.5">
+        <div class="engineer-only p-2.5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-1.5">
           <div class="flex items-center justify-between text-[11px]">
             <span class="text-slate-300 font-medium flex items-center gap-1">
               <span>📐</span> แผนผังตู้ 2D (Cabinet Blueprint):
@@ -760,7 +765,7 @@
         </div>
 
         <!-- Power & Weight Estimation Bar (Phase 03) -->
-        <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 space-y-1.5">
+        <div class="engineer-only p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 space-y-1.5">
           <div class="flex items-center justify-between">
             <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">ประมาณการโหลดไฟฟ้าและน้ำหนัก (Electrical &amp; Structural)</div>
             <span class="text-base">⚡</span>
@@ -2324,6 +2329,29 @@
           measurePanelBtn.textContent = isMeasureOn ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
           measurePanelBtn.className = isMeasureOn ? 'px-2 py-0.5 rounded text-[10px] font-semibold bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/40' : 'px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700';
         }
+
+        // ================= PHASE 08: CUSTOMER VS SALES-ENGINEER MODE =================
+        const isCustomerMode = state.mode === 'customer';
+        const modeCustBtn = document.getElementById('mode-customer-btn');
+        const modeSalesBtn = document.getElementById('mode-sales-btn');
+
+        if (modeCustBtn && modeSalesBtn) {
+          if (isCustomerMode) {
+            modeCustBtn.className = 'px-2.5 py-1 rounded-lg font-bold bg-[#00E5FF] text-slate-950 transition';
+            modeSalesBtn.className = 'px-2.5 py-1 rounded-lg font-semibold text-slate-400 hover:text-white transition';
+          } else {
+            modeSalesBtn.className = 'px-2.5 py-1 rounded-lg font-bold bg-[#00E5FF] text-slate-950 transition';
+            modeCustBtn.className = 'px-2.5 py-1 rounded-lg font-semibold text-slate-400 hover:text-white transition';
+          }
+        }
+
+        document.querySelectorAll('.engineer-only').forEach(el => {
+          if (isCustomerMode) {
+            el.classList.add('hidden');
+          } else {
+            el.classList.remove('hidden');
+          }
+        });
       }
 
       function generateQuotationText(state, specs) {
@@ -2410,6 +2438,14 @@
           const shapeType = btn.getAttribute('data-shape');
           globalStateStore.update({ shapeType });
         });
+      });
+
+      // Phase 08: Customer Mode vs Sales-Engineer Mode
+      document.getElementById('mode-customer-btn').addEventListener('click', () => {
+        globalStateStore.update({ mode: 'customer' });
+      });
+      document.getElementById('mode-sales-btn').addEventListener('click', () => {
+        globalStateStore.update({ mode: 'sales' });
       });
 
       const distanceSlider = document.getElementById('distance-slider');
