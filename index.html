@@ -756,9 +756,9 @@
             </div>
             <input id="elevation-slider" type="range" min="0" max="4.0" step="0.05" value="1.0" class="orange-slider mt-1" />
             <div class="flex justify-between text-[9px] text-slate-500 font-mono">
-              <span>0.0m (ติดพื้น)</span>
-              <span>1.0m (มาตรฐาน)</span>
-              <span>4.0m (ลอยสูง)</span>
+              <span id="elevation-min-label">0.0m (ติดพื้น)</span>
+              <span id="elevation-mid-label">1.0m (มาตรฐาน)</span>
+              <span id="elevation-max-label">4.0m (ลอยสูง)</span>
             </div>
           </div>
 
@@ -1717,7 +1717,7 @@
       scene.background = new THREE.Color(0x070b14);
       scene.fog = new THREE.FogExp2(0x070b14, 0.018);
 
-      const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 150);
+      const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 600);
       const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -1750,7 +1750,8 @@
       controls.addEventListener('change', () => {
         if (isInternalCameraSync || !isUserOrbiting) return;
         const camDist = camera.position.distanceTo(controls.target);
-        const rounded = Math.round(Math.max(1.0, Math.min(30.0, camDist)) * 10) / 10;
+        const maxD = controls.maxDistance || 30.0;
+        const rounded = Math.round(Math.max(1.0, Math.min(maxD, camDist)) * 10) / 10;
         const currentDist = globalStateStore.getState().viewingDistanceM;
         if (Math.abs(rounded - currentDist) >= 0.1) {
           globalStateStore.update({ viewingDistanceM: rounded });
@@ -2444,7 +2445,8 @@
           controls.maxDistance = Math.max(8, Math.min(sceneId === 'boardroom' ? 18 : 30, room.depth + 1));
         } else {
           cameraManager.setRoomBounds(null);
-          controls.maxDistance = 30;
+          const isBillboard = sceneId === 'billboard' || state.sceneType === 'outdoor';
+          controls.maxDistance = isBillboard ? Math.max(120, 50 + (state.elevationMm || 0) / 1000 * 1.5) : 30;
         }
         lightingSystem.setEnvironment(sceneId, room || {});
         lightingSystem.applyPreset(state.lightingPreset || 'cool', 0);
@@ -2879,6 +2881,18 @@
         resBadgeEl.className = `px-2 py-0.5 rounded text-[10px] font-extrabold bg-gradient-to-r ${qBadge.colorClass} text-slate-950`;
 
         // ================= PHASE 04: 3D SPATIAL & MEASUREMENTS =================
+        const canonicalScene = getCanonicalSceneId(state.sceneType);
+        const isBillboard = canonicalScene === 'billboard' || state.sceneType === 'outdoor';
+        const targetMaxElevM = isBillboard ? 70.0 : 4.0;
+        const targetStepElev = isBillboard ? 0.25 : 0.05;
+
+        // Auto-clamp elevation if switching from billboard (>4.0m) to non-billboard venue
+        if (!isBillboard && (state.elevationMm || 0) > 4000) {
+          setTimeout(() => {
+            globalStateStore.update({ elevationMm: 1000 });
+          }, 0);
+        }
+
         const elevM = (state.elevationMm != null ? state.elevationMm : 1000) / 1000;
         const posX = (state.positionXMm || 0) / 1000;
         const posZ = (state.positionZMm || 0) / 1000;
@@ -2887,7 +2901,20 @@
         const elevValEl = document.getElementById('elevation-val');
         if (elevValEl) elevValEl.textContent = elevM.toFixed(2);
         const elevSlider = document.getElementById('elevation-slider');
-        if (elevSlider && Math.abs(parseFloat(elevSlider.value) - elevM) > 0.01) elevSlider.value = elevM;
+        if (elevSlider) {
+          if (parseFloat(elevSlider.max) !== targetMaxElevM) {
+            elevSlider.max = targetMaxElevM.toFixed(1);
+            elevSlider.step = targetStepElev.toString();
+          }
+          if (Math.abs(parseFloat(elevSlider.value) - elevM) > 0.01) elevSlider.value = elevM;
+        }
+
+        const elevMinLabel = document.getElementById('elevation-min-label');
+        const elevMidLabel = document.getElementById('elevation-mid-label');
+        const elevMaxLabel = document.getElementById('elevation-max-label');
+        if (elevMinLabel) elevMinLabel.textContent = '0.0m (ติดพื้น)';
+        if (elevMidLabel) elevMidLabel.textContent = isBillboard ? '15.0m (เสามาตรฐาน)' : '1.0m (มาตรฐาน)';
+        if (elevMaxLabel) elevMaxLabel.textContent = isBillboard ? '70.0m (ป้ายสูงพิเศษ)' : '4.0m (ลอยสูง)';
 
         const posXValEl = document.getElementById('pos-x-val');
         if (posXValEl) posXValEl.textContent = `${posX > 0 ? '+' : ''}${posX.toFixed(1)}m`;
@@ -3391,11 +3418,14 @@
       });
 
       document.getElementById('reset-spatial-btn').addEventListener('click', () => {
+        const canonicalId = getCanonicalSceneId(globalStateStore.getState().sceneType);
+        const def = SCENE_DEFINITIONS[canonicalId];
+        const defaultElev = def && def.defaultElevationM ? Math.round(def.defaultElevationM * 1000) : 1000;
         globalStateStore.update({
           positionXMm: 0,
           positionZMm: 0,
           rotationYDeg: 0,
-          elevationMm: 1000
+          elevationMm: defaultElev
         });
       });
 

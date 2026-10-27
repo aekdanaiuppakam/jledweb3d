@@ -119,11 +119,15 @@ export class LightingSystem {
     const zs = [Math.min(3, depth * 0.27), Math.min(7, depth * 0.56)];
     if (this.lights.directional && this.lights.directional.shadow) {
       const shadowCamera = this.lights.directional.shadow.camera;
-      const extent = isBoardroom ? Math.max(width, depth) * 0.58 : 18;
+      const isBillboard = sceneId === 'billboard';
+      const extent = isBoardroom ? Math.max(width, depth) * 0.58 : (isBillboard ? 65 : 18);
       shadowCamera.left = -extent;
       shadowCamera.right = extent;
       shadowCamera.top = extent;
       shadowCamera.bottom = -extent;
+      if (isBillboard) {
+        shadowCamera.far = 280;
+      }
       shadowCamera.updateProjectionMatrix();
     }
     this.lights.pointLights.forEach((light, index) => {

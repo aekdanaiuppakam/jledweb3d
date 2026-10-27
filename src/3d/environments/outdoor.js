@@ -161,11 +161,12 @@ export function buildBillboard(group, state, specs) {
   if (typeof THREE === 'undefined') return;
   const s = dimensions(state, specs);
   const m = materials();
-  const siteW = Math.max(44, s.width + Math.abs(s.x) * 2 + 24);
+  const siteW = Math.max(50, s.width + Math.abs(s.x) * 2 + 24 + s.elevation * 0.6);
   const leftClear = s.x - s.width / 2 - 1.4;
   const rightClear = s.x + s.width / 2 + 1.4;
+  const groundDepth = Math.max(58, 58 + s.elevation * 1.0);
 
-  horizontal(group, siteW, 58, m.grass, 0, 0, 8);
+  horizontal(group, siteW, groundDepth, m.grass, 0, 0, 8);
   horizontal(group, siteW, 13.6, m.asphalt, 0, 0.015, 11);
   horizontal(group, siteW, 0.16, m.marking, 0, 0.025, 4.35);
   horizontal(group, siteW, 0.16, m.marking, 0, 0.025, 17.65);
@@ -176,10 +177,14 @@ export function buildBillboard(group, state, specs) {
   }
 
   // The foundation, pole, and rear service deck remain behind the display.
+  // When elevated up to 70m, the monopole scales gracefully for structural proportion.
   const pylonHeight = Math.max(1.2, s.elevation + s.height * 0.62);
   const supportX = s.x;
-  cylinder(group, 0.43, 0.63, pylonHeight, m.darkSteel, supportX, pylonHeight / 2, s.z - 1.5, 20, true);
-  cylinder(group, 0.88, 1.0, 0.5, m.stone, supportX, 0.25, s.z - 1.5, 20);
+  const poleScale = Math.min(2.5, 1.0 + s.elevation * 0.022);
+  const topRadius = 0.43 * poleScale;
+  const bottomRadius = 0.65 * poleScale;
+  cylinder(group, topRadius, bottomRadius, pylonHeight, m.darkSteel, supportX, pylonHeight / 2, s.z - 1.5, 24, true);
+  cylinder(group, bottomRadius * 1.35, bottomRadius * 1.5, Math.max(0.5, 0.5 * poleScale), m.stone, supportX, (0.5 * poleScale) / 2, s.z - 1.5, 24);
   const deckY = Math.max(0.18, s.elevation - 0.22);
   box(group, s.width + 1.0, 0.12, 0.95, m.darkSteel, supportX, deckY, s.z - 1.2, true);
   box(group, s.width + 0.85, 0.055, 0.055, m.steel, supportX, deckY + 0.9, s.z - 1.62);

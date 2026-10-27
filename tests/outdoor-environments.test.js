@@ -66,6 +66,15 @@ describe('Outdoor display sightlines', () => {
           }
         }
       }
+
+      // Explicit verification for 70m high-elevation billboard
+      const billboardGroup = { children: [], add(...objects) { this.children.push(...objects); } };
+      buildBillboard(billboardGroup, { elevationMm: 70000, positionXMm: 0, positionZMm: 0 }, {
+        actualWidthM: 16, actualHeightM: 8
+      });
+      assert.ok(billboardGroup.children.length > 10, '70m billboard scene built successfully');
+      const pylonMesh = billboardGroup.children.find(c => c.geometry instanceof CylinderGeometry && c.geometry.size[1] > 60);
+      assert.ok(pylonMesh, '70m billboard created structural monopole taller than 60m');
     } finally {
       globalThis.THREE = originalThree;
     }
