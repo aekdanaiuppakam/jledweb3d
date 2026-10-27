@@ -979,6 +979,7 @@
             <!-- Quick Pins Presets -->
             <div class="flex items-center gap-1">
               <button id="reset-pins-btn" type="button" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]">↺ รีเซ็ตมุม</button>
+              <button id="preset-pin-center" type="button" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 text-[10px]">ผนังตรงกลาง</button>
               <button id="preset-pin-left" type="button" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]">ผนังซ้าย</button>
               <button id="preset-pin-right" type="button" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]">ผนังขวา</button>
             </div>
@@ -988,8 +989,8 @@
         <!-- Canvas Container -->
         <div class="relative flex-1 min-h-[380px] sm:min-h-[460px] bg-slate-950 rounded-xl border border-slate-800 overflow-hidden flex items-center justify-center select-none" id="mockup-canvas-wrapper">
           <canvas id="mockup-canvas" class="max-w-full max-h-full block cursor-crosshair"></canvas>
-          <div class="absolute bottom-2 left-2 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-sm border border-slate-700 text-[10px] text-slate-300 flex items-center gap-2 pointer-events-none">
-            <span>💡 ลากจุดหมุดสีส้มทั้ง 4 จุดเพื่อทาบจอให้พอดีกับมุมผนังหน้างานจริง</span>
+          <div class="absolute bottom-2 left-2 right-2 sm:right-auto px-3 py-1.5 rounded-lg bg-black/85 backdrop-blur-sm border border-slate-700 text-[11px] text-slate-200 flex flex-wrap items-center gap-2 pointer-events-none shadow-lg">
+            <span>💡 <strong>วิธีใช้:</strong> ลากหมุด 4 มุม (<span class="text-cyan-400 font-bold">TL บนซ้าย</span>, <span class="text-purple-400 font-bold">TR บนขวา</span>, <span class="text-emerald-400 font-bold">BR ล่างขวา</span>, <span class="text-amber-400 font-bold">BL ล่างซ้าย</span>) ไปวางตรงขอบผนังหรือจอเดิมที่ต้องการติดตั้ง</span>
           </div>
         </div>
 
@@ -3206,21 +3207,57 @@
         mockupCtx.stroke();
         mockupCtx.setLineDash([]);
 
-        const pinLabels = ['TL', 'TR', 'BR', 'BL'];
+        const pinConfigs = [
+          { label: 'TL • บนซ้าย', color: '#00E5FF' },
+          { label: 'TR • บนขวา', color: '#A855F7' },
+          { label: 'BR • ล่างขวา', color: '#10B981' },
+          { label: 'BL • ล่างซ้าย', color: '#FF6B00' }
+        ];
+
         cornerPins.forEach(([px, py], idx) => {
-          mockupCtx.fillStyle = idx === activePinIndex ? '#00E5FF' : '#FF6B00';
-          mockupCtx.strokeStyle = '#FFFFFF';
+          const cfg = pinConfigs[idx] || { label: 'PIN', color: '#FF6B00' };
+          const isActive = idx === activePinIndex;
+
+          if (isActive) {
+            mockupCtx.beginPath();
+            mockupCtx.arc(px, py, 16, 0, Math.PI * 2);
+            mockupCtx.fillStyle = 'rgba(0, 229, 255, 0.25)';
+            mockupCtx.fill();
+          }
+
+          mockupCtx.fillStyle = isActive ? '#FFFFFF' : cfg.color;
+          mockupCtx.strokeStyle = '#000000';
           mockupCtx.lineWidth = 3;
           mockupCtx.beginPath();
           mockupCtx.arc(px, py, 10, 0, Math.PI * 2);
           mockupCtx.fill();
           mockupCtx.stroke();
 
+          // Pill Badge for pin name
+          const badgeText = cfg.label;
+          mockupCtx.font = 'bold 11px Kanit, Inter, sans-serif';
+          const textW = mockupCtx.measureText(badgeText).width;
+          const badgeW = textW + 14;
+          const badgeH = 20;
+          const badgeX = px - badgeW / 2;
+          const badgeY = py - 32;
+
+          mockupCtx.fillStyle = 'rgba(10, 15, 29, 0.88)';
+          mockupCtx.strokeStyle = cfg.color;
+          mockupCtx.lineWidth = 1.5;
+          mockupCtx.beginPath();
+          if (mockupCtx.roundRect) {
+            mockupCtx.roundRect(badgeX, badgeY, badgeW, badgeH, 4);
+          } else {
+            mockupCtx.rect(badgeX, badgeY, badgeW, badgeH);
+          }
+          mockupCtx.fill();
+          mockupCtx.stroke();
+
           mockupCtx.fillStyle = '#FFFFFF';
-          mockupCtx.font = 'bold 10px sans-serif';
           mockupCtx.textAlign = 'center';
           mockupCtx.textBaseline = 'middle';
-          mockupCtx.fillText(pinLabels[idx], px, py - 18);
+          mockupCtx.fillText(badgeText, px, badgeY + badgeH / 2);
         });
         mockupCtx.restore();
       }
@@ -3344,6 +3381,18 @@
 
       document.getElementById('reset-pins-btn').addEventListener('click', () => {
         cornerPins = getDefaultCornerPins(siteImage.width, siteImage.height, 0.15);
+        updateMockupView();
+      });
+
+      document.getElementById('preset-pin-center')?.addEventListener('click', () => {
+        const w = siteImage.width;
+        const h = siteImage.height;
+        cornerPins = [
+          [w * 0.25, h * 0.22],
+          [w * 0.75, h * 0.22],
+          [w * 0.75, h * 0.72],
+          [w * 0.25, h * 0.72]
+        ];
         updateMockupView();
       });
 

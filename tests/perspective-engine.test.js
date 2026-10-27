@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {
   computeHomography,
   projectPoint,
-  getDefaultCornerPins
+  getDefaultCornerPins,
+  renderWarpedCanvas
 } from '../src/core/perspective-engine.js';
 
 describe('Phase 05: Real-Site Photo Perspective Engine', () => {
@@ -51,5 +52,30 @@ describe('Phase 05: Real-Site Photo Perspective Engine', () => {
     assert.throws(() => {
       computeHomography([[0, 0]], [[1, 1]]);
     }, /must contain exactly 4 points/);
+  });
+
+  test('Renders warped canvas with positive affine scale for standard quad', () => {
+    const mockSource = { width: 400, height: 300 };
+    const transforms = [];
+    const mockCtx = {
+      save: () => {},
+      restore: () => {},
+      beginPath: () => {},
+      moveTo: () => {},
+      lineTo: () => {},
+      closePath: () => {},
+      clip: () => {},
+      drawImage: () => {},
+      transform: (a, b, c, d, e, f) => {
+        transforms.push({ a, b, c, d, e, f });
+      }
+    };
+    const pins = [[10, 10], [510, 10], [510, 310], [10, 310]];
+    renderWarpedCanvas(mockSource, mockCtx, pins, { gridSubdivisions: 2 });
+    assert.ok(transforms.length > 0);
+    for (const t of transforms) {
+      assert.ok(t.a > 0, `Expected a > 0, got ${t.a}`);
+      assert.ok(t.d > 0, `Expected d > 0, got ${t.d}`);
+    }
   });
 });

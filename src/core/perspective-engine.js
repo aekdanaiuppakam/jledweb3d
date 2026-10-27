@@ -131,16 +131,22 @@ export function renderWarpedCanvas(sourceCanvas, targetCtx, cornerPins, options 
   const sub = Math.max(2, Math.min(16, gridSubdivisions));
   const step = 1 / sub;
 
-  // Bilinear interpolation helper for arbitrary quad
-  const interpolateQuad = (u, v) => {
+  let H = null;
+  try {
+    H = computeHomography([[0, 0], [srcW, 0], [srcW, srcH], [0, srcH]], [tl, tr, br, bl]);
+  } catch (e) {
+    H = null;
+  }
+
+  const mapPoint = (sx, sy, u, v) => {
+    if (H) {
+      return projectPoint(H, [sx, sy]);
+    }
     const topX = tl[0] + u * (tr[0] - tl[0]);
     const topY = tl[1] + u * (tr[1] - tl[1]);
     const botX = bl[0] + u * (br[0] - bl[0]);
     const botY = bl[1] + u * (br[1] - bl[1]);
-    return [
-      topX + v * (botX - topX),
-      topY + v * (botY - topY)
-    ];
+    return [topX + v * (botX - topX), topY + v * (botY - topY)];
   };
 
   for (let i = 0; i < sub; i++) {
@@ -148,19 +154,17 @@ export function renderWarpedCanvas(sourceCanvas, targetCtx, cornerPins, options 
     const u1 = (i + 1) * step;
     const sx0 = u0 * srcW;
     const sx1 = u1 * srcW;
-    const sw = sx1 - sx0;
 
     for (let j = 0; j < sub; j++) {
       const v0 = j * step;
       const v1 = (j + 1) * step;
       const sy0 = v0 * srcH;
       const sy1 = v1 * srcH;
-      const sh = sy1 - sy0;
 
-      const p00 = interpolateQuad(u0, v0);
-      const p10 = interpolateQuad(u1, v0);
-      const p11 = interpolateQuad(u1, v1);
-      const p01 = interpolateQuad(u0, v1);
+      const p00 = mapPoint(sx0, sy0, u0, v0);
+      const p10 = mapPoint(sx1, sy0, u1, v0);
+      const p11 = mapPoint(sx1, sy1, u1, v1);
+      const p01 = mapPoint(sx0, sy1, u0, v1);
 
       // Triangle 1: p00, p10, p01
       drawTriangle(targetCtx, sourceCanvas,
@@ -182,30 +186,30 @@ export function renderWarpedCanvas(sourceCanvas, targetCtx, cornerPins, options 
 /**
  * Affine texture mapper for a single triangle using canvas clipping and transformation.
  */
-function drawTriangle(ctx, im, x0, y0, x1, y1, x2, y2, sx0, sy0, sx1, sy1, sx2, sy2) {
+function drawTriangle(ctx, im, x0, y0, x1, y1, x2, y2, u0, v0, u1, v1, u2, v2) {
   ctx.save();
   ctx.beginPath();
-  ctx.moveTo(sx0, sy0);
-  ctx.lineTo(sx1, sy1);
-  ctx.lineTo(sx2, sy2);
+  ctx.moveTo(u0, v0);
+  ctx.lineTo(u1, v1);
+  ctx.lineTo(u2, v2);
   ctx.closePath();
   ctx.clip();
 
-  // Solve affine matrix mapping (x0, y0), (x1, y1), (x2, y2) to (sx0, sy0), (sx1, sy1), (sx2, sy2)
-  const denom = (x0 * (y1 - y2) - y0 * (x1 - x2) + (x1 * y2 - x2 * y1));
-  if (Math.abs(denom) < 1e-6) {
+  const det = x0 * (y1 - y2) - y0 * (x1 - x2) + (x1 * y2 - x2 * y1);
+  if (Math.abs(det) < 1e-8) {
     ctx.restore();
     return;
   }
 
-  const m11 = -(y0 * (sx1 - sx2) - y1 * sx0 + y2 * sx0 + (y1 * sx2 - y2 * sx1)) / denom;
-  const m12 = (y0 * (sy1 - sy2) - y1 * sy0 + y2 * sy0 + (y1 * sy2 - y2 * sy1)) / denom;
-  const m21 = (x0 * (sx1 - sx2) - x1 * sx0 + x2 * sx0 + (x1 * sx2 - x2 * sx1)) / denom;
-  const m22 = -(x0 * (sy1 - sy2) - x1 * sy0 + x2 * sy0 + (x1 * sy2 - x2 * sy1)) / denom;
-  const dx = (x0 * (y1 * sx2 - y2 * sx1) - y0 * (x1 * sx2 - x2 * sx1) + (x1 * y2 - x2 * y1) * sx0) / denom;
-  const dy = (x0 * (y1 * sy2 - y2 * sy1) - y0 * (x1 * sy2 - x2 * sy1) + (x1 * y2 - x2 * y1) * sy0) / denom;
+  const a = ((y1 - y2) * u0 + (y2 - y0) * u1 + (y0 - y1) * u2) / det;
+  const c = ((x2 - x1) * u0 + (x0 - x2) * u1 + (x1 - x0) * u2) / det;
+  const e = ((x1 * y2 - x2 * y1) * u0 + (x2 * y0 - x0 * y2) * u1 + (x0 * y1 - x1 * y0) * u2) / det;
 
-  ctx.transform(m11, m12, m21, m22, dx, dy);
+  const b = ((y1 - y2) * v0 + (y2 - y0) * v1 + (y0 - y1) * v2) / det;
+  const d = ((x2 - x1) * v0 + (x0 - x2) * v1 + (x1 - x0) * v2) / det;
+  const f = ((x1 * y2 - x2 * y1) * v0 + (x2 * y0 - x0 * y2) * v1 + (x0 * y1 - x1 * y0) * v2) / det;
+
+  ctx.transform(a, b, c, d, e, f);
   ctx.drawImage(im, 0, 0);
   ctx.restore();
 }
