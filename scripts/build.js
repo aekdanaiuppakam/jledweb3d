@@ -53,8 +53,8 @@ for (const relPath of requiredFiles) {
 // 3. Write Release Metadata
 console.log('\n▶ [Step 3/3] Generating Release Metadata...');
 const releaseInfo = {
-  version: '4.0.0-phase01',
-  phase: 'Phase 01: Audit, Refactor & Regression Baseline',
+  version: '4.0.0-phase02',
+  phase: 'Phase 02: Verified Product Catalog & Compatibility Engine',
   timestamp: new Date().toISOString(),
   testStatus: 'PASS',
   modules: [

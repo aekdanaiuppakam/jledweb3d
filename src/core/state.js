@@ -5,7 +5,7 @@
  */
 
 import { DEFAULTS, SCENE_DEFINITIONS } from './constants.js';
-import { defaultCatalog } from './product-catalog.js';
+import { defaultCatalog, checkCompatibility } from './product-catalog.js';
 import { calculateScreenSpecs } from './calculation-engine.js';
 
 export class StateStore {
@@ -55,6 +55,14 @@ export class StateStore {
 
   getSpecs() {
     return this.specs;
+  }
+
+  getCompatibility() {
+    const product = this.getProduct();
+    return checkCompatibility(product, {
+      sceneType: this.state.sceneType,
+      mountType: this.state.mountType
+    });
   }
 
   update(partialState) {
@@ -114,9 +122,10 @@ export class StateStore {
   notify() {
     const currentState = this.getState();
     const currentSpecs = this.getSpecs();
+    const compatibility = this.getCompatibility();
     for (const listener of this.listeners) {
       try {
-        listener(currentState, currentSpecs);
+        listener(currentState, currentSpecs, compatibility);
       } catch (err) {
         console.error('Error in state subscriber:', err);
       }

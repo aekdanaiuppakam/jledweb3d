@@ -62,7 +62,7 @@
       background: rgba(0, 229, 255, 0.6);
     }
     .glass-panel {
-      background: rgba(11, 16, 28, 0.85);
+      background: rgba(11, 16, 28, 0.88);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       border: 1px solid rgba(255, 255, 255, 0.09);
@@ -123,12 +123,10 @@
       color: #FFFFFF;
       box-shadow: 0 0 12px rgba(0, 229, 255, 0.28);
     }
-    @keyframes pulseSubtle {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.65; }
-    }
-    .animate-pulse-subtle {
-      animation: pulseSubtle 2.2s infinite ease-in-out;
+    .filter-tab.active {
+      background: #00E5FF;
+      color: #060911;
+      font-weight: 700;
     }
   </style>
 </head>
@@ -243,17 +241,25 @@
   </div>
 
   <!-- ================= RIGHT: CONTROL PANEL & LIVE SPEC DASHBOARD ================= -->
-  <aside class="w-full lg:w-[430px] xl:w-[460px] h-[48vh] lg:h-full glass-panel border-t lg:border-t-0 lg:border-l border-slate-800/90 flex flex-col z-30 shrink-0">
+  <aside class="w-full lg:w-[440px] xl:w-[480px] h-[48vh] lg:h-full glass-panel border-t lg:border-t-0 lg:border-l border-slate-800/90 flex flex-col z-30 shrink-0">
     
-    <!-- Control Panel Navigation Header -->
+    <!-- Control Panel Navigation Header with Phase 02 Tools -->
     <div class="px-4 pt-3 pb-2 border-b border-slate-800/80 flex items-center justify-between bg-slate-950/50">
       <div class="flex items-center gap-2">
         <span class="w-2 h-5 rounded-full bg-gradient-to-b from-[#00E5FF] to-[#FF6B00]"></span>
-        <h2 class="text-sm font-bold tracking-wide text-white uppercase">แผงควบคุมและคำนวณสเปกจอ</h2>
+        <h2 class="text-sm font-bold tracking-wide text-white uppercase">แผงควบคุมและสเปกจอ JLED</h2>
       </div>
-      <button id="reset-default-btn" type="button" class="text-[11px] text-slate-400 hover:text-[#00E5FF] transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-slate-800">
-        <span>↺</span> รีเซ็ตค่าเริ่มต้น
-      </button>
+      <div class="flex items-center gap-1.5">
+        <button id="open-compare-btn" type="button" title="เปรียบเทียบสเปกรุ่น" class="text-[11px] text-cyan-300 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-cyan-500/30 hover:border-cyan-400">
+          <span>⚖️</span> เทียบรุ่น
+        </button>
+        <button id="open-catalog-btn" type="button" title="จัดการ Product Catalog JSON" class="text-[11px] text-slate-300 hover:text-[#00E5FF] transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-slate-800 hover:border-[#00E5FF]/50">
+          <span>⚙️</span> Catalog
+        </button>
+        <button id="reset-default-btn" type="button" title="รีเซ็ตค่าเริ่มต้น" class="text-[11px] text-slate-400 hover:text-[#00E5FF] transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-slate-800">
+          <span>↺</span>
+        </button>
+      </div>
     </div>
 
     <!-- Scrollable Controls & Spec Body -->
@@ -319,11 +325,11 @@
         </div>
       </div>
 
-      <!-- SECTION 2: PIXEL PITCH & VIEWING DISTANCE -->
-      <div class="glass-card rounded-xl p-3.5 space-y-3">
+      <!-- SECTION 2: PRODUCT CATALOG & PIXEL PITCH -->
+      <div class="glass-card rounded-xl p-3.5 space-y-3 border-l-2 border-l-[#00E5FF]">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold uppercase tracking-wider text-[#00E5FF] flex items-center gap-1.5">
-            <span>🔬</span> 2. ความละเอียด (Pixel Pitch) &amp; ระยะยืนดู
+            <span>📦</span> 2. รุ่นสินค้า (Product SKU) &amp; ความละเอียด
           </h3>
           <div class="flex items-center gap-1.5">
             <span id="product-status-pill" class="text-[9px] px-1.5 py-0.5 rounded uppercase font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Verified</span>
@@ -331,39 +337,59 @@
           </div>
         </div>
 
-        <!-- Fine Pitch (Indoor) -->
-        <div class="space-y-1">
-          <div class="flex items-center justify-between text-[11px]">
-            <span class="text-cyan-300 font-medium">Fine Pitch (Indoor คมชัดสูงพิเศษ)</span>
-            <span class="text-slate-500">ตู้ 0.6×0.34m / 0.64×0.48m</span>
+        <!-- Environment / Usage Filter Tabs -->
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">กรองตามประเภทการใช้งาน (Environment Filter):</label>
+          <div class="flex rounded-lg bg-slate-950 p-1 border border-slate-800 text-xs">
+            <button type="button" data-filter="all" class="filter-tab active flex-1 py-1 rounded text-center transition">ทั้งหมด</button>
+            <button type="button" data-filter="indoor" class="filter-tab flex-1 py-1 rounded text-center transition">ในอาคาร (Indoor)</button>
+            <button type="button" data-filter="outdoor" class="filter-tab flex-1 py-1 rounded text-center transition">กลางแจ้ง (Outdoor)</button>
+            <button type="button" data-filter="rental" class="filter-tab flex-1 py-1 rounded text-center transition">งานเช่า (Rental)</button>
           </div>
+        </div>
+
+        <!-- Product SKU Dropdown Selector -->
+        <div>
+          <label for="sku-select" class="block text-[11px] text-slate-400 mb-1">เลือกรุ่นสินค้า JLED (Model Picker):</label>
+          <select id="sku-select" class="w-full bg-slate-900 border border-slate-700 text-slate-100 text-xs rounded-lg px-2.5 py-2 outline-none focus:border-[#00E5FF] font-medium transition cursor-pointer">
+            <!-- Populated dynamically -->
+          </select>
+          <div id="sku-metadata-bar" class="mt-1.5 flex flex-wrap items-center gap-1.5 text-[10px] text-slate-400">
+            <span class="px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 font-mono" id="sku-size-tag">ตู้: 500×500 mm</span>
+            <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300" id="sku-ip-tag">IP40/IP20</span>
+            <span class="px-1.5 py-0.5 rounded bg-slate-800 text-amber-300" id="sku-nits-tag">1000 Nits</span>
+            <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300" id="sku-refresh-tag">3840 Hz</span>
+          </div>
+        </div>
+
+        <!-- Compatibility Alert Banner -->
+        <div id="compatibility-alert-box" class="p-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-xs flex items-start gap-2 transition-all">
+          <span id="compat-icon" class="text-sm leading-none mt-0.5">✅</span>
+          <div id="compat-text" class="text-[11px] text-emerald-300 leading-snug">
+            รุ่นสินค้าเหมาะสมกับสภาพแวดล้อมและโครงสร้างที่เลือก
+          </div>
+        </div>
+
+        <!-- Quick Pitch Selection Presets (Fine Pitch, Standard, Outdoor) -->
+        <div class="space-y-1.5 pt-1">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-slate-300 font-medium">เลือกความละเอียดด่วน (Quick Pitch):</span>
+            <span class="text-slate-500 text-[10px]">คลิกเพื่อสลับไปยังรุ่นที่ใกล้เคียง</span>
+          </div>
+          <!-- Fine Pitch -->
           <div class="grid grid-cols-3 gap-1.5">
             <button type="button" data-pitch="1.25" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P1.25</button>
             <button type="button" data-pitch="1.5" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P1.5</button>
             <button type="button" data-pitch="1.8" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P1.8</button>
           </div>
-        </div>
-
-        <!-- Standard Indoor -->
-        <div class="space-y-1">
-          <div class="flex items-center justify-between text-[11px]">
-            <span class="text-sky-300 font-medium">Standard Indoor (ยอดนิยมในอาคาร)</span>
-            <span class="text-slate-500">ตู้ 0.5×0.5m</span>
-          </div>
+          <!-- Standard Indoor -->
           <div class="grid grid-cols-4 gap-1.5">
             <button type="button" data-pitch="2" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P2</button>
             <button type="button" data-pitch="2.5" class="pitch-btn active py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P2.5</button>
             <button type="button" data-pitch="3" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P3</button>
             <button type="button" data-pitch="4" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P4</button>
           </div>
-        </div>
-
-        <!-- Outdoor -->
-        <div class="space-y-1">
-          <div class="flex items-center justify-between text-[11px]">
-            <span class="text-orange-400 font-medium">Outdoor (สู้แดด กันน้ำ IP65)</span>
-            <span class="text-slate-500">ตู้ 0.96×0.96m</span>
-          </div>
+          <!-- Outdoor -->
           <div class="grid grid-cols-4 gap-1.5">
             <button type="button" data-pitch="5" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P5</button>
             <button type="button" data-pitch="6" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P6</button>
@@ -461,14 +487,18 @@
         </div>
 
         <!-- Requested vs Buildable Size Callout -->
-        <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px] space-y-1">
+        <div class="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px] space-y-1.5">
           <div class="flex justify-between text-slate-400">
             <span>ขนาดที่ต้องการ (Requested):</span>
             <span id="requested-dimension-callout" class="font-mono text-slate-200">4.00 × 2.50 ม.</span>
           </div>
-          <div class="flex justify-between text-[#00E5FF] font-medium">
+          <div class="flex justify-between text-[#00E5FF] font-medium border-t border-slate-800/80 pt-1">
             <span>ขนาดประกอบได้จริง (Buildable):</span>
             <span id="buildable-dimension-callout" class="font-mono font-bold">4.00 × 2.50 ม.</span>
+          </div>
+          <div class="text-[10px] text-slate-500 flex justify-between" id="buildable-diff-callout">
+            <span>ความคลาดเคลื่อนจากเป้าหมาย:</span>
+            <span class="font-mono text-slate-400">กว้าง ±0 mm | สูง ±0 mm</span>
           </div>
         </div>
       </div>
@@ -579,6 +609,96 @@
     </div>
   </aside>
 
+  <!-- ================= MODEL COMPARISON MODAL (PHASE 02) ================= -->
+  <div id="compare-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-panel max-w-4xl w-full rounded-2xl border border-[#00E5FF]/40 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <!-- Header -->
+      <div class="px-5 py-3.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">⚖️</span>
+          <div>
+            <h3 class="text-base font-bold text-white leading-tight">เปรียบเทียบสเปกรุ่นจอ LED (Model Comparison)</h3>
+            <p class="text-[11px] text-slate-400">เลือก 2 รุ่นเพื่อเปรียบเทียบความละเอียด สเปกตู้ และกำลังไฟเคียงข้างกัน</p>
+          </div>
+        </div>
+        <button id="close-compare-btn" type="button" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold">
+          ✕
+        </button>
+      </div>
+
+      <!-- Compare Body -->
+      <div class="p-5 overflow-y-auto space-y-4">
+        <!-- SKU Pickers for Compare -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+            <label class="block text-xs font-bold text-[#00E5FF] mb-1.5">รุ่นที่ 1 (Model A):</label>
+            <select id="compare-select-a" class="w-full bg-slate-950 border border-slate-700 text-slate-100 text-xs rounded-lg p-2 outline-none focus:border-[#00E5FF]"></select>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+            <label class="block text-xs font-bold text-[#FF6B00] mb-1.5">รุ่นที่ 2 (Model B):</label>
+            <select id="compare-select-b" class="w-full bg-slate-950 border border-slate-700 text-slate-100 text-xs rounded-lg p-2 outline-none focus:border-[#FF6B00]"></select>
+          </div>
+        </div>
+
+        <!-- Comparison Table Container -->
+        <div id="compare-table-container" class="rounded-xl border border-slate-800 overflow-hidden">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN JSON CATALOG MANAGER MODAL (PHASE 02) ================= -->
+  <div id="catalog-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-panel max-w-3xl w-full rounded-2xl border border-[#00E5FF]/40 overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+      <!-- Header -->
+      <div class="px-5 py-3.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">⚙️</span>
+          <div>
+            <h3 class="text-base font-bold text-white leading-tight">จัดการฐานข้อมูล Product Catalog (Admin JSON)</h3>
+            <p class="text-[11px] text-slate-400">สำหรับทีมวิศวกร/ฝ่ายเทคนิค: แก้ไข นำเข้า หรือส่งออกข้อมูล SKU ในรูปแบบ JSON พร้อมตรวจสอบ Schema</p>
+          </div>
+        </div>
+        <button id="close-catalog-btn" type="button" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold">
+          ✕
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="p-5 overflow-y-auto space-y-3.5">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-slate-300 font-medium">โครงสร้าง Catalog ปัจจุบัน:</span>
+          <span id="catalog-count-pill" class="text-[11px] px-2 py-0.5 rounded bg-cyan-500/20 text-[#00E5FF] font-mono">14 รุ่น</span>
+        </div>
+
+        <!-- JSON Textarea -->
+        <textarea id="catalog-json-textarea" rows="12" class="w-full bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-xs rounded-xl p-3 outline-none focus:border-[#00E5FF] leading-relaxed resize-y"></textarea>
+
+        <!-- Validation Message Banner -->
+        <div id="catalog-validation-banner" class="hidden p-3 rounded-xl text-xs space-y-1"></div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="export-catalog-btn" type="button" class="py-2 px-3.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center gap-1.5 border border-slate-700">
+              <span>📥</span> ดาวน์โหลด JSON
+            </button>
+            <button id="copy-catalog-btn" type="button" class="py-2 px-3.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center gap-1.5 border border-slate-700">
+              <span>📋</span> คัดลอก
+            </button>
+            <button id="reset-catalog-btn" type="button" class="py-2 px-3 rounded-lg text-slate-400 hover:text-red-400 text-xs transition">
+              ↺ รีเซ็ตเป็นค่าเริ่มต้น
+            </button>
+          </div>
+          <button id="save-catalog-btn" type="button" class="py-2 px-4 rounded-lg bg-[#00E5FF] hover:bg-[#00c4db] text-slate-950 text-xs font-bold transition flex items-center gap-1.5 shadow-lg">
+            <span>💾</span> ตรวจสอบและบันทึก Catalog
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= QUOTATION & SPEC SUMMARY MODAL ================= -->
   <div id="quote-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
     <div class="glass-panel max-w-lg w-full rounded-2xl border border-[#00E5FF]/40 overflow-hidden shadow-2xl">
@@ -628,7 +748,7 @@
   <!-- ================= APPLICATION SCRIPT ================= -->
   <script type="module">
     import { DEFAULTS, SCENE_DEFINITIONS, MOUNT_DEFINITIONS, BOUNDS, formatM } from './src/core/constants.js';
-    import { defaultCatalog, PRODUCT_STATUS } from './src/core/product-catalog.js';
+    import { defaultCatalog, PRODUCT_STATUS, checkCompatibility } from './src/core/product-catalog.js';
     import { calculateScreenSpecs } from './src/core/calculation-engine.js';
     import { globalStateStore } from './src/core/state.js';
     import { disposeHierarchy, globalMediaTracker } from './src/core/disposal.js';
@@ -666,10 +786,7 @@
       const loupeCanvas = document.getElementById('loupe-canvas');
       const loupeCtx = loupeCanvas.getContext('2d');
 
-      let isContentDirty = true;
-      let lastRenderTime = 0;
       let isTabVisible = !document.hidden;
-
       document.addEventListener('visibilitychange', () => {
         isTabVisible = !document.hidden;
       });
@@ -738,7 +855,6 @@
           const vid = document.getElementById('custom-video-el');
           sourceCtx.drawImage(vid, 0, 0, w, h);
         } else if (state.contentType === 'tech') {
-          // Preset 1: JLED 3D Motion Cyber Ad
           const grad = sourceCtx.createLinearGradient(0, 0, w, h);
           grad.addColorStop(0, '#040B1E');
           grad.addColorStop(0.5, '#091E3A');
@@ -805,7 +921,6 @@
             sourceCtx.fillRect(boxX + idx * barW, boxY + boxH - 14, barW, 14);
           });
         } else if (state.contentType === 'conference') {
-          // Preset 2: Executive Seminar
           const grad = sourceCtx.createLinearGradient(0, 0, w, h);
           grad.addColorStop(0, '#0F172A');
           grad.addColorStop(1, '#1E293B');
@@ -870,7 +985,6 @@
           sourceCtx.font = 'bold 13px Inter, sans-serif';
           sourceCtx.fillText(`Model: JLED P${state.pitchMm}`, 298, 220);
         } else {
-          // Preset 3: Retail Sale Promo
           const grad = sourceCtx.createLinearGradient(0, 0, w, h);
           grad.addColorStop(0, '#FF1744');
           grad.addColorStop(0.5, '#FF6B00');
@@ -1362,8 +1476,33 @@
         controls.update();
       }
 
-      // 6. UI Synchronizer
-      function updateDOM(state, specs) {
+      // 6. UI Synchronizer & Dynamic Catalog
+      let currentFilterEnv = 'all';
+
+      function renderSkuOptions(filterEnv = 'all') {
+        const skuSelect = document.getElementById('sku-select');
+        const currentState = globalStateStore.getState();
+        const products = defaultCatalog.getAllProducts(filterEnv);
+
+        skuSelect.innerHTML = '';
+        products.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          const statusPrefix = p.status === PRODUCT_STATUS.VERIFIED ? '★ [Verified]' : '[DEMO]';
+          opt.textContent = `${statusPrefix} ${p.displayName} (P${p.actualPixelPitchMm} | ${p.cabinetWidthMm}×${p.cabinetHeightMm}mm)`;
+          if (p.id === currentState.productId) {
+            opt.selected = true;
+          }
+          skuSelect.appendChild(opt);
+        });
+
+        // If current product not in filtered list, select first available in filter
+        if (products.length > 0 && !products.some(p => p.id === currentState.productId)) {
+          globalStateStore.update({ productId: products[0].id });
+        }
+      }
+
+      function updateDOM(state, specs, compatibility) {
         document.getElementById('hud-pitch-label').textContent = `P${state.pitchMm}`;
         document.getElementById('hud-dist-label').textContent = `${state.viewingDistanceM.toFixed(1)} ม.`;
         document.getElementById('selected-pitch-pill').textContent = `P${state.pitchMm}`;
@@ -1419,12 +1558,21 @@
         document.getElementById('requested-dimension-callout').textContent = `${specs.requestedWidthM.toFixed(2)} × ${specs.requestedHeightM.toFixed(2)} ม.`;
         document.getElementById('buildable-dimension-callout').textContent = `${specs.actualWidthM.toFixed(2)} × ${specs.actualHeightM.toFixed(2)} ม.`;
 
+        const diffW = specs.diffWidthMm;
+        const diffH = specs.diffHeightMm;
+        const diffSignW = diffW > 0 ? `+${diffW}` : `${diffW}`;
+        const diffSignH = diffH > 0 ? `+${diffH}` : `${diffH}`;
+        document.getElementById('buildable-diff-callout').innerHTML = `
+          <span>ความคลาดเคลื่อนจากเป้าหมาย:</span>
+          <span class="font-mono text-slate-300">กว้าง ${diffSignW} mm | สูง ${diffSignH} mm</span>
+        `;
+
         const envBadge = document.getElementById('env-badge');
         if (specs.isOutdoor) {
-          envBadge.textContent = 'Outdoor IP65 (6500 Nits)';
+          envBadge.textContent = 'Outdoor IP65 (High-Bright)';
           envBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-300 border border-orange-500/30';
         } else {
-          envBadge.textContent = 'Indoor Pro (1000 Nits)';
+          envBadge.textContent = 'Indoor Pro (High Refresh)';
           envBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20';
         }
 
@@ -1438,6 +1586,48 @@
           prodStatusPill.className = 'text-[9px] px-1.5 py-0.5 rounded uppercase font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30';
         }
 
+        // Update SKU selector & metadata bar
+        const skuSelect = document.getElementById('sku-select');
+        if (skuSelect.value !== state.productId) {
+          skuSelect.value = state.productId;
+        }
+
+        if (product) {
+          document.getElementById('sku-size-tag').textContent = `ตู้: ${product.cabinetWidthMm}×${product.cabinetHeightMm} mm`;
+          document.getElementById('sku-ip-tag').textContent = `${product.ipRatingFront || 'IP??'}/${product.ipRatingBack || 'IP??'}`;
+          document.getElementById('sku-nits-tag').textContent = `${product.brightnessNits || 'รอยืนยัน'} Nits`;
+          document.getElementById('sku-refresh-tag').textContent = `${product.refreshHz || 3840} Hz`;
+        }
+
+        // Compatibility Alert Box
+        const compatBox = document.getElementById('compatibility-alert-box');
+        const compatIcon = document.getElementById('compat-icon');
+        const compatText = document.getElementById('compat-text');
+
+        if (compatibility && compatibility.errors && compatibility.errors.length > 0) {
+          compatBox.className = 'p-2.5 rounded-lg border border-red-500/50 bg-red-500/15 text-xs flex items-start gap-2 transition-all';
+          compatIcon.textContent = '🚫';
+          compatText.className = 'text-[11px] text-red-300 leading-snug';
+          compatText.innerHTML = compatibility.errors.join('<br/>');
+        } else if (compatibility && compatibility.warnings && compatibility.warnings.length > 0) {
+          compatBox.className = 'p-2.5 rounded-lg border border-amber-500/50 bg-amber-500/15 text-xs flex items-start gap-2 transition-all';
+          compatIcon.textContent = '⚠️';
+          compatText.className = 'text-[11px] text-amber-300 leading-snug';
+          compatText.innerHTML = compatibility.warnings.join('<br/>');
+        } else {
+          compatBox.className = 'p-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-xs flex items-start gap-2 transition-all';
+          compatIcon.textContent = '✅';
+          compatText.className = 'text-[11px] text-emerald-300 leading-snug';
+          compatText.textContent = `รุ่น ${product ? product.displayName : ''} สอดคล้องกับสภาพแวดล้อมและรูปแบบโครงสร้างที่เลือก`;
+        }
+
+        // Sync pitch buttons active state
+        document.querySelectorAll('.pitch-btn').forEach(btn => {
+          const btnPitch = parseFloat(btn.getAttribute('data-pitch'));
+          btn.classList.toggle('active', Math.abs(btnPitch - state.pitchMm) < 0.05);
+        });
+
+        // Live Spec Values
         document.getElementById('spec-dimensions').textContent = `${specs.actualWidthM.toFixed(2)} × ${specs.actualHeightM.toFixed(2)} m`;
         document.getElementById('spec-area').textContent = specs.actualAreaSqm.toFixed(2);
         document.getElementById('spec-cabinets-total').textContent = `${specs.totalCabinets.toLocaleString()} ตู้`;
@@ -1467,6 +1657,7 @@
           `📋 ใบสรุปสเปกจอ LED แบรนด์ JLED (JLED Design Studio v4.0)`,
           `==========================================`,
           `• รหัสรุ่นสินค้า: ${product ? product.displayName : 'JLED Pro'} [${specs.productStatus === PRODUCT_STATUS.VERIFIED ? 'Verified' : 'Demo Profile'}]`,
+          `• Series: ${product ? product.series || 'J-Standard' : 'J-Standard'} | Datasheet: ${product ? product.datasheetRef || 'JLED-STD' : 'JLED-STD'}`,
           `• Pixel Pitch: P${state.pitchMm} (${specs.isOutdoor ? 'Outdoor IP65' : 'Indoor Pro'})`,
           `• สถานที่จำลองติดตั้ง: ${sceneDef ? sceneDef.nameTh : state.sceneType}`,
           `• รูปแบบโครงสร้างติดตั้ง: ${mountDef ? mountDef.nameTh : state.mountType}`,
@@ -1502,10 +1693,25 @@
         });
       });
 
+      // Environment Filter Tabs
+      document.querySelectorAll('.filter-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentFilterEnv = tab.getAttribute('data-filter');
+          renderSkuOptions(currentFilterEnv);
+        });
+      });
+
+      // SKU Dropdown Change
+      document.getElementById('sku-select').addEventListener('change', (e) => {
+        const productId = e.target.value;
+        globalStateStore.update({ productId });
+      });
+
+      // Quick Pitch Buttons
       document.querySelectorAll('.pitch-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.pitch-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
           const pitchMm = parseFloat(btn.getAttribute('data-pitch'));
           globalStateStore.update({ pitchMm });
         });
@@ -1554,7 +1760,7 @@
         });
       });
 
-      // Media Upload with leak prevention
+      // Media Upload
       const uploadBtn = document.getElementById('upload-media-btn');
       const fileInput = document.getElementById('custom-media-input');
       const fileNameLabel = document.getElementById('uploaded-file-name');
@@ -1566,7 +1772,6 @@
         const file = e.target.files && e.target.files[0];
         if (!file) return;
 
-        // Clean up previous uploaded media and revoke blob URLs safely
         globalMediaTracker.detachVideo(customVideoEl);
         globalMediaTracker.cleanupAll();
 
@@ -1641,9 +1846,204 @@
         document.querySelectorAll('.mount-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-mount') === 'wall'));
         document.querySelectorAll('.pitch-btn').forEach(b => b.classList.toggle('active', parseFloat(b.getAttribute('data-pitch')) === 2.5));
         document.querySelectorAll('.content-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-content') === 'tech'));
+        document.querySelectorAll('.filter-tab').forEach(b => b.classList.toggle('active', b.getAttribute('data-filter') === 'all'));
+        renderSkuOptions('all');
+
         document.getElementById('human-status-txt').textContent = 'เปิด';
         document.getElementById('grid-status-txt').textContent = 'เปิด';
         syncCameraToViewingDistance('front');
+      });
+
+      // ================= PHASE 02: COMPARE MODAL =================
+      const compareModal = document.getElementById('compare-modal');
+      const compareSelectA = document.getElementById('compare-select-a');
+      const compareSelectB = document.getElementById('compare-select-b');
+      const compareTableContainer = document.getElementById('compare-table-container');
+
+      function populateCompareSelects() {
+        const all = defaultCatalog.getAllProducts();
+        compareSelectA.innerHTML = '';
+        compareSelectB.innerHTML = '';
+        all.forEach((p, idx) => {
+          const optA = document.createElement('option');
+          optA.value = p.id;
+          optA.textContent = `${p.displayName} (P${p.actualPixelPitchMm})`;
+          if (idx === 0) optA.selected = true;
+          compareSelectA.appendChild(optA);
+
+          const optB = document.createElement('option');
+          optB.value = p.id;
+          optB.textContent = `${p.displayName} (P${p.actualPixelPitchMm})`;
+          if (idx === 1 || (idx === 0 && all.length === 1)) optB.selected = true;
+          compareSelectB.appendChild(optB);
+        });
+      }
+
+      function renderCompareTable() {
+        const pA = defaultCatalog.getProductById(compareSelectA.value);
+        const pB = defaultCatalog.getProductById(compareSelectB.value);
+        if (!pA || !pB) return;
+
+        const rows = [
+          { label: 'รหัส SKU', a: pA.id, b: pB.id },
+          { label: 'ชื่อรุ่นทางการ', a: pA.displayName, b: pB.displayName },
+          { label: 'Series', a: pA.series || '-', b: pB.series || '-' },
+          { label: 'สถานะสเปก', a: pA.status === PRODUCT_STATUS.VERIFIED ? '★ Verified Spec' : 'Demo Profile', b: pB.status === PRODUCT_STATUS.VERIFIED ? '★ Verified Spec' : 'Demo Profile', highlightStatus: true },
+          { label: 'สภาพแวดล้อม', a: pA.environment, b: pB.environment },
+          { label: 'Pixel Pitch จริง', a: `P${pA.actualPixelPitchMm} mm`, b: `P${pB.actualPixelPitchMm} mm` },
+          { label: 'ขนาดตู้ (กว้าง×สูง)', a: `${pA.cabinetWidthMm} × ${pA.cabinetHeightMm} mm`, b: `${pB.cabinetWidthMm} × ${pB.cabinetHeightMm} mm` },
+          { label: 'ความลึกตู้', a: `${pA.cabinetDepthMm} mm`, b: `${pB.cabinetDepthMm} mm` },
+          { label: 'ความละเอียดต่อตู้', a: `${pA.cabinetPixelWidth} × ${pA.cabinetPixelHeight} px`, b: `${pB.cabinetPixelWidth} × ${pB.cabinetPixelHeight} px` },
+          { label: 'ความสว่าง', a: `${pA.brightnessNits || 'รอยืนยัน'} Nits`, b: `${pB.brightnessNits || 'รอยืนยัน'} Nits` },
+          { label: 'Refresh Rate', a: `${pA.refreshHz || 3840} Hz`, b: `${pB.refreshHz || 3840} Hz` },
+          { label: 'มาตรฐานกันน้ำ (หน้า/หลัง)', a: `${pA.ipRatingFront || '-'}/${pA.ipRatingBack || '-'}`, b: `${pB.ipRatingFront || '-'}/${pB.ipRatingBack || '-'}` },
+          { label: 'น้ำหนักต่อตู้', a: `${pA.weightKgPerCabinet != null ? `${pA.weightKgPerCabinet} kg` : 'รอยืนยัน'}`, b: `${pB.weightKgPerCabinet != null ? `${pB.weightKgPerCabinet} kg` : 'รอยืนยัน'}` },
+          { label: 'กินไฟเฉลี่ย/ตู้', a: `${pA.avgPowerWPerCabinet != null ? `${pA.avgPowerWPerCabinet} W` : 'รอยืนยัน'}`, b: `${pB.avgPowerWPerCabinet != null ? `${pB.avgPowerWPerCabinet} W` : 'รอยืนยัน'}` },
+          { label: 'กินไฟสูงสุด/ตู้', a: `${pA.maxPowerWPerCabinet != null ? `${pA.maxPowerWPerCabinet} W` : 'รอยืนยัน'}`, b: `${pB.maxPowerWPerCabinet != null ? `${pB.maxPowerWPerCabinet} W` : 'รอยืนยัน'}` },
+          { label: 'โครงสร้างที่รองรับ', a: (pA.allowedMounts || []).join(', '), b: (pB.allowedMounts || []).join(', ') }
+        ];
+
+        let html = `
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-950 text-slate-300 font-bold border-b border-slate-800">
+              <tr>
+                <th class="p-3 w-1/3">รายการเปรียบเทียบ</th>
+                <th class="p-3 w-1/3 text-cyan-300">${pA.displayName}</th>
+                <th class="p-3 w-1/3 text-orange-400">${pB.displayName}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/80">
+        `;
+
+        rows.forEach(r => {
+          html += `
+            <tr class="hover:bg-slate-900/60">
+              <td class="p-2.5 font-medium text-slate-400">${r.label}</td>
+              <td class="p-2.5 font-mono text-slate-200">${r.a}</td>
+              <td class="p-2.5 font-mono text-slate-200">${r.b}</td>
+            </tr>
+          `;
+        });
+
+        html += `</tbody></table>`;
+        compareTableContainer.innerHTML = html;
+      }
+
+      document.getElementById('open-compare-btn').addEventListener('click', () => {
+        populateCompareSelects();
+        renderCompareTable();
+        compareModal.classList.remove('hidden');
+        compareModal.classList.add('flex');
+      });
+
+      document.getElementById('close-compare-btn').addEventListener('click', () => {
+        compareModal.classList.add('hidden');
+        compareModal.classList.remove('flex');
+      });
+
+      compareSelectA.addEventListener('change', renderCompareTable);
+      compareSelectB.addEventListener('change', renderCompareTable);
+
+      compareModal.addEventListener('click', (e) => {
+        if (e.target === compareModal) {
+          compareModal.classList.add('hidden');
+          compareModal.classList.remove('flex');
+        }
+      });
+
+      // ================= PHASE 02: ADMIN JSON CATALOG MANAGER =================
+      const catalogModal = document.getElementById('catalog-modal');
+      const catalogTextarea = document.getElementById('catalog-json-textarea');
+      const catalogBanner = document.getElementById('catalog-validation-banner');
+      const catalogCountPill = document.getElementById('catalog-count-pill');
+
+      function syncCatalogModalContent() {
+        catalogTextarea.value = defaultCatalog.exportCatalogJson();
+        catalogCountPill.textContent = `${defaultCatalog.getAllProducts().length} รุ่น`;
+        catalogBanner.classList.add('hidden');
+      }
+
+      document.getElementById('open-catalog-btn').addEventListener('click', () => {
+        syncCatalogModalContent();
+        catalogModal.classList.remove('hidden');
+        catalogModal.classList.add('flex');
+      });
+
+      document.getElementById('close-catalog-btn').addEventListener('click', () => {
+        catalogModal.classList.add('hidden');
+        catalogModal.classList.remove('flex');
+      });
+
+      catalogModal.addEventListener('click', (e) => {
+        if (e.target === catalogModal) {
+          catalogModal.classList.add('hidden');
+          catalogModal.classList.remove('flex');
+        }
+      });
+
+      document.getElementById('export-catalog-btn').addEventListener('click', () => {
+        const jsonStr = defaultCatalog.exportCatalogJson();
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `jled_product_catalog_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById('copy-catalog-btn').addEventListener('click', () => {
+        const text = catalogTextarea.value;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text);
+        }
+        catalogBanner.className = 'p-3 rounded-xl text-xs bg-emerald-500/20 border border-emerald-500/40 text-emerald-300';
+        catalogBanner.textContent = '✅ คัดลอก JSON Catalog ลง Clipboard แล้ว';
+        catalogBanner.classList.remove('hidden');
+      });
+
+      document.getElementById('save-catalog-btn').addEventListener('click', () => {
+        const inputStr = catalogTextarea.value;
+        const res = defaultCatalog.importCatalogJson(inputStr);
+
+        if (res.success) {
+          catalogBanner.className = 'p-3 rounded-xl text-xs bg-emerald-500/20 border border-emerald-500/40 text-emerald-300';
+          catalogBanner.innerHTML = `✅ บันทึก Catalog สำเร็จ! นำเข้าข้อมูลสินค้าทั้งหมด <strong>${res.importedCount} รุ่น</strong> เรียบร้อยแล้ว`;
+          catalogBanner.classList.remove('hidden');
+          catalogCountPill.textContent = `${res.importedCount} รุ่น`;
+
+          // Refresh UI dropdown & state
+          renderSkuOptions(currentFilterEnv);
+          const currentProd = globalStateStore.getProduct();
+          if (currentProd) {
+            globalStateStore.update({ productId: currentProd.id });
+          } else {
+            const first = defaultCatalog.getAllProducts()[0];
+            if (first) globalStateStore.update({ productId: first.id });
+          }
+        } else {
+          catalogBanner.className = 'p-3 rounded-xl text-xs bg-red-500/20 border border-red-500/40 text-red-300 space-y-1';
+          let errHtml = `<strong>✖ ตรวจพบข้อผิดพลาดในข้อมูล JSON (${res.errors.length} จุด):</strong><ul class="list-disc list-inside mt-1 space-y-0.5">`;
+          res.errors.slice(0, 5).forEach(err => {
+            errHtml += `<li>${err}</li>`;
+          });
+          if (res.errors.length > 5) {
+            errHtml += `<li>...และอีก ${res.errors.length - 5} รายการ</li>`;
+          }
+          errHtml += `</ul>`;
+          catalogBanner.innerHTML = errHtml;
+          catalogBanner.classList.remove('hidden');
+        }
+      });
+
+      document.getElementById('reset-catalog-btn').addEventListener('click', () => {
+        defaultCatalog.resetToBaseline();
+        syncCatalogModalContent();
+        renderSkuOptions(currentFilterEnv);
+        globalStateStore.reset();
+        catalogBanner.className = 'p-3 rounded-xl text-xs bg-cyan-500/20 border border-cyan-500/40 text-cyan-300';
+        catalogBanner.textContent = '↺ รีเซ็ตฐานข้อมูล Catalog กลับเป็นค่าเริ่มต้นมาตรฐานของ JLED สำเร็จ';
+        catalogBanner.classList.remove('hidden');
       });
 
       // Quotation Modal
@@ -1704,27 +2104,28 @@
       });
 
       // 8. Reactive State Subscription
-      globalStateStore.subscribe((state, specs) => {
+      globalStateStore.subscribe((state, specs, compatibility) => {
         buildEnvironment(state, specs);
         buildScreenAndMount(state, specs);
         buildHumanModel(state, specs);
-        updateDOM(state, specs);
+        updateDOM(state, specs, compatibility);
       });
 
       // 9. Initial Build & Animation Loop
+      renderSkuOptions('all');
       const initialState = globalStateStore.getState();
       const initialSpecs = globalStateStore.getSpecs();
+      const initialCompat = globalStateStore.getCompatibility();
       buildEnvironment(initialState, initialSpecs);
       buildScreenAndMount(initialState, initialSpecs);
       buildHumanModel(initialState, initialSpecs);
       syncCameraToViewingDistance('front');
-      updateDOM(initialState, initialSpecs);
+      updateDOM(initialState, initialSpecs, initialCompat);
 
       let startTime = performance.now();
       function animate(now) {
         requestAnimationFrame(animate);
 
-        // Pause per-frame heavy work when tab is not visible
         if (!isTabVisible) return;
 
         const elapsedSec = (now - startTime) / 1000;
