@@ -36,6 +36,7 @@ const requiredFiles = [
   'src/core/calculation-engine.js',
   'src/core/product-catalog.js',
   'src/core/measurements.js',
+  'src/core/perspective-engine.js',
   'src/core/disposal.js',
   'docs/AUDIT_AND_ARCHITECTURE.md',
   'backup/jled_3d_screen_simulator_configurator_led_v3.5_original.html'

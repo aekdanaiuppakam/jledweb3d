@@ -259,6 +259,9 @@
         <h2 class="text-sm font-bold tracking-wide text-white uppercase">แผงควบคุมและสเปกจอ JLED</h2>
       </div>
       <div class="flex items-center gap-1.5">
+        <button id="open-mockup-btn" type="button" title="ทาบภาพหน้างานจริง (Photo Mockup)" class="text-[11px] text-amber-300 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-amber-500/40 hover:border-amber-400">
+          <span>📷</span> ทาบภาพจริง
+        </button>
         <button id="open-compare-btn" type="button" title="เปรียบเทียบสเปกรุ่น" class="text-[11px] text-cyan-300 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-cyan-500/30 hover:border-cyan-400">
           <span>⚖️</span> เทียบรุ่น
         </button>
@@ -854,6 +857,84 @@
     </div>
   </div>
 
+  <!-- ================= REAL-SITE PHOTO MOCKUP MODAL (PHASE 05) ================= -->
+  <div id="mockup-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-5">
+    <div class="glass-panel max-w-5xl w-full rounded-2xl border border-amber-500/40 overflow-hidden shadow-2xl flex flex-col max-h-[94vh]">
+      <!-- Header -->
+      <div class="px-5 py-3.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📷</span>
+          <div>
+            <h3 class="text-base font-bold text-white leading-tight">ทาบจอ LED บนภาพถ่ายหน้างานจริง (Real-Site Photo Mockup)</h3>
+            <p class="text-[11px] text-slate-400">อัปโหลดภาพสถานที่จริง ปรับมุม 4 มุม (Perspective Pinning) เพื่อดูความสมจริง ประมวลผลบนเครื่องของคุณ 100% (Client-Side Privacy)</p>
+          </div>
+        </div>
+        <button id="close-mockup-btn" type="button" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold">
+          ✕
+        </button>
+      </div>
+
+      <!-- Mockup Workspace Body -->
+      <div class="p-4 overflow-y-auto space-y-3 flex-1 flex flex-col min-h-0">
+        <!-- Controls Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-2.5 p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 text-xs shrink-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Upload Site Photo Button -->
+            <input id="site-photo-input" type="file" accept="image/*" class="hidden" />
+            <button id="upload-site-btn" type="button" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#FF6B00] to-amber-500 hover:brightness-110 text-slate-950 font-bold transition flex items-center gap-1.5 shadow">
+              <span>📤</span> เลือกภาพหน้างาน
+            </button>
+            <span id="site-photo-name" class="text-slate-400 text-[11px] max-w-[180px] truncate">ยังไม่ได้เลือกรูปภาพ (ใช้ภาพตัวอย่าง)</span>
+          </div>
+
+          <!-- Sliders & Blend Modes -->
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-1.5">
+              <label for="mockup-opacity-slider" class="text-slate-400 text-[11px]">ความโปร่งใส:</label>
+              <input id="mockup-opacity-slider" type="range" min="20" max="100" value="95" class="w-24 orange-slider" />
+              <span id="mockup-opacity-val" class="font-mono text-cyan-300 text-[11px]">95%</span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <label for="mockup-blend-select" class="text-slate-400 text-[11px]">โหมดสี:</label>
+              <select id="mockup-blend-select" class="bg-slate-900 border border-slate-700 text-slate-200 text-[11px] rounded px-1.5 py-1">
+                <option value="source-over">ปกติ (Normal)</option>
+                <option value="screen">สว่าง (Screen)</option>
+                <option value="multiply">มืด (Multiply)</option>
+                <option value="overlay">ผสมแสง (Overlay)</option>
+              </select>
+            </div>
+
+            <!-- Quick Pins Presets -->
+            <div class="flex items-center gap-1">
+              <button id="reset-pins-btn" type="button" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]">↺ รีเซ็ตมุม</button>
+              <button id="preset-pin-left" type="button" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]">ผนังซ้าย</button>
+              <button id="preset-pin-right" type="button" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]">ผนังขวา</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div class="relative flex-1 min-h-[380px] sm:min-h-[460px] bg-slate-950 rounded-xl border border-slate-800 overflow-hidden flex items-center justify-center select-none" id="mockup-canvas-wrapper">
+          <canvas id="mockup-canvas" class="max-w-full max-h-full block cursor-crosshair"></canvas>
+          <div class="absolute bottom-2 left-2 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-sm border border-slate-700 text-[10px] text-slate-300 flex items-center gap-2 pointer-events-none">
+            <span>💡 ลากจุดหมุดสีส้มทั้ง 4 จุดเพื่อทาบจอให้พอดีกับมุมผนังหน้างานจริง</span>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="flex items-center justify-between pt-1 shrink-0">
+          <div class="text-[10px] text-slate-500 italic">
+            * ภาพจำลองเพื่อช่วยในการตัดสินใจ — สัดส่วนจริงขึ้นอยู่กับการคำนวณวิศวกรรมของ JLED
+          </div>
+          <button id="export-mockup-png-btn" type="button" class="px-4 py-2 rounded-xl bg-[#00E5FF] hover:bg-[#00c4db] text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow-lg">
+            <span>📸</span> ส่งออกภาพ Mockup พร้อมลายน้ำ (Export PNG)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= QUOTATION & SPEC SUMMARY MODAL ================= -->
   <div id="quote-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
     <div class="glass-panel max-w-lg w-full rounded-2xl border border-[#00E5FF]/40 overflow-hidden shadow-2xl">
@@ -906,6 +987,7 @@
     import { defaultCatalog, PRODUCT_STATUS, checkCompatibility } from './src/core/product-catalog.js';
     import { calculateScreenSpecs } from './src/core/calculation-engine.js';
     import { calculateDimensionCoordinates } from './src/core/measurements.js';
+    import { getDefaultCornerPins, renderWarpedCanvas } from './src/core/perspective-engine.js';
     import { globalStateStore } from './src/core/state.js';
     import { disposeHierarchy, globalMediaTracker } from './src/core/disposal.js';
 
@@ -2546,6 +2628,282 @@
         catalogBanner.className = 'p-3 rounded-xl text-xs bg-cyan-500/20 border border-cyan-500/40 text-cyan-300';
         catalogBanner.textContent = '↺ รีเซ็ตฐานข้อมูล Catalog กลับเป็นค่าเริ่มต้นมาตรฐานของ JLED สำเร็จ';
         catalogBanner.classList.remove('hidden');
+      });
+
+      // ================= PHASE 05: REAL-SITE PHOTO MOCKUP =================
+      const mockupModal = document.getElementById('mockup-modal');
+      const mockupCanvas = document.getElementById('mockup-canvas');
+      const mockupCtx = mockupCanvas.getContext('2d');
+      const sitePhotoInput = document.getElementById('site-photo-input');
+      const sitePhotoName = document.getElementById('site-photo-name');
+      const mockupOpacitySlider = document.getElementById('mockup-opacity-slider');
+      const mockupOpacityVal = document.getElementById('mockup-opacity-val');
+      const mockupBlendSelect = document.getElementById('mockup-blend-select');
+
+      let siteImage = null;
+      let cornerPins = getDefaultCornerPins(960, 600, 0.15);
+      let activePinIndex = -1;
+      let isMockupOpen = false;
+
+      function createSampleSiteImage() {
+        const c = document.createElement('canvas');
+        c.width = 960;
+        c.height = 600;
+        const ctx = c.getContext('2d');
+        const bgGrad = ctx.createLinearGradient(0, 0, 960, 600);
+        bgGrad.addColorStop(0, '#1a2233');
+        bgGrad.addColorStop(0.5, '#0f172a');
+        bgGrad.addColorStop(1, '#080d1a');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, 960, 600);
+
+        ctx.fillStyle = '#0b1120';
+        ctx.beginPath();
+        ctx.moveTo(0, 460);
+        ctx.lineTo(960, 460);
+        ctx.lineTo(960, 600);
+        ctx.lineTo(0, 600);
+        ctx.fill();
+
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 460);
+        ctx.lineTo(960, 460);
+        ctx.moveTo(180, 0);
+        ctx.lineTo(180, 460);
+        ctx.moveTo(780, 0);
+        ctx.lineTo(780, 460);
+        ctx.stroke();
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 16px Inter, Sarabun, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('ภาพถ่ายจำลองผนังหน้างาน (Sample Architectural Wall)', 480, 60);
+
+        const img = new Image();
+        img.src = c.toDataURL('image/png');
+        return img;
+      }
+
+      siteImage = createSampleSiteImage();
+
+      function updateMockupView() {
+        if (!isMockupOpen || !mockupCanvas) return;
+        const cw = siteImage.width || 960;
+        const ch = siteImage.height || 600;
+
+        if (mockupCanvas.width !== cw || mockupCanvas.height !== ch) {
+          mockupCanvas.width = cw;
+          mockupCanvas.height = ch;
+        }
+
+        mockupCtx.clearRect(0, 0, cw, ch);
+        mockupCtx.drawImage(siteImage, 0, 0, cw, ch);
+
+        const opacity = parseFloat(mockupOpacitySlider.value) / 100;
+        const blendMode = mockupBlendSelect.value;
+        renderWarpedCanvas(screenCanvas, mockupCtx, cornerPins, { opacity, blendMode });
+
+        mockupCtx.save();
+        mockupCtx.strokeStyle = '#00E5FF';
+        mockupCtx.lineWidth = 2.5;
+        mockupCtx.setLineDash([6, 6]);
+        mockupCtx.beginPath();
+        mockupCtx.moveTo(cornerPins[0][0], cornerPins[0][1]);
+        mockupCtx.lineTo(cornerPins[1][0], cornerPins[1][1]);
+        mockupCtx.lineTo(cornerPins[2][0], cornerPins[2][1]);
+        mockupCtx.lineTo(cornerPins[3][0], cornerPins[3][1]);
+        mockupCtx.closePath();
+        mockupCtx.stroke();
+        mockupCtx.setLineDash([]);
+
+        const pinLabels = ['TL', 'TR', 'BR', 'BL'];
+        cornerPins.forEach(([px, py], idx) => {
+          mockupCtx.fillStyle = idx === activePinIndex ? '#00E5FF' : '#FF6B00';
+          mockupCtx.strokeStyle = '#FFFFFF';
+          mockupCtx.lineWidth = 3;
+          mockupCtx.beginPath();
+          mockupCtx.arc(px, py, 10, 0, Math.PI * 2);
+          mockupCtx.fill();
+          mockupCtx.stroke();
+
+          mockupCtx.fillStyle = '#FFFFFF';
+          mockupCtx.font = 'bold 10px sans-serif';
+          mockupCtx.textAlign = 'center';
+          mockupCtx.textBaseline = 'middle';
+          mockupCtx.fillText(pinLabels[idx], px, py - 18);
+        });
+        mockupCtx.restore();
+      }
+
+      function getCanvasPointer(e) {
+        const rect = mockupCanvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const scaleX = mockupCanvas.width / rect.width;
+        const scaleY = mockupCanvas.height / rect.height;
+        return [
+          (clientX - rect.left) * scaleX,
+          (clientY - rect.top) * scaleY
+        ];
+      }
+
+      mockupCanvas.addEventListener('mousedown', (e) => {
+        const [mx, my] = getCanvasPointer(e);
+        activePinIndex = -1;
+        cornerPins.forEach(([px, py], idx) => {
+          const dist = Math.hypot(px - mx, py - my);
+          if (dist < 28) activePinIndex = idx;
+        });
+        if (activePinIndex >= 0) updateMockupView();
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (activePinIndex >= 0 && isMockupOpen) {
+          const [mx, my] = getCanvasPointer(e);
+          cornerPins[activePinIndex] = [
+            Math.max(0, Math.min(mockupCanvas.width, mx)),
+            Math.max(0, Math.min(mockupCanvas.height, my))
+          ];
+          updateMockupView();
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (activePinIndex >= 0) {
+          activePinIndex = -1;
+          updateMockupView();
+        }
+      });
+
+      mockupCanvas.addEventListener('touchstart', (e) => {
+        const [mx, my] = getCanvasPointer(e);
+        activePinIndex = -1;
+        cornerPins.forEach(([px, py], idx) => {
+          if (Math.hypot(px - mx, py - my) < 36) activePinIndex = idx;
+        });
+        if (activePinIndex >= 0) {
+          e.preventDefault();
+          updateMockupView();
+        }
+      }, { passive: false });
+
+      mockupCanvas.addEventListener('touchmove', (e) => {
+        if (activePinIndex >= 0 && isMockupOpen) {
+          e.preventDefault();
+          const [mx, my] = getCanvasPointer(e);
+          cornerPins[activePinIndex] = [
+            Math.max(0, Math.min(mockupCanvas.width, mx)),
+            Math.max(0, Math.min(mockupCanvas.height, my))
+          ];
+          updateMockupView();
+        }
+      }, { passive: false });
+
+      mockupCanvas.addEventListener('touchend', () => {
+        activePinIndex = -1;
+        updateMockupView();
+      });
+
+      document.getElementById('open-mockup-btn').addEventListener('click', () => {
+        isMockupOpen = true;
+        mockupModal.classList.remove('hidden');
+        mockupModal.classList.add('flex');
+        cornerPins = getDefaultCornerPins(siteImage.width, siteImage.height, 0.15);
+        updateMockupView();
+      });
+
+      document.getElementById('close-mockup-btn').addEventListener('click', () => {
+        isMockupOpen = false;
+        mockupModal.classList.add('hidden');
+        mockupModal.classList.remove('flex');
+      });
+
+      mockupModal.addEventListener('click', (e) => {
+        if (e.target === mockupModal) {
+          isMockupOpen = false;
+          mockupModal.classList.add('hidden');
+          mockupModal.classList.remove('flex');
+        }
+      });
+
+      document.getElementById('upload-site-btn').addEventListener('click', () => sitePhotoInput.click());
+      sitePhotoInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const img = new Image();
+          img.onload = () => {
+            siteImage = img;
+            sitePhotoName.textContent = file.name;
+            cornerPins = getDefaultCornerPins(img.width, img.height, 0.15);
+            updateMockupView();
+          };
+          img.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      mockupOpacitySlider.addEventListener('input', (e) => {
+        mockupOpacityVal.textContent = `${e.target.value}%`;
+        updateMockupView();
+      });
+
+      mockupBlendSelect.addEventListener('change', updateMockupView);
+
+      document.getElementById('reset-pins-btn').addEventListener('click', () => {
+        cornerPins = getDefaultCornerPins(siteImage.width, siteImage.height, 0.15);
+        updateMockupView();
+      });
+
+      document.getElementById('preset-pin-left').addEventListener('click', () => {
+        const w = siteImage.width;
+        const h = siteImage.height;
+        cornerPins = [
+          [w * 0.12, h * 0.22],
+          [w * 0.52, h * 0.28],
+          [w * 0.52, h * 0.72],
+          [w * 0.12, h * 0.78]
+        ];
+        updateMockupView();
+      });
+
+      document.getElementById('preset-pin-right').addEventListener('click', () => {
+        const w = siteImage.width;
+        const h = siteImage.height;
+        cornerPins = [
+          [w * 0.48, h * 0.28],
+          [w * 0.88, h * 0.22],
+          [w * 0.88, h * 0.78],
+          [w * 0.48, h * 0.72]
+        ];
+        updateMockupView();
+      });
+
+      document.getElementById('export-mockup-png-btn').addEventListener('click', () => {
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = siteImage.width;
+        exportCanvas.height = siteImage.height;
+        const expCtx = exportCanvas.getContext('2d');
+        expCtx.drawImage(siteImage, 0, 0);
+
+        const opacity = parseFloat(mockupOpacitySlider.value) / 100;
+        const blendMode = mockupBlendSelect.value;
+        renderWarpedCanvas(screenCanvas, expCtx, cornerPins, { opacity, blendMode });
+
+        expCtx.fillStyle = 'rgba(6, 9, 17, 0.85)';
+        expCtx.fillRect(16, exportCanvas.height - 48, 340, 36);
+        expCtx.fillStyle = '#00E5FF';
+        expCtx.font = 'bold 14px Inter, sans-serif';
+        expCtx.fillText('JLED DESIGN STUDIO PRO v4.0', 28, exportCanvas.height - 25);
+
+        const a = document.createElement('a');
+        a.href = exportCanvas.toDataURL('image/png');
+        a.download = `jled_mockup_${new Date().toISOString().slice(0, 10)}.png`;
+        a.click();
       });
 
       // Quotation Modal
