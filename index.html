@@ -212,26 +212,35 @@
       <div class="glass-panel px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 pointer-events-auto overflow-x-auto max-w-full">
         <span class="text-[11px] text-slate-400 px-1.5 hidden sm:inline font-medium">มุมกล้อง:</span>
         <button id="cam-front-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/40 hover:bg-[#00E5FF]/25 transition flex items-center gap-1 whitespace-nowrap">
-          <span>🎯</span> มุมตรงหน้าจอ
+          <span>🎯</span> มุมตรง
         </button>
         <button id="cam-angle-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-slate-200 border border-slate-700 hover:border-[#00E5FF]/50 transition flex items-center gap-1 whitespace-nowrap">
-          <span>📐</span> มุมเฉียง 45°
+          <span>📐</span> เฉียง 45°
         </button>
         <button id="cam-human-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-slate-200 border border-slate-700 hover:border-[#00E5FF]/50 transition flex items-center gap-1 whitespace-nowrap">
-          <span>👁️</span> มุมสายตาคนจริง (1.65m)
+          <span>👁️</span> สายตาคน (1.65m)
+        </button>
+        <button id="cam-top-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-slate-200 border border-slate-700 hover:border-[#00E5FF]/50 transition flex items-center gap-1 whitespace-nowrap">
+          <span>🛸</span> มุมบน Bird-Eye
+        </button>
+        <button id="cam-side-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-slate-200 border border-slate-700 hover:border-[#00E5FF]/50 transition flex items-center gap-1 whitespace-nowrap">
+          <span>📏</span> มุมข้าง Side 90°
         </button>
         <button id="cam-closeup-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-amber-300 border border-amber-500/30 hover:border-amber-400 transition flex items-center gap-1 whitespace-nowrap">
-          <span>🔍</span> ซูมดูเม็ดไฟใกล้ (1.2m)
+          <span>🔍</span> ซูมเม็ดไฟ (1.2m)
         </button>
       </div>
 
-      <!-- Quick Scene Toggles (Human Reference & Cabinet Grid) -->
+      <!-- Quick Scene Toggles (Human Reference, Cabinet Grid, 3D Measurements) -->
       <div class="glass-panel px-2.5 py-1.5 rounded-xl flex items-center gap-2 pointer-events-auto">
+        <button id="toggle-measure-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#00E5FF]/20 text-white border border-[#00E5FF] transition flex items-center gap-1.5">
+          <span>📏</span> เส้นวัด 3D: <strong id="measure-status-txt" class="text-[#00E5FF]">เปิด</strong>
+        </button>
         <button id="toggle-human-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#00E5FF]/20 text-white border border-[#00E5FF] transition flex items-center gap-1.5">
-          <span>🧍</span> โมเดลคน 1.70m: <strong id="human-status-txt" class="text-[#00E5FF]">เปิด</strong>
+          <span>🧍</span> คน 1.70m: <strong id="human-status-txt" class="text-[#00E5FF]">เปิด</strong>
         </button>
         <button id="toggle-grid-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#00E5FF]/20 text-white border border-[#00E5FF] transition flex items-center gap-1.5">
-          <span>⊞</span> รอยต่อตู้ (Grid): <strong id="grid-status-txt" class="text-[#00E5FF]">เปิด</strong>
+          <span>⊞</span> รอยต่อตู้: <strong id="grid-status-txt" class="text-[#00E5FF]">เปิด</strong>
         </button>
         <div class="hidden xl:flex items-center gap-1.5 text-[11px] text-slate-400 pl-2 border-l border-slate-700">
           <span>🖱️ คลิกซ้ายหมุน • คลิกขวาเลื่อน • ลูกกลิ้งซูม</span>
@@ -322,6 +331,70 @@
           <p class="text-[10px] text-slate-500 mt-1 italic">
             * โครงสร้างและการแขวนเป็นภาพจำลองเบื้องต้น — ต้องให้วิศวกร/ทีมเทคนิคตรวจสอบหน้างานจริง
           </p>
+        </div>
+      </div>
+
+      <!-- SECTION 1.5: 3D SPATIAL CONTROLS & MEASUREMENTS (PHASE 04) -->
+      <div class="glass-card rounded-xl p-3.5 space-y-3 border-l-2 border-l-[#FF6B00]">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+            <span>📐</span> ตำแหน่ง &amp; ความสูงจอ 3D (Spatial)
+          </h3>
+          <button id="reset-spatial-btn" type="button" class="text-[10px] text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800 transition">↺ กึ่งกลาง</button>
+        </div>
+
+        <div class="space-y-2.5 text-xs">
+          <!-- Elevation Slider -->
+          <div>
+            <div class="flex items-center justify-between">
+              <label for="elevation-slider" class="text-slate-300 font-medium text-[11px]">ความสูงฐานจอจากพื้น (Elevation):</label>
+              <div class="font-mono text-[#00E5FF] font-bold text-xs"><span id="elevation-val">1.00</span> ม.</div>
+            </div>
+            <input id="elevation-slider" type="range" min="0" max="4.0" step="0.05" value="1.0" class="orange-slider mt-1" />
+            <div class="flex justify-between text-[9px] text-slate-500 font-mono">
+              <span>0.0m (ติดพื้น)</span>
+              <span>1.0m (มาตรฐาน)</span>
+              <span>4.0m (ลอยสูง)</span>
+            </div>
+          </div>
+
+          <!-- Position X & Z -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <div class="flex items-center justify-between">
+                <label for="pos-x-slider" class="text-slate-300 text-[10px]">ซ้าย - ขวา (X):</label>
+                <span id="pos-x-val" class="font-mono text-cyan-300 text-[11px]">0.0m</span>
+              </div>
+              <input id="pos-x-slider" type="range" min="-4.0" max="4.0" step="0.1" value="0" class="orange-slider mt-1" />
+            </div>
+            <div>
+              <div class="flex items-center justify-between">
+                <label for="pos-z-slider" class="text-slate-300 text-[10px]">หน้า - หลัง (Z):</label>
+                <span id="pos-z-val" class="font-mono text-cyan-300 text-[11px]">0.0m</span>
+              </div>
+              <input id="pos-z-slider" type="range" min="-3.0" max="3.0" step="0.1" value="0" class="orange-slider mt-1" />
+            </div>
+          </div>
+
+          <!-- Rotation Yaw -->
+          <div>
+            <div class="flex items-center justify-between">
+              <label for="rot-y-slider" class="text-slate-300 text-[11px]">มุมเอียงจอ (Rotation Yaw):</label>
+              <div class="flex items-center gap-1.5">
+                <span id="rot-y-val" class="font-mono text-amber-300 font-bold text-xs">0°</span>
+                <button id="snap-rot-zero-btn" type="button" class="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white">0° หน้าตรง</button>
+              </div>
+            </div>
+            <input id="rot-y-slider" type="range" min="-90" max="90" step="1" value="0" class="orange-slider mt-1" />
+          </div>
+
+          <!-- Toggle 3D Dimension Lines -->
+          <div class="flex items-center justify-between pt-1 border-t border-slate-800/80">
+            <span class="text-slate-300 text-[11px] flex items-center gap-1">
+              <span>📏</span> แสดงเส้นบอกขนาด 3D (Dimensions):
+            </span>
+            <button id="toggle-measure-panel-btn" type="button" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/40">เปิดใช้งาน</button>
+          </div>
         </div>
       </div>
 
@@ -832,6 +905,7 @@
     import { DEFAULTS, SCENE_DEFINITIONS, MOUNT_DEFINITIONS, BOUNDS, formatM } from './src/core/constants.js';
     import { defaultCatalog, PRODUCT_STATUS, checkCompatibility } from './src/core/product-catalog.js';
     import { calculateScreenSpecs } from './src/core/calculation-engine.js';
+    import { calculateDimensionCoordinates } from './src/core/measurements.js';
     import { globalStateStore } from './src/core/state.js';
     import { disposeHierarchy, globalMediaTracker } from './src/core/disposal.js';
 
@@ -900,10 +974,13 @@
       const sharedResources = new Set([screenTexture]);
 
       const environmentGroup = new THREE.Group();
+      const screenRootGroup = new THREE.Group();
       const mountGroup = new THREE.Group();
       const screenGroup = new THREE.Group();
+      const measureGroup = new THREE.Group();
       const humanGroup = new THREE.Group();
-      scene.add(environmentGroup, mountGroup, screenGroup, humanGroup);
+      screenRootGroup.add(mountGroup, screenGroup, measureGroup);
+      scene.add(environmentGroup, screenRootGroup, humanGroup);
 
       const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.45);
       scene.add(ambientLight);
@@ -1237,18 +1314,118 @@
         screenTexture.needsUpdate = true;
       }
 
+      function createTextSprite(text, { bgColor = 'rgba(6, 12, 24, 0.88)', textColor = '#00E5FF', borderColor = '#00E5FF' } = {}) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = bgColor;
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(4, 4, 248, 56, 10);
+        } else {
+          ctx.rect(4, 4, 248, 56);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 22px Inter, Sarabun, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, 128, 32);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.minFilter = THREE.LinearFilter;
+        const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+        const sprite = new THREE.Sprite(spriteMat);
+        sprite.scale.set(0.95, 0.24, 1);
+        return sprite;
+      }
+
+      function buildMeasurements(state, specs) {
+        disposeHierarchy(measureGroup, { sharedResources });
+        if (state.showMeasurements === false) return;
+
+        const dim = calculateDimensionCoordinates({
+          actualWidthM: specs.actualWidthM,
+          actualHeightM: specs.actualHeightM,
+          elevationM: (state.elevationMm != null ? state.elevationMm : 1000) / 1000,
+          positionXM: (state.positionXMm || 0) / 1000,
+          positionZM: (state.positionZMm || 0) / 1000,
+          viewingDistanceM: state.viewingDistanceM
+        });
+
+        const lineMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, linewidth: 2, transparent: true, opacity: 0.85 });
+        const tickMat = new THREE.LineBasicMaterial({ color: 0xff6b00, linewidth: 2, transparent: true, opacity: 0.9 });
+
+        // 1. Width Dimension Line & Ticks
+        const wPoints = [
+          new THREE.Vector3(...dim.widthDimension.start),
+          new THREE.Vector3(...dim.widthDimension.end)
+        ];
+        const wLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(wPoints), lineMat);
+        measureGroup.add(wLine);
+
+        [dim.widthDimension.tickLeft, dim.widthDimension.tickRight].forEach(tick => {
+          const tPoints = [new THREE.Vector3(...tick[0]), new THREE.Vector3(...tick[1])];
+          measureGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(tPoints), tickMat));
+        });
+        const wSprite = createTextSprite(dim.widthDimension.text, { textColor: '#00E5FF' });
+        wSprite.position.set(...dim.widthDimension.badgePosition);
+        measureGroup.add(wSprite);
+
+        // 2. Height Dimension Line & Ticks
+        const hPoints = [
+          new THREE.Vector3(...dim.heightDimension.start),
+          new THREE.Vector3(...dim.heightDimension.end)
+        ];
+        const hLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(hPoints), lineMat);
+        measureGroup.add(hLine);
+
+        [dim.heightDimension.tickBottom, dim.heightDimension.tickTop].forEach(tick => {
+          const tPoints = [new THREE.Vector3(...tick[0]), new THREE.Vector3(...tick[1])];
+          measureGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(tPoints), tickMat));
+        });
+        const hSprite = createTextSprite(dim.heightDimension.text, { textColor: '#00E5FF' });
+        hSprite.position.set(...dim.heightDimension.badgePosition);
+        measureGroup.add(hSprite);
+
+        // 3. Elevation Dimension Line & Ticks
+        if (dim.elevationDimension.end[1] > 0.05) {
+          const ePoints = [
+            new THREE.Vector3(...dim.elevationDimension.start),
+            new THREE.Vector3(...dim.elevationDimension.end)
+          ];
+          const eLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(ePoints), lineMat);
+          measureGroup.add(eLine);
+
+          [dim.elevationDimension.tickFloor, dim.elevationDimension.tickScreenBottom].forEach(tick => {
+            const tPoints = [new THREE.Vector3(...tick[0]), new THREE.Vector3(...tick[1])];
+            measureGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(tPoints), tickMat));
+          });
+          const eSprite = createTextSprite(dim.elevationDimension.text, { textColor: '#FFB800', borderColor: '#FFB800' });
+          eSprite.position.set(...dim.elevationDimension.badgePosition);
+          measureGroup.add(eSprite);
+        }
+      }
+
       // 5. 3D Scene Builder
       function buildScreenAndMount(state, specs) {
         disposeHierarchy(screenGroup, { sharedResources });
         disposeHierarchy(mountGroup, { sharedResources });
 
+        const posX = (state.positionXMm || 0) / 1000;
+        const posZ = (state.positionZMm || 0) / 1000;
+        const rotYRad = ((state.rotationYDeg || 0) * Math.PI) / 180;
+        screenRootGroup.position.set(posX, 0, posZ);
+        screenRootGroup.rotation.y = rotYRad;
+
         const w = specs.actualWidthM;
         const h = specs.actualHeightM;
-        const sceneDef = SCENE_DEFINITIONS[state.sceneType];
-        let bottomY = sceneDef ? sceneDef.defaultElevationM : 1.0;
-        if (state.sceneType === 'outdoor' && state.mountType === 'truss') {
-          bottomY = 2.2;
-        }
+        const bottomY = (state.elevationMm != null ? state.elevationMm : 1000) / 1000;
         screenCenterY = bottomY + h / 2;
 
         const product = globalStateStore.getProduct();
@@ -1535,8 +1712,10 @@
         const markerLine = new THREE.Line(markerGeo, new THREE.LineBasicMaterial({ color: 0x00e5ff }));
         humanGroup.add(markerLine);
 
-        const humanZ = Math.min(Math.max(1.5, state.viewingDistanceM * 0.55), 8.0);
-        const humanX = -Math.min(2.2, specs.actualWidthM * 0.28);
+        const posX = (state.positionXMm || 0) / 1000;
+        const posZ = (state.positionZMm || 0) / 1000;
+        const humanZ = posZ + Math.min(Math.max(1.5, state.viewingDistanceM * 0.55), 8.0);
+        const humanX = posX - Math.min(2.2, specs.actualWidthM * 0.28);
         const baseStageOffset = state.sceneType === 'exhibition' && humanZ < 2.2 ? 0.3 : 0;
         humanGroup.position.set(humanX, baseStageOffset, humanZ);
       }
@@ -1545,15 +1724,20 @@
         const state = globalStateStore.getState();
         const d = state.viewingDistanceM;
         const targetY = screenCenterY;
-        controls.target.set(0, targetY, 0);
+        const posX = (state.positionXMm || 0) / 1000;
+        const posZ = (state.positionZMm || 0) / 1000;
+        controls.target.set(posX, targetY, posZ);
 
         if (angleMode === 'angle45') {
-          camera.position.set(d * 0.65, targetY + d * 0.12, d * 0.76);
+          camera.position.set(posX + d * 0.65, targetY + d * 0.18, posZ + d * 0.76);
         } else if (angleMode === 'humanEye') {
-          camera.position.set(0, 1.65, d);
-          controls.target.set(0, screenCenterY, 0);
+          camera.position.set(posX, 1.65, posZ + d);
+        } else if (angleMode === 'topDown') {
+          camera.position.set(posX, targetY + d * 1.25, posZ + 0.05);
+        } else if (angleMode === 'side') {
+          camera.position.set(posX + d * 1.1, targetY, posZ);
         } else {
-          camera.position.set(0, targetY, d);
+          camera.position.set(posX, targetY, posZ + d);
         }
         controls.update();
       }
@@ -1852,6 +2036,44 @@
         const resBadgeEl = document.getElementById('res-quality-badge');
         resBadgeEl.textContent = qBadge.label;
         resBadgeEl.className = `px-2 py-0.5 rounded text-[10px] font-extrabold bg-gradient-to-r ${qBadge.colorClass} text-slate-950`;
+
+        // ================= PHASE 04: 3D SPATIAL & MEASUREMENTS =================
+        const elevM = (state.elevationMm != null ? state.elevationMm : 1000) / 1000;
+        const posX = (state.positionXMm || 0) / 1000;
+        const posZ = (state.positionZMm || 0) / 1000;
+        const rotY = state.rotationYDeg || 0;
+
+        const elevValEl = document.getElementById('elevation-val');
+        if (elevValEl) elevValEl.textContent = elevM.toFixed(2);
+        const elevSlider = document.getElementById('elevation-slider');
+        if (elevSlider && Math.abs(parseFloat(elevSlider.value) - elevM) > 0.01) elevSlider.value = elevM;
+
+        const posXValEl = document.getElementById('pos-x-val');
+        if (posXValEl) posXValEl.textContent = `${posX > 0 ? '+' : ''}${posX.toFixed(1)}m`;
+        const posXSlider = document.getElementById('pos-x-slider');
+        if (posXSlider && Math.abs(parseFloat(posXSlider.value) - posX) > 0.05) posXSlider.value = posX;
+
+        const posZValEl = document.getElementById('pos-z-val');
+        if (posZValEl) posZValEl.textContent = `${posZ > 0 ? '+' : ''}${posZ.toFixed(1)}m`;
+        const posZSlider = document.getElementById('pos-z-slider');
+        if (posZSlider && Math.abs(parseFloat(posZSlider.value) - posZ) > 0.05) posZSlider.value = posZ;
+
+        const rotYValEl = document.getElementById('rot-y-val');
+        if (rotYValEl) rotYValEl.textContent = `${rotY > 0 ? '+' : ''}${rotY}°`;
+        const rotYSlider = document.getElementById('rot-y-slider');
+        if (rotYSlider && parseInt(rotYSlider.value, 10) !== rotY) rotYSlider.value = rotY;
+
+        const isMeasureOn = state.showMeasurements !== false;
+        const measureBtnTxt = document.getElementById('measure-status-txt');
+        if (measureBtnTxt) {
+          measureBtnTxt.textContent = isMeasureOn ? 'เปิด' : 'ปิด';
+          measureBtnTxt.className = isMeasureOn ? 'text-[#00E5FF]' : 'text-slate-400';
+        }
+        const measurePanelBtn = document.getElementById('toggle-measure-panel-btn');
+        if (measurePanelBtn) {
+          measurePanelBtn.textContent = isMeasureOn ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
+          measurePanelBtn.className = isMeasureOn ? 'px-2 py-0.5 rounded text-[10px] font-semibold bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/40' : 'px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+        }
       }
 
       function generateQuotationText(state, specs) {
@@ -2041,11 +2263,59 @@
       document.getElementById('cam-front-btn').addEventListener('click', () => syncCameraToViewingDistance('front'));
       document.getElementById('cam-angle-btn').addEventListener('click', () => syncCameraToViewingDistance('angle45'));
       document.getElementById('cam-human-btn').addEventListener('click', () => syncCameraToViewingDistance('humanEye'));
+      document.getElementById('cam-top-btn').addEventListener('click', () => syncCameraToViewingDistance('topDown'));
+      document.getElementById('cam-side-btn').addEventListener('click', () => syncCameraToViewingDistance('side'));
       document.getElementById('cam-closeup-btn').addEventListener('click', () => {
         distanceSlider.value = 1.2;
         globalStateStore.update({ viewingDistanceM: 1.2 });
         syncCameraToViewingDistance('front');
       });
+
+      // Phase 04: Spatial Controls Event Listeners
+      const elevSlider = document.getElementById('elevation-slider');
+      elevSlider.addEventListener('input', (e) => {
+        const valM = parseFloat(e.target.value);
+        globalStateStore.update({ elevationMm: Math.round(valM * 1000) });
+      });
+
+      const posXSlider = document.getElementById('pos-x-slider');
+      posXSlider.addEventListener('input', (e) => {
+        const valM = parseFloat(e.target.value);
+        globalStateStore.update({ positionXMm: Math.round(valM * 1000) });
+      });
+
+      const posZSlider = document.getElementById('pos-z-slider');
+      posZSlider.addEventListener('input', (e) => {
+        const valM = parseFloat(e.target.value);
+        globalStateStore.update({ positionZMm: Math.round(valM * 1000) });
+      });
+
+      const rotYSlider = document.getElementById('rot-y-slider');
+      rotYSlider.addEventListener('input', (e) => {
+        const valDeg = parseInt(e.target.value, 10);
+        globalStateStore.update({ rotationYDeg: valDeg });
+      });
+
+      document.getElementById('snap-rot-zero-btn').addEventListener('click', () => {
+        globalStateStore.update({ rotationYDeg: 0 });
+      });
+
+      document.getElementById('reset-spatial-btn').addEventListener('click', () => {
+        globalStateStore.update({
+          positionXMm: 0,
+          positionZMm: 0,
+          rotationYDeg: 0,
+          elevationMm: 1000
+        });
+      });
+
+      function toggleMeasurements() {
+        const current = globalStateStore.getState().showMeasurements !== false;
+        globalStateStore.update({ showMeasurements: !current });
+      }
+
+      document.getElementById('toggle-measure-btn').addEventListener('click', toggleMeasurements);
+      document.getElementById('toggle-measure-panel-btn').addEventListener('click', toggleMeasurements);
 
       document.getElementById('toggle-human-btn').addEventListener('click', () => {
         const current = globalStateStore.getState().showHuman;
@@ -2339,6 +2609,7 @@
       globalStateStore.subscribe((state, specs, compatibility) => {
         buildEnvironment(state, specs);
         buildScreenAndMount(state, specs);
+        buildMeasurements(state, specs);
         buildHumanModel(state, specs);
         updateDOM(state, specs, compatibility);
       });
@@ -2350,6 +2621,7 @@
       const initialCompat = globalStateStore.getCompatibility();
       buildEnvironment(initialState, initialSpecs);
       buildScreenAndMount(initialState, initialSpecs);
+      buildMeasurements(initialState, initialSpecs);
       buildHumanModel(initialState, initialSpecs);
       syncCameraToViewingDistance('front');
       updateDOM(initialState, initialSpecs, initialCompat);

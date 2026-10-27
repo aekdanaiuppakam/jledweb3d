@@ -62,4 +62,24 @@ describe('Unified Project State Store', () => {
     assert.equal(store.getState().requestedWidthMm, 4000);
     assert.equal(store.getState().sceneType, 'boardroom');
   });
+
+  test('Phase 04: Supports 3D positioning, elevation, rotation and measurement toggles', () => {
+    const store = new StateStore();
+    store.update({
+      elevationMm: 1500,
+      positionXMm: -800,
+      positionZMm: 500,
+      rotationYDeg: 25,
+      showMeasurements: false,
+      cameraSeparated: true
+    });
+
+    const st = store.getState();
+    assert.equal(st.elevationMm, 1500);
+    assert.equal(st.positionXMm, -800);
+    assert.equal(st.positionZMm, 500);
+    assert.equal(st.rotationYDeg, 25);
+    assert.equal(st.showMeasurements, false);
+    assert.equal(st.cameraSeparated, true);
+  });
 });

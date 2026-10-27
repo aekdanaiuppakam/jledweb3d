@@ -41,7 +41,12 @@ export class StateStore {
       cameraPreset: 'front',
       elevationMm: Math.round((defaultScene?.defaultElevationM || 0.95) * 1000),
       positionXMm: 0,
+      positionZMm: 0,
       rotationYDeg: 0,
+      showMeasurements: true,
+      cameraSeparated: false,
+      shapeType: 'flat', // 'flat' | 'curved' | 'l-shape-inner' | 'l-shape-outer' | 'cube'
+      mode: 'sales', // 'customer' | 'sales'
       ...overrides
     };
   }
