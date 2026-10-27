@@ -30,6 +30,8 @@ export class StateStore {
       requestedWidthMm: DEFAULTS.requestedWidthMm,
       requestedHeightMm: DEFAULTS.requestedHeightMm,
       layoutPolicy: 'nearest', // 'nearest' | 'floor' | 'ceil'
+      orientation: 'landscape', // 'landscape' | 'portrait'
+      targetAspectKey: '16:9',
       showHuman: DEFAULTS.showHuman,
       showGrid: DEFAULTS.showGrid,
       contentType: DEFAULTS.contentType,
@@ -104,7 +106,9 @@ export class StateStore {
       requestedHeightMm: this.state.requestedHeightMm,
       product,
       layoutPolicy: this.state.layoutPolicy,
-      viewingDistanceM: this.state.viewingDistanceM
+      orientation: this.state.orientation,
+      viewingDistanceM: this.state.viewingDistanceM,
+      targetAspectKey: this.state.targetAspectKey
     });
   }
 

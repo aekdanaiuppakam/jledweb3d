@@ -1,8 +1,9 @@
 /**
- * JLED DESIGN STUDIO v4.0 — Pure Calculation Engine
- * Completely decoupled from DOM and Three.js.
- * Handles cabinet layout, buildable dimensions, resolution, electrical load, weight,
- * viewing distance metrics, and strict resolution quality classification.
+ * JLED DESIGN STUDIO v4.0 — Real Cabinet Layout, Resolution, Power & Weight Engine (Phase 03)
+ * Pure, testable engineering domain calculation engine.
+ * Computes buildable dimensions strictly from discrete physical cabinets (no fractional cutting).
+ * Provides 3 layout suggestions (Smaller, Nearest, Larger), exact aspect ratio deviation metrics,
+ * verified electrical & structural load estimations, and strict resolution quality tiers.
  */
 
 import { UNITS } from './constants.js';
@@ -10,9 +11,9 @@ import { PRODUCT_STATUS } from './product-catalog.js';
 
 /**
  * Calculates discrete cabinet count given a requested dimension and physical cabinet size.
- * @param {number} requestedMm 
- * @param {number} cabinetSizeMm 
- * @param {'nearest'|'floor'|'ceil'} policy 
+ * @param {number} requestedMm Positive dimension in mm
+ * @param {number} cabinetSizeMm Physical cabinet size in mm
+ * @param {'nearest'|'floor'|'ceil'} policy Rounding strategy
  * @returns {number} Integer cabinet count (minimum 1)
  */
 export function calculateCabinetCount(requestedMm, cabinetSizeMm, policy = 'nearest') {
@@ -38,7 +39,9 @@ export function calculateCabinetCount(requestedMm, cabinetSizeMm, policy = 'near
 /**
  * Classifies resolution into standard industry quality tiers.
  * Both axes must meet the threshold (or rotated for vertical orientation).
- * 1600x1000 is correctly classified as HD READY, not Full HD.
+ * Note: 1600x1000 is correctly classified as HD READY, not Full HD.
+ * @param {number} resW Resolution width in pixels
+ * @param {number} resH Resolution height in pixels
  */
 export function getQualityBadge(resW, resH) {
   const maxAxis = Math.max(resW, resH);
@@ -60,7 +63,7 @@ export function getQualityBadge(resW, resH) {
 }
 
 /**
- * Evaluates simulated viewing distance metrics.
+ * Evaluates simulated viewing distance metrics based on pixel pitch.
  * @param {number} pitchMm Actual pixel pitch in mm
  * @param {number} viewingDistanceM Viewer distance in meters
  */
@@ -72,7 +75,7 @@ export function getPixelSimulationMetrics(pitchMm, viewingDistanceM) {
     throw new Error(`Invalid viewing distance: ${viewingDistanceM}`);
   }
 
-  // Engineering rule of thumb: Optimal distance ~ pitch (mm) * 1.2 meters
+  // Engineering guideline: Optimal viewing distance ~ pitch (mm) * 1.2 meters
   const optimalDistM = +(pitchMm * 1.2).toFixed(2);
   const ratio = viewingDistanceM / optimalDistM;
 
@@ -92,13 +95,61 @@ export function getPixelSimulationMetrics(pitchMm, viewingDistanceM) {
 }
 
 /**
+ * Computes exact aspect ratio analysis and deviation from target ratio.
+ * @param {number} actualWidthMm 
+ * @param {number} actualHeightMm 
+ * @param {string} [targetRatioKey='16:9'] Optional target preset key
+ */
+export function analyzeAspectRatio(actualWidthMm, actualHeightMm, targetRatioKey = null) {
+  const numericRatio = actualWidthMm / actualHeightMm;
+  const standardRatios = [
+    { key: '16:9', value: 16 / 9, label: '16:9 Widescreen' },
+    { key: '21:9', value: 21 / 9, label: '21:9 Ultra-Wide Banner' },
+    { key: '9:16', value: 9 / 16, label: '9:16 Vertical Poster' },
+    { key: '4:3', value: 4 / 3, label: '4:3 Standard' },
+    { key: '1:1', value: 1.0, label: '1:1 Square' }
+  ];
+
+  let closest = standardRatios[0];
+  let minDiff = Math.abs(numericRatio - closest.value);
+  for (const sr of standardRatios) {
+    const diff = Math.abs(numericRatio - sr.value);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closest = sr;
+    }
+  }
+
+  const target = targetRatioKey
+    ? standardRatios.find(r => r.key === targetRatioKey) || closest
+    : closest;
+
+  const diffPercent = +(((numericRatio - target.value) / target.value) * 100).toFixed(1);
+  const isExact = Math.abs(diffPercent) < 0.5;
+
+  return {
+    numericRatio: +numericRatio.toFixed(2),
+    label: isExact ? target.label : `${numericRatio.toFixed(2)} : 1 (Custom)`,
+    closestStandardLabel: closest.label,
+    targetKey: target.key,
+    diffPercent,
+    isExact,
+    discrepancyNote: isExact
+      ? `อัตราส่วนตรงตามมาตรฐาน ${target.key}`
+      : `อัตราส่วนจริง ${numericRatio.toFixed(2)}:1 (ต่างจาก ${target.key} อยู่ ${diffPercent > 0 ? '+' : ''}${diffPercent}%)`
+  };
+}
+
+/**
  * Performs full screen configuration calculations.
  * @param {Object} params
  * @param {number} params.requestedWidthMm Customer requested width in mm
  * @param {number} params.requestedHeightMm Customer requested height in mm
  * @param {Object} params.product Product profile object from ProductCatalog
  * @param {'nearest'|'floor'|'ceil'} [params.layoutPolicy='nearest']
+ * @param {'landscape'|'portrait'} [params.orientation='landscape']
  * @param {number} [params.viewingDistanceM=5.0]
+ * @param {string} [params.targetAspectKey='16:9']
  */
 export function calculateScreenSpecs(params) {
   const {
@@ -106,51 +157,61 @@ export function calculateScreenSpecs(params) {
     requestedHeightMm,
     product,
     layoutPolicy = 'nearest',
-    viewingDistanceM = 5.0
+    orientation = 'landscape',
+    viewingDistanceM = 5.0,
+    targetAspectKey = null
   } = params;
 
   if (!product) {
     throw new Error('Product profile is required for spec calculation');
   }
 
-  const cabW = product.cabinetWidthMm;
-  const cabH = product.cabinetHeightMm;
+  // Determine effective cabinet dimensions based on orientation
+  let cabW = product.cabinetWidthMm;
+  let cabH = product.cabinetHeightMm;
+  let cabPixelW = product.cabinetPixelWidth;
+  let cabPixelH = product.cabinetPixelHeight;
+
+  if (orientation === 'portrait' && cabW !== cabH) {
+    // Swap dimensions if cabinet is rectangular and oriented portrait
+    cabW = product.cabinetHeightMm;
+    cabH = product.cabinetWidthMm;
+    cabPixelW = product.cabinetPixelHeight;
+    cabPixelH = product.cabinetPixelWidth;
+  }
+
   const pitchMm = product.actualPixelPitchMm;
 
-  // Calculate discrete cabinet layout
-  const cols = calculateCabinetCount(requestedWidthMm, cabW, layoutPolicy);
-  const rows = calculateCabinetCount(requestedHeightMm, cabH, layoutPolicy);
-  const totalCabinets = cols * rows;
+  // 1. Calculate discrete cabinet count for chosen policy
+  const countX = calculateCabinetCount(requestedWidthMm, cabW, layoutPolicy);
+  const countY = calculateCabinetCount(requestedHeightMm, cabH, layoutPolicy);
+  const totalCabinets = countX * countY;
 
-  // Actual physical buildable dimensions
-  const actualWidthMm = cols * cabW;
-  const actualHeightMm = rows * cabH;
+  // 2. Physical buildable dimensions
+  const actualWidthMm = countX * cabW;
+  const actualHeightMm = countY * cabH;
   const actualWidthM = actualWidthMm / UNITS.MM_PER_METER;
   const actualHeightM = actualHeightMm / UNITS.MM_PER_METER;
   const actualAreaSqm = +(actualWidthM * actualHeightM).toFixed(3);
 
-  const diffWidthMm = actualWidthMm - requestedWidthMm;
-  const diffHeightMm = actualHeightMm - requestedHeightMm;
+  // Gaps / differences from requested
+  const gapWidthMm = actualWidthMm - requestedWidthMm;
+  const gapHeightMm = actualHeightMm - requestedHeightMm;
 
-  // Resolution calculations
-  const resW = cols * product.cabinetPixelWidth;
-  const resH = rows * product.cabinetPixelHeight;
-  const totalPixels = resW * resH;
+  // 3. Resolution calculations
+  const resolutionWidth = countX * cabPixelW;
+  const resolutionHeight = countY * cabPixelH;
+  const totalPixels = resolutionWidth * resolutionHeight;
   const totalPixelsM = +(totalPixels / 1000000).toFixed(2);
 
-  // Aspect ratio calculation
-  const actualAspectRatio = +(actualWidthMm / actualHeightMm).toFixed(2);
-  let aspectLabel = `${actualAspectRatio} : 1 Custom`;
-  if (Math.abs(actualAspectRatio - 16 / 9) < 0.08) aspectLabel = '16:9 Widescreen';
-  else if (Math.abs(actualAspectRatio - 21 / 9) < 0.12) aspectLabel = '21:9 Ultra Banner';
-  else if (Math.abs(actualAspectRatio - 9 / 16) < 0.08) aspectLabel = '9:16 Vertical Poster';
+  // 4. Aspect ratio analysis
+  const aspectRatio = analyzeAspectRatio(actualWidthMm, actualHeightMm, targetAspectKey);
 
-  // Distance metrics
+  // 5. Distance and Quality Metrics
   const distanceMetrics = getPixelSimulationMetrics(pitchMm, viewingDistanceM);
-  const qualityBadge = getQualityBadge(resW, resH);
+  const qualityBadge = getQualityBadge(resolutionWidth, resolutionHeight);
 
-  // Electrical and Weight calculations
-  // If product data is not verified or fields are null, flag as unavailable
+  // 6. Verified Electrical and Structural Load Calculations
   const hasVerifiedPower = product.avgPowerWPerCabinet != null && product.maxPowerWPerCabinet != null;
   const hasVerifiedWeight = product.weightKgPerCabinet != null;
 
@@ -158,66 +219,120 @@ export function calculateScreenSpecs(params) {
   const powerMaxKw = hasVerifiedPower ? +((totalCabinets * product.maxPowerWPerCabinet) / 1000).toFixed(2) : null;
   const totalWeightKg = hasVerifiedWeight ? +(totalCabinets * product.weightKgPerCabinet).toFixed(1) : null;
 
-  // 3 Layout suggestions: nearest, floor, ceil
-  const floorCols = calculateCabinetCount(requestedWidthMm, cabW, 'floor');
-  const floorRows = calculateCabinetCount(requestedHeightMm, cabH, 'floor');
-  const ceilCols = calculateCabinetCount(requestedWidthMm, cabW, 'ceil');
-  const ceilRows = calculateCabinetCount(requestedHeightMm, cabH, 'ceil');
+  // Estimated Single Phase / Three Phase Amps at 220V/380V (Reference only)
+  const estimatedAmps220V = powerMaxKw != null ? +((powerMaxKw * 1000) / 220).toFixed(1) : null;
+
+  // 7. Compute 3 Layout Suggestions (Smaller / Nearest / Larger)
+  const floorX = calculateCabinetCount(requestedWidthMm, cabW, 'floor');
+  const floorY = calculateCabinetCount(requestedHeightMm, cabH, 'floor');
+  const ceilX = calculateCabinetCount(requestedWidthMm, cabW, 'ceil');
+  const ceilY = calculateCabinetCount(requestedHeightMm, cabH, 'ceil');
+  const nearestX = calculateCabinetCount(requestedWidthMm, cabW, 'nearest');
+  const nearestY = calculateCabinetCount(requestedHeightMm, cabH, 'nearest');
+
+  function makeSuggestion(cx, cy, policyName) {
+    const wMm = cx * cabW;
+    const hMm = cy * cabH;
+    const wM = +(wMm / UNITS.MM_PER_METER).toFixed(2);
+    const hM = +(hMm / UNITS.MM_PER_METER).toFixed(2);
+    const total = cx * cy;
+    const pAvg = hasVerifiedPower ? +((total * product.avgPowerWPerCabinet) / 1000).toFixed(2) : null;
+    return {
+      policy: policyName,
+      countX: cx,
+      countY: cy,
+      totalCabinets: total,
+      actualWidthMm: wMm,
+      actualHeightMm: hMm,
+      actualWidthM: wM,
+      actualHeightM: hM,
+      actualAreaSqm: +(wM * hM).toFixed(2),
+      resolutionWidth: cx * cabPixelW,
+      resolutionHeight: cy * cabPixelH,
+      powerAvgKw: pAvg,
+      diffWidthMm: wMm - requestedWidthMm,
+      diffHeightMm: hMm - requestedHeightMm
+    };
+  }
 
   const suggestions = {
-    smaller: {
-      cols: floorCols,
-      rows: floorRows,
-      totalCabinets: floorCols * floorRows,
-      actualWidthM: (floorCols * cabW) / UNITS.MM_PER_METER,
-      actualHeightM: (floorRows * cabH) / UNITS.MM_PER_METER
-    },
-    nearest: {
-      cols,
-      rows,
-      totalCabinets,
-      actualWidthM,
-      actualHeightM
-    },
-    larger: {
-      cols: ceilCols,
-      rows: ceilRows,
-      totalCabinets: ceilCols * ceilRows,
-      actualWidthM: (ceilCols * cabW) / UNITS.MM_PER_METER,
-      actualHeightM: (ceilRows * cabH) / UNITS.MM_PER_METER
-    }
+    smaller: makeSuggestion(floorX, floorY, 'floor'),
+    nearest: makeSuggestion(nearestX, nearestY, 'nearest'),
+    larger: makeSuggestion(ceilX, ceilY, 'ceil')
   };
 
+  // Warnings collection
+  const warnings = [];
+  if (!aspectRatio.isExact && targetAspectKey) {
+    warnings.push(aspectRatio.discrepancyNote);
+  }
+  if (!distanceMetrics.isOptimal) {
+    warnings.push(`ระยะยืนดู ${viewingDistanceM.toFixed(1)} ม. ใกล้กว่าระยะแนะนำสำหรับ P${pitchMm} (≥ ${distanceMetrics.optimalDistanceM.toFixed(1)} ม.)`);
+  }
+  if (!hasVerifiedPower || !hasVerifiedWeight) {
+    warnings.push('ข้อมูลกำลังไฟหรือน้ำหนักบางส่วนยังไม่ได้รับการรับรองจากวิศวกร (แสดงเป็น "รอยืนยัน")');
+  }
+
   return {
+    requestedDimensions: {
+      widthMm: requestedWidthMm,
+      heightMm: requestedHeightMm,
+      widthM: +(requestedWidthMm / UNITS.MM_PER_METER).toFixed(2),
+      heightM: +(requestedHeightMm / UNITS.MM_PER_METER).toFixed(2)
+    },
+    actualDimensions: {
+      widthMm: actualWidthMm,
+      heightMm: actualHeightMm,
+      widthM: actualWidthM,
+      heightM: actualHeightM
+    },
+    // Backward-compatible top level properties
     requestedWidthMm,
     requestedHeightMm,
     requestedWidthM: +(requestedWidthMm / UNITS.MM_PER_METER).toFixed(2),
     requestedHeightM: +(requestedHeightMm / UNITS.MM_PER_METER).toFixed(2),
     actualWidthMm,
     actualHeightMm,
-    actualWidthM: +actualWidthM.toFixed(2),
-    actualHeightM: +actualHeightM.toFixed(2),
-    diffWidthMm,
-    diffHeightMm,
-    cols,
-    rows,
+    actualWidthM,
+    actualHeightM,
+    diffWidthMm: gapWidthMm,
+    diffHeightMm: gapHeightMm,
+    gapMm: {
+      widthMm: gapWidthMm,
+      heightMm: gapHeightMm
+    },
+    countX,
+    countY,
+    cols: countX,
+    rows: countY,
     totalCabinets,
     actualAreaSqm,
-    resolutionWidth: resW,
-    resolutionHeight: resH,
+    resolutionPx: {
+      width: resolutionWidth,
+      height: resolutionHeight,
+      total: totalPixels,
+      totalM: totalPixelsM
+    },
+    resolutionWidth,
+    resolutionHeight,
     totalPixels,
     totalPixelsM,
-    actualAspectRatio,
-    aspectLabel,
+    aspectRatio,
+    actualAspectRatio: aspectRatio.numericRatio,
+    aspectLabel: aspectRatio.label,
     distanceMetrics,
     qualityBadge,
     powerAvgKw,
     powerMaxKw,
     totalWeightKg,
+    estimatedAmps220V,
     hasVerifiedPower,
     hasVerifiedWeight,
     productStatus: product.status,
+    layoutPolicy,
+    orientation,
     suggestions,
-    isOutdoor: product.environment === 'outdoor'
+    isOutdoor: product.environment === 'outdoor',
+    warnings
   };
 }

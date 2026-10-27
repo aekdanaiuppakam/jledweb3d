@@ -430,18 +430,21 @@
         </div>
       </div>
 
-      <!-- SECTION 3: SCREEN DIMENSIONS & ASPECT RATIO -->
+      <!-- SECTION 3: SCREEN DIMENSIONS & ASPECT RATIO (PHASE 03 ENGINE) -->
       <div class="glass-card rounded-xl p-3.5 space-y-3">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold uppercase tracking-wider text-[#00E5FF] flex items-center gap-1.5">
-            <span>📐</span> 3. ขนาดหน้าจอ LED (Screen Size)
+            <span>📐</span> 3. ขนาดหน้าจอ &amp; การเรียงตู้ (Cabinet Layout)
           </h3>
           <span id="aspect-tag" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">16:9 Widescreen</span>
         </div>
 
         <!-- Preset Aspect Ratio Buttons -->
         <div>
-          <label class="block text-[11px] text-slate-400 mb-1.5">อัตราส่วนยอดฮิต (Quick Presets):</label>
+          <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1.5">
+            <span>อัตราส่วนเป้าหมาย (Target Aspect Ratio):</span>
+            <span class="text-[10px] text-slate-500">คลิกตั้งขนาดตามสัดส่วน</span>
+          </div>
           <div class="grid grid-cols-3 gap-1.5">
             <button type="button" id="preset-16-9" class="px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900/80 hover:border-[#00E5FF] text-xs font-medium transition flex flex-col items-center">
               <span class="font-bold text-white">16 : 9</span>
@@ -484,6 +487,80 @@
             <span>6.0m</span>
             <span>12.0m</span>
           </div>
+        </div>
+
+        <!-- Layout Policy & Orientation Row (Phase 03) -->
+        <div class="space-y-2 pt-1 border-t border-slate-800/80">
+          <div>
+            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+              <span>นโยบายประกอบตู้ (Layout Policy):</span>
+              <span class="text-[#00E5FF] font-medium" id="policy-label">🎯 ใกล้เคียงสุด</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1.5 text-xs">
+              <button type="button" data-policy="nearest" class="policy-btn option-btn active py-1.5 px-2 rounded-lg border border-slate-700 bg-slate-900/80 text-center transition flex flex-col items-center">
+                <span class="font-bold">🎯 ใกล้เคียงสุด</span>
+                <span class="text-[9px] text-slate-400">Nearest (แนะนำ)</span>
+              </button>
+              <button type="button" data-policy="floor" class="policy-btn option-btn py-1.5 px-2 rounded-lg border border-slate-700 bg-slate-900/80 text-center transition flex flex-col items-center">
+                <span class="font-bold">📉 ไม่เกินขนาด</span>
+                <span class="text-[9px] text-slate-400">Floor (ประหยัดงบ)</span>
+              </button>
+              <button type="button" data-policy="ceil" class="policy-btn option-btn py-1.5 px-2 rounded-lg border border-slate-700 bg-slate-900/80 text-center transition flex flex-col items-center">
+                <span class="font-bold">📈 เต็มพื้นที่</span>
+                <span class="text-[9px] text-slate-400">Ceil (ใหญ่กว่า)</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between text-xs pt-1">
+            <span class="text-slate-400 text-[11px]">ทิศทางตู้จอ (Orientation):</span>
+            <div class="flex items-center gap-1 bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+              <button type="button" id="orient-landscape-btn" class="orient-btn px-2.5 py-1 rounded text-[11px] font-semibold bg-[#00E5FF] text-slate-950 transition">
+                แนวนอน (Landscape)
+              </button>
+              <button type="button" id="orient-portrait-btn" class="orient-btn px-2.5 py-1 rounded text-[11px] font-semibold text-slate-400 hover:text-white transition">
+                แนวตั้ง (Portrait)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Interactive Layout Suggestions (Phase 03) -->
+        <div class="space-y-1.5 pt-1 border-t border-slate-800/80">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-cyan-300 font-semibold flex items-center gap-1">
+              <span>💡</span> 3 ทางเลือกขนาดตู้จริง:
+            </span>
+            <span class="text-slate-500 text-[10px]">คลิกการ์ดเพื่อนำไปใช้</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 text-center" id="layout-suggestions-container">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- 2D Cabinet Grid Mini-Blueprint (Phase 03) -->
+        <div class="p-2.5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-1.5">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-slate-300 font-medium flex items-center gap-1">
+              <span>📐</span> แผนผังตู้ 2D (Cabinet Blueprint):
+            </span>
+            <span id="blueprint-grid-tag" class="font-mono text-[#00E5FF] font-semibold">8×5 ตู้</span>
+          </div>
+          <div class="relative w-full h-24 bg-slate-900/70 rounded-lg border border-slate-800/80 flex items-center justify-center overflow-hidden p-2">
+            <svg id="cabinet-blueprint-svg" class="w-full h-full" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+          <div class="flex items-center justify-between text-[10px] text-slate-400">
+            <span id="blueprint-size-tag">กว้าง 4.00 ม. × สูง 2.50 ม.</span>
+            <span id="blueprint-pitch-tag" class="text-slate-300 font-mono">ตู้ละ 500×500 mm</span>
+          </div>
+        </div>
+
+        <!-- Aspect Ratio Discrepancy Analysis Callout -->
+        <div id="aspect-analysis-callout" class="p-2 rounded-lg bg-slate-950/70 border border-slate-800 text-[10px] flex items-center justify-between">
+          <span class="flex items-center gap-1 text-slate-300">
+            <span>🎯</span> <span id="aspect-target-txt">เป้าหมาย 16:9</span>
+          </span>
+          <span id="aspect-discrepancy-txt" class="font-mono text-cyan-300 font-medium">อัตราส่วนจริง 1.60:1 (ต่าง -10.0%)</span>
         </div>
 
         <!-- Requested vs Buildable Size Callout -->
@@ -578,10 +655,10 @@
           </div>
         </div>
 
-        <!-- Power & Weight Estimation Bar -->
-        <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 space-y-1">
+        <!-- Power & Weight Estimation Bar (Phase 03) -->
+        <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 space-y-1.5">
           <div class="flex items-center justify-between">
-            <div class="text-[10px] text-slate-400">อัตรากินไฟและน้ำหนักตู้จอโดยประมาณ (Estimated)</div>
+            <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">ประมาณการโหลดไฟฟ้าและน้ำหนัก (Electrical &amp; Structural)</div>
             <span class="text-base">⚡</span>
           </div>
           <div class="text-xs text-slate-200">
@@ -589,13 +666,18 @@
             <span class="text-slate-600 mx-1">|</span>
             สูงสุด: <strong id="spec-power-max" class="text-orange-400 font-mono">5.80 kW</strong>
           </div>
-          <div class="text-[11px] text-slate-400">
-            น้ำหนักเฉพาะตู้จอรวม: <strong id="spec-total-weight" class="text-slate-200 font-mono">280.0 kg</strong>
-            <span class="text-[10px] text-slate-500">(ไม่รวมโครงสร้างเหล็ก)</span>
+          <div class="text-[11px] text-slate-300 flex items-center justify-between">
+            <span>กระแสไฟสูงสุดโดยประมาณ (220V Single-Phase):</span>
+            <strong id="spec-power-amps" class="font-mono text-cyan-300">~26.4 A</strong>
           </div>
-          <p class="text-[9px] text-slate-500 pt-1 border-t border-slate-800/80 italic">
-            * ข้อมูลเบื้องต้น — ต้องให้วิศวกร/ทีมเทคนิคตรวจสอบระบบไฟและโครงสร้างหน้างานจริง
-          </p>
+          <div class="text-[11px] text-slate-300 flex items-center justify-between">
+            <span>น้ำหนักเฉพาะตู้จอรวม (Cabinets):</span>
+            <strong id="spec-total-weight" class="font-mono text-white">280.0 kg</strong>
+          </div>
+          <div class="text-[9px] text-slate-500 pt-1 border-t border-slate-800/80 space-y-0.5 italic">
+            <p>* ข้อมูลเบื้องต้นสำหรับการคำนวณ ไม่ใช่คำสั่งกำหนดขนาดเบรกเกอร์หรือวงจรย่อย</p>
+            <p>* น้ำหนักไม่รวมโครงเหล็ก/จุดยึด ต้องให้วิศวกรโครงสร้างคำนวณหน้างานจริง</p>
+          </div>
         </div>
       </div>
 
@@ -1621,6 +1703,130 @@
           compatText.textContent = `รุ่น ${product ? product.displayName : ''} สอดคล้องกับสภาพแวดล้อมและรูปแบบโครงสร้างที่เลือก`;
         }
 
+        // ================= PHASE 03: LAYOUT POLICY & ORIENTATION =================
+        const policyLabels = {
+          nearest: '🎯 ใกล้เคียงสุด (Nearest)',
+          floor: '📉 ไม่เกินขนาด (Floor)',
+          ceil: '📈 เต็มพื้นที่ (Ceil)'
+        };
+        document.getElementById('policy-label').textContent = policyLabels[state.layoutPolicy] || 'ใกล้เคียงสุด';
+        document.querySelectorAll('.policy-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-policy') === state.layoutPolicy);
+        });
+
+        // Orientation Buttons
+        const isLandscape = state.orientation !== 'portrait';
+        const orientLandBtn = document.getElementById('orient-landscape-btn');
+        const orientPortBtn = document.getElementById('orient-portrait-btn');
+        orientLandBtn.className = isLandscape ? 'orient-btn px-2.5 py-1 rounded text-[11px] font-semibold bg-[#00E5FF] text-slate-950 transition' : 'orient-btn px-2.5 py-1 rounded text-[11px] font-semibold text-slate-400 hover:text-white transition';
+        orientPortBtn.className = !isLandscape ? 'orient-btn px-2.5 py-1 rounded text-[11px] font-semibold bg-[#FF6B00] text-slate-950 transition' : 'orient-btn px-2.5 py-1 rounded text-[11px] font-semibold text-slate-400 hover:text-white transition';
+
+        // Aspect Discrepancy Callout
+        const aspectTargetTxt = document.getElementById('aspect-target-txt');
+        const aspectDiscrepancyTxt = document.getElementById('aspect-discrepancy-txt');
+        aspectTargetTxt.textContent = `เป้าหมาย ${state.targetAspectKey || '16:9'}`;
+        aspectDiscrepancyTxt.textContent = specs.aspectRatio ? specs.aspectRatio.discrepancyNote : `${specs.actualAspectRatio}:1`;
+
+        // Render 3 Layout Suggestions (Phase 03)
+        const suggestionsContainer = document.getElementById('layout-suggestions-container');
+        if (specs.suggestions && suggestionsContainer) {
+          const s = specs.suggestions;
+          const cards = [
+            { key: 'smaller', title: '📉 เล็กกว่า', data: s.smaller, badge: 'ประหยัดงบ' },
+            { key: 'nearest', title: '🎯 ใกล้สุด', data: s.nearest, badge: 'แนะนำ', isRecommended: true },
+            { key: 'larger', title: '📈 ใหญ่กว่า', data: s.larger, badge: 'เต็มขอบ' }
+          ];
+
+          suggestionsContainer.innerHTML = '';
+          cards.forEach(c => {
+            const cardEl = document.createElement('button');
+            cardEl.type = 'button';
+            const isActive = state.layoutPolicy === c.key;
+            cardEl.className = `p-2 rounded-lg border text-left transition flex flex-col justify-between ${isActive ? 'bg-[#00E5FF]/20 border-[#00E5FF] shadow-lg' : 'bg-slate-900/80 border-slate-700/80 hover:border-slate-500'}`;
+            
+            const diffW = c.data.diffWidthMm;
+            const diffH = c.data.diffHeightMm;
+            const signW = diffW > 0 ? `+${diffW}` : `${diffW}`;
+            const signH = diffH > 0 ? `+${diffH}` : `${diffH}`;
+
+            cardEl.innerHTML = `
+              <div class="flex items-center justify-between w-full">
+                <span class="text-[10px] font-bold ${isActive ? 'text-[#00E5FF]' : 'text-slate-300'}">${c.title}</span>
+                <span class="text-[8px] px-1 py-0.2 rounded font-semibold ${c.isRecommended ? 'bg-[#FF6B00]/30 text-[#FF6B00]' : 'bg-slate-800 text-slate-400'}">${c.badge}</span>
+              </div>
+              <div class="mt-1 font-mono text-[11px] font-bold text-white leading-tight">
+                ${c.data.actualWidthM.toFixed(2)}×${c.data.actualHeightM.toFixed(2)}m
+              </div>
+              <div class="text-[9px] text-slate-400 font-mono mt-0.5">
+                ${c.data.countX}×${c.data.countY} = ${c.data.totalCabinets} ตู้
+              </div>
+              <div class="text-[8px] text-slate-500 mt-0.5">
+                กว้าง ${signW}mm
+              </div>
+            `;
+
+            cardEl.addEventListener('click', () => {
+              globalStateStore.update({
+                layoutPolicy: c.key,
+                requestedWidthMm: c.data.actualWidthMm,
+                requestedHeightMm: c.data.actualHeightMm
+              });
+              widthSlider.value = c.data.actualWidthM;
+              heightSlider.value = c.data.actualHeightM;
+            });
+
+            suggestionsContainer.appendChild(cardEl);
+          });
+        }
+
+        // Render 2D SVG Cabinet Blueprint (Phase 03)
+        const svg = document.getElementById('cabinet-blueprint-svg');
+        if (svg && specs) {
+          const cols = specs.cols;
+          const rows = specs.rows;
+          const svgW = 280;
+          const svgH = 80;
+          const pad = 6;
+          const availW = svgW - pad * 2;
+          const availH = svgH - pad * 2;
+
+          const screenAspect = specs.actualWidthM / specs.actualHeightM;
+          let drawW, drawH;
+          if (availW / availH > screenAspect) {
+            drawH = availH;
+            drawW = drawH * screenAspect;
+          } else {
+            drawW = availW;
+            drawH = drawW / screenAspect;
+          }
+
+          const startX = (svgW - drawW) / 2;
+          const startY = (svgH - drawH) / 2;
+          const cellW = drawW / cols;
+          const cellH = drawH / rows;
+
+          let svgContent = `
+            <rect x="${startX}" y="${startY}" width="${drawW}" height="${drawH}" fill="rgba(6, 12, 24, 0.9)" stroke="#00E5FF" stroke-width="1.5" rx="3" />
+          `;
+
+          // Grid lines for cabinets
+          for (let i = 1; i < cols; i++) {
+            const gx = startX + i * cellW;
+            svgContent += `<line x1="${gx}" y1="${startY}" x2="${gx}" y2="${startY + drawH}" stroke="rgba(0, 229, 255, 0.45)" stroke-width="1" stroke-dasharray="2,2" />`;
+          }
+          for (let j = 1; j < rows; j++) {
+            const gy = startY + j * cellH;
+            svgContent += `<line x1="${startX}" y1="${gy}" x2="${startX + drawW}" y2="${gy}" stroke="rgba(0, 229, 255, 0.45)" stroke-width="1" stroke-dasharray="2,2" />`;
+          }
+
+          svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
+          svg.innerHTML = svgContent;
+
+          document.getElementById('blueprint-grid-tag').textContent = `${cols}×${rows} ตู้ (${specs.totalCabinets} ตู้)`;
+          document.getElementById('blueprint-size-tag').textContent = `ขนาดจริง ${specs.actualWidthM.toFixed(2)} × ${specs.actualHeightM.toFixed(2)} ม.`;
+          document.getElementById('blueprint-pitch-tag').textContent = `ตู้ละ ${(product ? product.cabinetWidthMm : 500)}×${(product ? product.cabinetHeightMm : 500)} mm`;
+        }
+
         // Sync pitch buttons active state
         document.querySelectorAll('.pitch-btn').forEach(btn => {
           const btnPitch = parseFloat(btn.getAttribute('data-pitch'));
@@ -1639,6 +1845,7 @@
 
         document.getElementById('spec-power-avg').textContent = specs.powerAvgKw != null ? `${specs.powerAvgKw} kW` : 'รอยืนยัน';
         document.getElementById('spec-power-max').textContent = specs.powerMaxKw != null ? `${specs.powerMaxKw} kW` : 'รอยืนยัน';
+        document.getElementById('spec-power-amps').textContent = specs.estimatedAmps220V != null ? `~${specs.estimatedAmps220V} A` : 'รอยืนยัน';
         document.getElementById('spec-total-weight').textContent = specs.totalWeightKg != null ? `${specs.totalWeightKg} kg` : 'รอยืนยัน';
 
         const qBadge = specs.qualityBadge;
@@ -1652,6 +1859,11 @@
         const sceneDef = SCENE_DEFINITIONS[state.sceneType];
         const mountDef = MOUNT_DEFINITIONS[state.mountType];
         const pSizeM = (product ? product.cabinetWidthMm / 1000 : 0.5).toFixed(2);
+        const policyLabels = {
+          nearest: 'ใกล้เคียงที่สุด (Nearest)',
+          floor: 'ไม่เกินพื้นที่ (Floor / Budget)',
+          ceil: 'เต็มพื้นที่ขอบนอก (Ceil)'
+        };
 
         return [
           `📋 ใบสรุปสเปกจอ LED แบรนด์ JLED (JLED Design Studio v4.0)`,
@@ -1659,15 +1871,18 @@
           `• รหัสรุ่นสินค้า: ${product ? product.displayName : 'JLED Pro'} [${specs.productStatus === PRODUCT_STATUS.VERIFIED ? 'Verified' : 'Demo Profile'}]`,
           `• Series: ${product ? product.series || 'J-Standard' : 'J-Standard'} | Datasheet: ${product ? product.datasheetRef || 'JLED-STD' : 'JLED-STD'}`,
           `• Pixel Pitch: P${state.pitchMm} (${specs.isOutdoor ? 'Outdoor IP65' : 'Indoor Pro'})`,
+          `• ทิศทางการติดตั้ง: ${state.orientation === 'portrait' ? 'แนวตั้ง (Portrait)' : 'แนวนอน (Landscape)'} | นโยบายคำนวณตู้: ${policyLabels[state.layoutPolicy] || state.layoutPolicy}`,
           `• สถานที่จำลองติดตั้ง: ${sceneDef ? sceneDef.nameTh : state.sceneType}`,
           `• รูปแบบโครงสร้างติดตั้ง: ${mountDef ? mountDef.nameTh : state.mountType}`,
           `• ขนาดที่ลูกค้าต้องการ: ${specs.requestedWidthM.toFixed(2)} × ${specs.requestedHeightM.toFixed(2)} ม.`,
-          `• ขนาดประกอบได้จริง (Actual): กว้าง ${specs.actualWidthM.toFixed(2)} ม. × สูง ${specs.actualHeightM.toFixed(2)} ม. (พื้นที่ ${specs.actualAreaSqm.toFixed(2)} ตร.ม.)`,
+          `• ขนาดประกอบได้จริง (Buildable): กว้าง ${specs.actualWidthM.toFixed(2)} ม. × สูง ${specs.actualHeightM.toFixed(2)} ม. (พื้นที่ ${specs.actualAreaSqm.toFixed(2)} ตร.ม.)`,
+          `• อัตราส่วนภาพจริง: ${specs.actualAspectRatio}:1 (${specs.aspectRatio ? specs.aspectRatio.discrepancyNote : specs.aspectLabel})`,
           `• จำนวนตู้ Cabinet: ${specs.totalCabinets} ตู้ (${specs.cols} คอลัมน์ × ${specs.rows} แถว | ขนาดตู้ ${pSizeM}×${pSizeM} ม.)`,
           `• ความละเอียดภาพ (Resolution): ${specs.resolutionWidth.toLocaleString()} × ${specs.resolutionHeight.toLocaleString()} px [${specs.qualityBadge.label}]`,
           `• ระยะรับชมที่แนะนำ: เริ่มต้น ≥ ${specs.distanceMetrics.optimalDistanceM.toFixed(1)} ม. (ระยะจำลอง: ${state.viewingDistanceM.toFixed(1)} ม.)`,
           `• อัตรากินไฟโดยประมาณ: ${specs.powerAvgKw != null ? `เฉลี่ย ${specs.powerAvgKw} kW | สูงสุด ${specs.powerMaxKw} kW` : 'รอวิศวกรยืนยัน'}`,
-          `• น้ำหนักเฉพาะตู้จอรวม: ${specs.totalWeightKg != null ? `${specs.totalWeightKg} kg (ไม่รวมโครงสร้าง)` : 'รอวิศวกรยืนยัน'}`,
+          `• กระแสไฟฟ้าสูงสุดโดยประมาณ (220V): ${specs.estimatedAmps220V != null ? `~${specs.estimatedAmps220V} A (Single-Phase)` : 'รอวิศวกรยืนยัน'}`,
+          `• น้ำหนักเฉพาะตู้จอรวม: ${specs.totalWeightKg != null ? `${specs.totalWeightKg} kg (ไม่รวมโครงสร้างเหล็ก)` : 'รอวิศวกรยืนยัน'}`,
           `==========================================`,
           `* ข้อมูลเบื้องต้นสำหรับการออกแบบ — ต้องให้ทีมวิศวกร JLED ตรวจสอบหน้างานจริงก่อนสั่งผลิต`,
           `สนใจขอใบเสนอราคาพิเศษ / นัดสำรวจหน้างาน ติดต่อ LINE OA: @JLED หรือโทร 02-xxx-xxxx`
@@ -1737,18 +1952,35 @@
         globalStateStore.update({ requestedHeightMm });
       });
 
-      function applyPresetDimensions(wM, hM) {
+      // Phase 03: Layout Policy Buttons
+      document.querySelectorAll('.policy-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const layoutPolicy = btn.getAttribute('data-policy');
+          globalStateStore.update({ layoutPolicy });
+        });
+      });
+
+      // Phase 03: Orientation Buttons
+      document.getElementById('orient-landscape-btn').addEventListener('click', () => {
+        globalStateStore.update({ orientation: 'landscape' });
+      });
+      document.getElementById('orient-portrait-btn').addEventListener('click', () => {
+        globalStateStore.update({ orientation: 'portrait' });
+      });
+
+      function applyPresetDimensions(wM, hM, targetAspectKey = '16:9') {
         widthSlider.value = wM;
         heightSlider.value = hM;
         globalStateStore.update({
           requestedWidthMm: Math.round(wM * 1000),
-          requestedHeightMm: Math.round(hM * 1000)
+          requestedHeightMm: Math.round(hM * 1000),
+          targetAspectKey
         });
       }
 
-      document.getElementById('preset-16-9').addEventListener('click', () => applyPresetDimensions(4.0, 2.25));
-      document.getElementById('preset-21-9').addEventListener('click', () => applyPresetDimensions(7.0, 3.0));
-      document.getElementById('preset-9-16').addEventListener('click', () => applyPresetDimensions(2.0, 3.5));
+      document.getElementById('preset-16-9').addEventListener('click', () => applyPresetDimensions(4.0, 2.25, '16:9'));
+      document.getElementById('preset-21-9').addEventListener('click', () => applyPresetDimensions(7.0, 3.0, '21:9'));
+      document.getElementById('preset-9-16').addEventListener('click', () => applyPresetDimensions(2.0, 3.5, '9:16'));
 
       document.querySelectorAll('.content-btn').forEach((btn) => {
         btn.addEventListener('click', () => {

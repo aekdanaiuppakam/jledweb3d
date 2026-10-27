@@ -53,8 +53,8 @@ for (const relPath of requiredFiles) {
 // 3. Write Release Metadata
 console.log('\n▶ [Step 3/3] Generating Release Metadata...');
 const releaseInfo = {
-  version: '4.0.0-phase02',
-  phase: 'Phase 02: Verified Product Catalog & Compatibility Engine',
+  version: '4.0.0-phase03',
+  phase: 'Phase 03: Real Cabinet Layout, Aspect Discrepancy, 2D Blueprint & Electrical Engine',
   timestamp: new Date().toISOString(),
   testStatus: 'PASS',
   modules: [
@@ -74,5 +74,5 @@ fs.writeFileSync(
 
 console.log('  ✔ release-info.json generated.');
 console.log('\n======================================================');
-console.log('   BUILD SUCCESSFUL: JLED Design Studio v4.0 Phase 01 ');
+console.log('   BUILD SUCCESSFUL: JLED Design Studio v4.0 Phase 03 ');
 console.log('======================================================\n');
