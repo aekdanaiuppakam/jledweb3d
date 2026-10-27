@@ -540,6 +540,31 @@
           </div>
         </div>
 
+        <!-- Advanced Shape Selection (Phase 07) -->
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">รูปทรงหน้าจอพิเศษ (Screen Shape):</label>
+          <div class="grid grid-cols-4 gap-1 text-xs">
+            <button type="button" data-shape="flat" class="shape-btn active py-1.5 px-1 rounded-lg border border-slate-700 bg-slate-900/80 text-center transition">
+              <span class="block font-semibold text-[11px]">⬛ ด้านเดียว</span>
+              <span class="text-[9px] text-slate-400">Flat Plane</span>
+            </button>
+            <button type="button" data-shape="l-shape-outer" class="shape-btn py-1.5 px-1 rounded-lg border border-slate-700 bg-slate-900/80 text-center transition">
+              <span class="block font-semibold text-[11px]">📐 มุมนอก 90°</span>
+              <span class="text-[9px] text-slate-400">L-Outer</span>
+            </button>
+            <button type="button" data-shape="l-shape-inner" class="shape-btn py-1.5 px-1 rounded-lg border border-slate-700 bg-slate-900/80 text-center transition">
+              <span class="block font-semibold text-[11px]">🏠 มุมใน 90°</span>
+              <span class="text-[9px] text-slate-400">L-Inner</span>
+            </button>
+            <button type="button" data-shape="curved-concave" class="shape-btn py-1.5 px-1 rounded-lg border border-slate-700 bg-slate-900/80 text-center transition">
+              <span class="block font-semibold text-[11px]">🌙 จอดัดโค้ง</span>
+              <span class="text-[9px] text-slate-400">Curved Arc</span>
+            </button>
+          </div>
+          <!-- Shape Warning Banner -->
+          <div id="shape-warning-banner" class="hidden mt-1.5 p-2 rounded-lg bg-amber-500/15 border border-amber-500/40 text-[10px] text-amber-300"></div>
+        </div>
+
         <!-- Width Slider (1m - 20m) -->
         <div class="space-y-1">
           <div class="flex justify-between text-xs">
@@ -1059,6 +1084,7 @@
     import { calculateDimensionCoordinates } from './src/core/measurements.js';
     import { getDefaultCornerPins, renderWarpedCanvas } from './src/core/perspective-engine.js';
     import { comparePixelPitches } from './src/core/pitch-comparison.js';
+    import { SHAPE_TYPES, validateShapeCompatibility, calculateLCornerParameters, calculateCurveParameters } from './src/core/shape-engine.js';
     import { globalStateStore } from './src/core/state.js';
     import { disposeHierarchy, globalMediaTracker } from './src/core/disposal.js';
 
@@ -1583,22 +1609,76 @@
 
         const product = globalStateStore.getProduct();
         const depth = (product ? product.cabinetDepthMm : 75) / 1000;
-
-        // Housing
-        const housingGeo = new THREE.BoxGeometry(w + 0.08, h + 0.08, depth);
         const housingMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4, metalness: 0.75 });
-        const housingMesh = new THREE.Mesh(housingGeo, housingMat);
-        housingMesh.position.set(0, screenCenterY, -depth / 2);
-        housingMesh.castShadow = true;
-        housingMesh.receiveShadow = true;
-        screenGroup.add(housingMesh);
+        const shapeType = state.shapeType || 'flat';
 
-        // Front LED Screen
-        const panelGeo = new THREE.PlaneGeometry(w, h);
-        const panelMat = new THREE.MeshBasicMaterial({ map: screenTexture });
-        const screenMesh = new THREE.Mesh(panelGeo, panelMat);
-        screenMesh.position.set(0, screenCenterY, 0.005);
-        screenGroup.add(screenMesh);
+        if (shapeType === 'l-shape-outer' || shapeType === 'l-shape-inner') {
+          const lparams = calculateLCornerParameters({
+            totalWidthM: w,
+            splitRatio: 0.65,
+            heightM: h,
+            cornerType: shapeType,
+            depthM: depth
+          });
+
+          // Face 1 (Main Front)
+          const f1Housing = new THREE.Mesh(new THREE.BoxGeometry(lparams.w1 + 0.04, h + 0.04, depth), housingMat);
+          f1Housing.position.set(-lparams.w1 / 2, screenCenterY, -depth / 2);
+          screenGroup.add(f1Housing);
+
+          const f1Mesh = new THREE.Mesh(new THREE.PlaneGeometry(lparams.w1, h), new THREE.MeshBasicMaterial({ map: screenTexture }));
+          f1Mesh.position.set(-lparams.w1 / 2, screenCenterY, 0.005);
+          screenGroup.add(f1Mesh);
+
+          // Face 2 (Perpendicular Side)
+          const sideZ = lparams.isOuter ? -lparams.w2 / 2 : lparams.w2 / 2;
+          const f2Housing = new THREE.Mesh(new THREE.BoxGeometry(depth, h + 0.04, lparams.w2 + 0.04), housingMat);
+          f2Housing.position.set(lparams.isOuter ? depth / 2 : -depth / 2, screenCenterY, sideZ);
+          screenGroup.add(f2Housing);
+
+          const f2Mesh = new THREE.Mesh(new THREE.PlaneGeometry(lparams.w2, h), new THREE.MeshBasicMaterial({ map: screenTexture }));
+          f2Mesh.position.set(0.005, screenCenterY, sideZ);
+          f2Mesh.rotation.y = lparams.isOuter ? -Math.PI / 2 : Math.PI / 2;
+          screenGroup.add(f2Mesh);
+        } else if (shapeType === 'curved-concave' || shapeType === 'curved-convex') {
+          const curveParams = calculateCurveParameters({
+            widthM: w,
+            heightM: h,
+            arcDegrees: 45,
+            isConcave: shapeType === 'curved-concave'
+          });
+
+          const cylGeo = new THREE.CylinderGeometry(
+            curveParams.radius, curveParams.radius, h, 32, 1, true,
+            -curveParams.arcRad / 2, curveParams.arcRad
+          );
+          const cylMat = new THREE.MeshBasicMaterial({ map: screenTexture, side: THREE.DoubleSide });
+          const curveMesh = new THREE.Mesh(cylGeo, cylMat);
+          curveMesh.position.set(0, screenCenterY, -curveParams.radius);
+          screenGroup.add(curveMesh);
+
+          const housingCyl = new THREE.CylinderGeometry(
+            curveParams.radius + depth, curveParams.radius + depth, h + 0.04, 32, 1, true,
+            -curveParams.arcRad / 2, curveParams.arcRad
+          );
+          const housingMesh = new THREE.Mesh(housingCyl, housingMat);
+          housingMesh.position.set(0, screenCenterY, -curveParams.radius);
+          screenGroup.add(housingMesh);
+        } else {
+          // Standard Flat Screen
+          const housingGeo = new THREE.BoxGeometry(w + 0.08, h + 0.08, depth);
+          const housingMesh = new THREE.Mesh(housingGeo, housingMat);
+          housingMesh.position.set(0, screenCenterY, -depth / 2);
+          housingMesh.castShadow = true;
+          housingMesh.receiveShadow = true;
+          screenGroup.add(housingMesh);
+
+          const panelGeo = new THREE.PlaneGeometry(w, h);
+          const panelMat = new THREE.MeshBasicMaterial({ map: screenTexture });
+          const screenMesh = new THREE.Mesh(panelGeo, panelMat);
+          screenMesh.position.set(0, screenCenterY, 0.005);
+          screenGroup.add(screenMesh);
+        }
 
         // Subtle Cyan Status Glow
         const rimGeo = new THREE.PlaneGeometry(w + 0.25, h + 0.25);
@@ -2040,6 +2120,23 @@
           compatText.textContent = `รุ่น ${product ? product.displayName : ''} สอดคล้องกับสภาพแวดล้อมและรูปแบบโครงสร้างที่เลือก`;
         }
 
+        // Phase 07: Shape Buttons & Compatibility Alert
+        const currentShape = state.shapeType || 'flat';
+        document.querySelectorAll('.shape-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-shape') === currentShape);
+        });
+
+        const shapeWarningBanner = document.getElementById('shape-warning-banner');
+        if (shapeWarningBanner) {
+          const shapeCheck = validateShapeCompatibility(product, currentShape);
+          if (shapeCheck.supported) {
+            shapeWarningBanner.classList.add('hidden');
+          } else {
+            shapeWarningBanner.textContent = `⚠️ ${shapeCheck.warning}`;
+            shapeWarningBanner.classList.remove('hidden');
+          }
+        }
+
         // ================= PHASE 03: LAYOUT POLICY & ORIENTATION =================
         const policyLabels = {
           nearest: '🎯 ใกล้เคียงสุด (Nearest)',
@@ -2304,6 +2401,14 @@
         btn.addEventListener('click', () => {
           const pitchMm = parseFloat(btn.getAttribute('data-pitch'));
           globalStateStore.update({ pitchMm });
+        });
+      });
+
+      // Phase 07: Shape Buttons
+      document.querySelectorAll('.shape-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const shapeType = btn.getAttribute('data-shape');
+          globalStateStore.update({ shapeType });
         });
       });
 
