@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JLED 3D Screen Simulator &amp; Configurator | ระบบจำลองติดตั้งจอ LED อัจฉริยะ</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Kanit', 'Inter', 'sans-serif'],
+            mono: ['Inter', 'monospace']
+          },
+          colors: {
+            jled: {
+              bg: '#060911',
+              panel: 'rgba(13, 19, 33, 0.82)',
+              cyan: '#00E5FF',
+              blue: '#0077FF',
+              orange: '#FF6B00',
+              amber: '#FFB800',
+              emerald: '#00E676'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #060911;
+      color: #F1F5F9;
+      font-family: 'Kanit', 'Inter', sans-serif;
+      overflow: hidden;
+    }
+    /* Custom Scrollbar for Right Control Panel */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 229, 255, 0.3);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 229, 255, 0.6);
+    }
+    /* Glassmorphism Utilities */
+    .glass-panel {
+      background: rgba(11, 16, 28, 0.82);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .glass-card {
+      background: rgba(20, 29, 49, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card:hover {
+      border-color: rgba(0, 229, 255, 0.35);
+    }
+    .neon-cyan-glow {
+      box-shadow: 0 0 18px rgba(0, 229, 255, 0.35);
+    }
+    .neon-orange-glow {
+      box-shadow: 0 0 20px rgba(255, 107, 0, 0.45);
+    }
+    /* Custom Range Sliders */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(30, 41, 59, 0.9);
+      border-radius: 999px;
+      outline: none;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #00E5FF;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+      border: 2px solid #ffffff;
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.18);
+    }
+    input[type="range"].orange-slider::-webkit-slider-thumb {
+      background: #FF6B00;
+      box-shadow: 0 0 10px rgba(255, 107, 0, 0.85);
+    }
+    .pitch-btn.active {
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.22), rgba(0, 119, 255, 0.35));
+      border-color: #00E5FF;
+      color: #FFFFFF;
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.35);
+    }
+    .option-btn.active {
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 119, 255, 0.3));
+      border-color: #00E5FF;
+      color: #FFFFFF;
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.28);
+    }
+    @keyframes pulseSubtle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.65; }
+    }
+    .animate-pulse-subtle {
+      animation: pulseSubtle 2.2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col lg:flex-row relative bg-[#060911]">
+
+  <!-- ================= LEFT / MAIN: 3D VIEWPORT ================= -->
+  <div id="viewport-wrapper" class="relative flex-1 h-[52vh] lg:h-full w-full overflow-hidden">
+    <!-- Three.js Canvas Mount -->
+    <div id="three-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
+
+    <!-- Top-Left Brand Header & Live Status Overlay -->
+    <div class="absolute top-3 left-3 right-3 lg:right-auto z-20 flex flex-wrap items-center justify-between lg:justify-start gap-2.5 pointer-events-none">
+      <!-- Brand Badge -->
+      <div class="glass-panel px-3.5 py-2 rounded-xl flex items-center gap-3 pointer-events-auto">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-[#00E5FF] via-[#0077FF] to-[#FF6B00] p-0.5 flex items-center justify-center shadow-lg">
+          <div class="w-full h-full bg-[#060911] rounded-[6px] flex items-center justify-center font-extrabold text-sm tracking-tighter text-white">
+            J<span class="text-[#00E5FF]">LED</span>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-sm sm:text-base tracking-wide text-white leading-none">JLED 3D SIMULATOR</h1>
+            <span class="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30">PRO v3.5</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-tight mt-0.5">ระบบจำลองการติดตั้งจอ LED และเปรียบเทียบ Pixel Pitch แบบ Real-time</p>
+        </div>
+      </div>
+
+      <!-- Viewing Distance Live Status Pill -->
+      <div id="hud-distance-badge" class="glass-panel px-3.5 py-2 rounded-xl flex items-center gap-2.5 border-l-4 border-l-emerald-400 pointer-events-auto transition-all duration-300">
+        <span id="hud-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[11px] text-slate-400">สถานะระยะรับชม:</span>
+            <span id="hud-pitch-label" class="text-xs font-bold text-[#00E5FF]">P2.5</span>
+            <span class="text-slate-600">•</span>
+            <span id="hud-dist-label" class="text-xs font-bold text-white">5.0 ม.</span>
+          </div>
+          <div id="hud-status-text" class="text-xs font-semibold text-emerald-400">
+            ภาพเนียนคมชัดเหมาะสม (Optimal Viewing)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top-Right Loupe: Real-time LED Matrix Magnifier (Zoomed Pixel Preview) -->
+    <div class="hidden sm:flex absolute top-20 lg:top-3 right-3 z-20 glass-panel p-2.5 rounded-xl flex-col items-center gap-1.5 w-40 pointer-events-auto">
+      <div class="w-full flex items-center justify-between text-[10px] text-slate-300 font-medium px-0.5">
+        <span class="flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#FF6B00]"></span>
+          ซูมเม็ดไฟ LED
+        </span>
+        <span id="loupe-pitch-tag" class="font-mono text-[#00E5FF] font-bold">P2.5</span>
+      </div>
+      <div class="relative w-32 h-24 rounded-lg overflow-hidden border border-slate-700/80 bg-black shadow-inner">
+        <canvas id="loupe-canvas" width="160" height="120" class="w-full h-full block"></canvas>
+        <div id="loupe-overlay-tag" class="absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-black/75 text-emerald-400 border border-emerald-500/30">
+          Optimal
+        </div>
+      </div>
+      <p id="loupe-caption" class="text-[10px] text-slate-400 text-center leading-tight">
+        จำลองความถี่เม็ดไฟที่ระยะ <span class="text-white font-semibold">5.0m</span>
+      </p>
+    </div>
+
+    <!-- Bottom Status & Camera Control Bar -->
+    <div class="absolute bottom-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+      <!-- Camera Preset Views -->
+      <div class="glass-panel px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 pointer-events-auto overflow-x-auto max-w-full">
+        <span class="text-[11px] text-slate-400 px-1.5 hidden sm:inline font-medium">มุมกล้อง (Camera):</span>
+        <button id="cam-front-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/40 hover:bg-[#00E5FF]/25 transition flex items-center gap-1 whitespace-nowrap">
+          <span>🎯</span> มุมตรงหน้าจอ
+        </button>
+        <button id="cam-angle-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-slate-200 border border-slate-700 hover:border-[#00E5FF]/50 transition flex items-center gap-1 whitespace-nowrap">
+          <span>📐</span> มุมเฉียง 45°
+        </button>
+        <button id="cam-human-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-slate-200 border border-slate-700 hover:border-[#00E5FF]/50 transition flex items-center gap-1 whitespace-nowrap">
+          <span>👁️</span> มุมสายตาคนจริง (1.65m)
+        </button>
+        <button id="cam-closeup-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-amber-300 border border-amber-500/30 hover:border-amber-400 transition flex items-center gap-1 whitespace-nowrap">
+          <span>🔍</span> ซูมดูเม็ดไฟใกล้ (1.2m)
+        </button>
+      </div>
+
+      <!-- Quick Scene Toggles (Human Reference & Cabinet Grid) -->
+      <div class="glass-panel px-2.5 py-1.5 rounded-xl flex items-center gap-2 pointer-events-auto">
+        <button id="toggle-human-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#00E5FF]/20 text-white border border-[#00E5FF] transition flex items-center gap-1.5">
+          <span>🧍</span> โมเดลคน 1.70m: <strong id="human-status-txt" class="text-[#00E5FF]">เปิด</strong>
+        </button>
+        <button id="toggle-grid-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#00E5FF]/20 text-white border border-[#00E5FF] transition flex items-center gap-1.5">
+          <span>⊞</span> รอยต่อตู้ (Grid): <strong id="grid-status-txt" class="text-[#00E5FF]">เปิด</strong>
+        </button>
+        <div class="hidden xl:flex items-center gap-1.5 text-[11px] text-slate-400 pl-2 border-l border-slate-700">
+          <span>🖱️ คลิกซ้ายหมุน • คลิกขวาเลื่อน • ลูกกลิ้งซูม</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= RIGHT: CONTROL PANEL & LIVE SPEC DASHBOARD ================= -->
+  <aside class="w-full lg:w-[430px] xl:w-[460px] h-[48vh] lg:h-full glass-panel border-t lg:border-t-0 lg:border-l border-slate-800/90 flex flex-col z-30 shrink-0">
+    
+    <!-- Control Panel Navigation Tabs (For Quick Jumping or Full Scroll) -->
+    <div class="px-4 pt-3 pb-2 border-b border-slate-800/80 flex items-center justify-between bg-slate-950/50">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-5 rounded-full bg-gradient-to-b from-[#00E5FF] to-[#FF6B00]"></span>
+        <h2 class="text-sm font-bold tracking-wide text-white uppercase">แผงควบคุมและคำนวณสเปกจอ</h2>
+      </div>
+      <button id="reset-default-btn" type="button" class="text-[11px] text-slate-400 hover:text-[#00E5FF] transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-slate-800">
+        <span>↺</span> รีเซ็ตค่าเริ่มต้น
+      </button>
+    </div>
+
+    <!-- Scrollable Controls & Spec Body -->
+    <div class="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+
+      <!-- SECTION 1: SCENE & INSTALLATION -->
+      <div class="glass-card rounded-xl p-3.5 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-[#00E5FF] flex items-center gap-1.5">
+            <span>🏢</span> 1. สถานที่และรูปแบบการติดตั้ง
+          </h3>
+          <span id="env-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Indoor</span>
+        </div>
+
+        <!-- 3 Scene Switcher Buttons -->
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1.5">เลือกสถานที่จำลอง (Scene Environment):</label>
+          <div class="grid grid-cols-3 gap-1.5">
+            <button type="button" data-scene="boardroom" class="scene-btn option-btn active p-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-left transition flex flex-col justify-between">
+              <span class="text-base">💼</span>
+              <div class="mt-1">
+                <div class="text-xs font-semibold leading-tight">ห้องประชุม</div>
+                <div class="text-[10px] text-slate-400">Boardroom</div>
+              </div>
+            </button>
+            <button type="button" data-scene="exhibition" class="scene-btn option-btn p-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-left transition flex flex-col justify-between">
+              <span class="text-base">✨</span>
+              <div class="mt-1">
+                <div class="text-xs font-semibold leading-tight">บูธ / โถงห้าง</div>
+                <div class="text-[10px] text-slate-400">Exhibition Mall</div>
+              </div>
+            </button>
+            <button type="button" data-scene="outdoor" class="scene-btn option-btn p-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-left transition flex flex-col justify-between">
+              <span class="text-base">🌆</span>
+              <div class="mt-1">
+                <div class="text-xs font-semibold leading-tight">ป้ายริมถนน</div>
+                <div class="text-[10px] text-slate-400">Outdoor Night</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3 Installation Types -->
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1.5">รูปแบบโครงสร้างติดตั้ง (Installation Type):</label>
+          <div class="grid grid-cols-3 gap-1.5">
+            <button type="button" data-mount="wall" class="mount-btn option-btn active px-2.5 py-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-center transition">
+              <div class="text-xs font-semibold">🧱 ติดผนัง</div>
+              <div class="text-[10px] text-slate-400">Wall Mount</div>
+            </button>
+            <button type="button" data-mount="truss" class="mount-btn option-btn px-2.5 py-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-center transition">
+              <div class="text-xs font-semibold">🏗️ ขาตั้ง/โครงถัก</div>
+              <div class="text-[10px] text-slate-400">Ground Truss</div>
+            </button>
+            <button type="button" data-mount="hanging" class="mount-btn option-btn px-2.5 py-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-center transition">
+              <div class="text-xs font-semibold">⛓️ แขวนสลิง</div>
+              <div class="text-[10px] text-slate-400">Hanging Rig</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: PIXEL PITCH & VIEWING DISTANCE -->
+      <div class="glass-card rounded-xl p-3.5 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-[#00E5FF] flex items-center gap-1.5">
+            <span>🔬</span> 2. ความละเอียด (Pixel Pitch) &amp; ระยะยืนดู
+          </h3>
+          <span id="selected-pitch-pill" class="text-xs font-bold px-2 py-0.5 rounded bg-[#FF6B00]/20 text-[#FF6B00] border border-[#FF6B00]/40">P2.5</span>
+        </div>
+
+        <!-- Fine Pitch (Indoor) -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-cyan-300 font-medium">Fine Pitch (Indoor คมชัดสูงพิเศษ)</span>
+            <span class="text-slate-500">ตู้ 0.6×0.34m / 0.5×0.5m</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5">
+            <button type="button" data-pitch="1.25" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P1.25</button>
+            <button type="button" data-pitch="1.5" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P1.5</button>
+            <button type="button" data-pitch="1.8" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P1.8</button>
+          </div>
+        </div>
+
+        <!-- Standard Indoor -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-sky-300 font-medium">Standard Indoor (ยอดนิยมในอาคาร)</span>
+            <span class="text-slate-500">ตู้ 0.5×0.5m</span>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5">
+            <button type="button" data-pitch="2" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P2</button>
+            <button type="button" data-pitch="2.5" class="pitch-btn active py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P2.5</button>
+            <button type="button" data-pitch="3" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P3</button>
+            <button type="button" data-pitch="4" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P4</button>
+          </div>
+        </div>
+
+        <!-- Outdoor -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-orange-400 font-medium">Outdoor (สู้แดด กันน้ำ IP65)</span>
+            <span class="text-slate-500">ตู้ 0.96×0.96m</span>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5">
+            <button type="button" data-pitch="5" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P5</button>
+            <button type="button" data-pitch="6" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P6</button>
+            <button type="button" data-pitch="8" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P8</button>
+            <button type="button" data-pitch="10" class="pitch-btn py-1.5 px-2 rounded-lg border border-slate-700/80 bg-slate-900/70 text-xs font-semibold transition">P10</button>
+          </div>
+        </div>
+
+        <!-- Viewing Distance Slider (1m - 30m) -->
+        <div class="pt-2 border-t border-slate-800/80 space-y-2">
+          <div class="flex items-center justify-between">
+            <label for="distance-slider" class="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+              <span>🚶</span> ระยะยืนดูจอ (Viewing Distance):
+            </label>
+            <div class="flex items-center gap-1">
+              <span id="distance-val-display" class="text-sm font-extrabold font-mono text-[#00E5FF]">5.0</span>
+              <span class="text-xs text-slate-400">เมตร</span>
+            </div>
+          </div>
+          <input id="distance-slider" type="range" min="1" max="30" step="0.5" value="5" class="orange-slider" />
+          <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+            <span>1.0m (ใกล้มาก)</span>
+            <span id="optimal-marker-label" class="text-emerald-400 font-sans font-medium">★ แนะนำ ≥ 3.0m</span>
+            <span>30.0m (ไกล)</span>
+          </div>
+
+          <!-- Dynamic Visual Status Box inside Panel -->
+          <div id="panel-viewing-alert" class="p-2.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 flex items-start gap-2.5 transition-all">
+            <span id="panel-alert-icon" class="text-base leading-none mt-0.5">✅</span>
+            <div class="text-xs leading-snug">
+              <div id="panel-alert-title" class="font-bold text-emerald-300">ภาพเนียนคมชัดเหมาะสม (Optimal)</div>
+              <div id="panel-alert-desc" class="text-[11px] text-slate-300 mt-0.5">ระยะยืนดู 5.0 ม. ไกลกว่าระยะขั้นต่ำ (3.0 ม.) ของจอ P2.5 ตาเปล่าจะมองเห็นภาพเนียนไร้เม็ดพิกเซล</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: SCREEN DIMENSIONS & ASPECT RATIO -->
+      <div class="glass-card rounded-xl p-3.5 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-[#00E5FF] flex items-center gap-1.5">
+            <span>📐</span> 3. ขนาดหน้าจอ LED (Screen Size)
+          </h3>
+          <span id="aspect-tag" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">16:9 Widescreen</span>
+        </div>
+
+        <!-- Preset Aspect Ratio Buttons -->
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1.5">อัตราส่วนยอดฮิต (Quick Presets):</label>
+          <div class="grid grid-cols-3 gap-1.5">
+            <button type="button" id="preset-16-9" class="px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900/80 hover:border-[#00E5FF] text-xs font-medium transition flex flex-col items-center">
+              <span class="font-bold text-white">16 : 9</span>
+              <span class="text-[10px] text-slate-400">มาตรฐาน (4×2.25m)</span>
+            </button>
+            <button type="button" id="preset-21-9" class="px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900/80 hover:border-[#00E5FF] text-xs font-medium transition flex flex-col items-center">
+              <span class="font-bold text-white">21 : 9</span>
+              <span class="text-[10px] text-slate-400">Banner (7×3m)</span>
+            </button>
+            <button type="button" id="preset-9-16" class="px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900/80 hover:border-[#00E5FF] text-xs font-medium transition flex flex-col items-center">
+              <span class="font-bold text-white">9 : 16</span>
+              <span class="text-[10px] text-slate-400">Poster (2×3.5m)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Width Slider (1m - 20m) -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs">
+            <label for="width-slider" class="text-slate-300 font-medium">ความกว้าง (Width):</label>
+            <span class="font-mono font-bold text-[#00E5FF]"><span id="width-val">4.0</span> ม.</span>
+          </div>
+          <input id="width-slider" type="range" min="1" max="20" step="0.5" value="4.0" />
+          <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+            <span>1.0m</span>
+            <span>10.0m</span>
+            <span>20.0m</span>
+          </div>
+        </div>
+
+        <!-- Height Slider (1m - 12m) -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs">
+            <label for="height-slider" class="text-slate-300 font-medium">ความสูง (Height):</label>
+            <span class="font-mono font-bold text-[#00E5FF]"><span id="height-val">2.5</span> ม.</span>
+          </div>
+          <input id="height-slider" type="range" min="1" max="12" step="0.25" value="2.5" />
+          <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+            <span>1.0m</span>
+            <span>6.0m</span>
+            <span>12.0m</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: CUSTOM MEDIA PREVIEW -->
+      <div class="glass-card rounded-xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-[#00E5FF] flex items-center gap-1.5">
+            <span>🎬</span> 4. คอนเทนต์จำลองบนจอ (Media Preview)
+          </h3>
+          <span id="media-status-tag" class="text-[10px] text-emerald-400 font-medium">Live Canvas 60fps</span>
+        </div>
+
+        <div class="grid grid-cols-3 gap-1.5">
+          <button type="button" data-content="tech" class="content-btn option-btn active px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900/70 text-center transition">
+            <div class="text-xs font-semibold">🚀 3D Motion</div>
+            <div class="text-[10px] text-slate-400">JLED Cyber Ad</div>
+          </button>
+          <button type="button" data-content="conference" class="content-btn option-btn px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900/70 text-center transition">
+            <div class="text-xs font-semibold">📊 งานสัมมนา</div>
+            <div class="text-[10px] text-slate-400">Keynote Live</div>
+          </button>
+          <button type="button" data-content="promo" class="content-btn option-btn px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900/70 text-center transition">
+            <div class="text-xs font-semibold">🔥 โปรโมชัน</div>
+            <div class="text-[10px] text-slate-400">Vibrant Retail</div>
+          </button>
+        </div>
+
+        <!-- Upload Custom Image / Video -->
+        <div class="pt-1">
+          <input id="custom-media-input" type="file" accept="image/*,video/*" class="hidden" />
+          <button type="button" id="upload-media-btn" class="w-full py-2 px-3 rounded-lg border border-dashed border-[#00E5FF]/50 bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 text-xs font-semibold text-[#00E5FF] transition flex items-center justify-center gap-2">
+            <span>📁</span> อัปโหลดรูปภาพ / วิดีโอของคุณ (Upload Media)
+          </button>
+          <p id="uploaded-file-name" class="text-[10px] text-slate-400 text-center mt-1 hidden"></p>
+        </div>
+      </div>
+
+      <!-- SECTION 5: LIVE SPEC DASHBOARD -->
+      <div class="glass-card rounded-xl p-3.5 space-y-3 border border-[#00E5FF]/30 bg-gradient-to-b from-slate-900/90 to-slate-950/95">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
+            <span>📋</span> สรุปสเปกจอแบบ Real-time (Live Spec)
+          </h3>
+          <span id="res-quality-badge" class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-gradient-to-r from-[#00E5FF] to-[#0077FF] text-slate-950">
+            FULL HD
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <!-- Total Screen Size & Area -->
+          <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+            <div class="text-[10px] text-slate-400">ขนาดจอรวม (กว้าง × สูง)</div>
+            <div id="spec-dimensions" class="text-sm font-bold text-white mt-0.5 font-mono">4.00 × 2.50 m</div>
+            <div class="text-[11px] text-[#00E5FF] font-medium mt-0.5">พื้นที่รวม: <span id="spec-area">10.00</span> ตร.ม.</div>
+          </div>
+
+          <!-- Cabinet Count -->
+          <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+            <div class="text-[10px] text-slate-400">จำนวนตู้ Cabinet ทั้งหมด</div>
+            <div id="spec-cabinets-total" class="text-sm font-bold text-white mt-0.5 font-mono">40 ตู้</div>
+            <div id="spec-cabinets-grid" class="text-[11px] text-slate-300 mt-0.5">8 คอลัมน์ × 5 แถว (0.5×0.5m)</div>
+          </div>
+
+          <!-- Total Resolution -->
+          <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+            <div class="text-[10px] text-slate-400">ความละเอียดรวม (Resolution)</div>
+            <div id="spec-resolution" class="text-sm font-bold text-[#00E5FF] mt-0.5 font-mono">1,600 × 1,000 px</div>
+            <div id="spec-total-pixels" class="text-[11px] text-slate-300 mt-0.5">รวม 1.60 ล้านพิกเซล</div>
+          </div>
+
+          <!-- Recommended Viewing Distance -->
+          <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+            <div class="text-[10px] text-slate-400">ระยะการมองเห็นที่แนะนำ</div>
+            <div id="spec-rec-distance" class="text-sm font-bold text-emerald-400 mt-0.5">เริ่มต้น ≥ 3.0 เมตร</div>
+            <div id="spec-pitch-detail" class="text-[11px] text-slate-300 mt-0.5">คำนวณจาก P2.5 × 1.2m</div>
+          </div>
+        </div>
+
+        <!-- Power Consumption Bar -->
+        <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+          <div>
+            <div class="text-[10px] text-slate-400">อัตราการกินไฟโดยประมาณ (Power Consumption)</div>
+            <div class="text-xs text-slate-200 mt-0.5">
+              ใช้งานเฉลี่ย (Avg): <strong id="spec-power-avg" class="text-amber-300 font-mono">2.20 kW</strong>
+              <span class="text-slate-600 mx-1">|</span>
+              สูงสุด (Max): <strong id="spec-power-max" class="text-orange-400 font-mono">6.50 kW</strong>
+            </div>
+          </div>
+          <span class="text-lg">⚡</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sticky Bottom CTA Button -->
+    <div class="p-3.5 border-t border-slate-800/90 bg-slate-950/90">
+      <button id="open-quote-modal-btn" type="button" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#FF6B00] via-[#FF8800] to-[#00E5FF] text-slate-950 font-extrabold text-sm tracking-wide shadow-lg neon-orange-glow hover:brightness-110 active:scale-[0.99] transition flex items-center justify-center gap-2">
+        <span>📄</span> คัดลอกสเปกเพื่อขอใบเสนอราคา (Get Quotation)
+      </button>
+    </div>
+  </aside>
+
+  <!-- ================= QUOTATION & SPEC SUMMARY MODAL ================= -->
+  <div id="quote-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-panel max-w-lg w-full rounded-2xl border border-[#00E5FF]/40 overflow-hidden shadow-2xl animate-fadeIn">
+      <!-- Modal Header -->
+      <div class="px-5 py-4 bg-gradient-to-r from-slate-900 via-slate-900 to-[#00E5FF]/15 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-[#00E5FF]/20 border border-[#00E5FF] flex items-center justify-center text-[#00E5FF] font-bold">
+            J
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white leading-tight">สรุปสเปกจอ JLED เพื่อขอใบเสนอราคา</h3>
+            <p class="text-[11px] text-slate-400">JLED Official Specification &amp; Quotation Request</p>
+          </div>
+        </div>
+        <button id="close-quote-modal-btn" type="button" class="w-8 h-8 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold">
+          ✕
+        </button>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="p-5 space-y-4">
+        <div class="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 font-mono text-xs text-slate-200 whitespace-pre-line leading-relaxed select-all" id="quote-summary-text"></div>
+
+        <!-- Copy Notification Toast inside modal -->
+        <div id="copy-success-banner" class="hidden p-2.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-medium text-center">
+          ✅ คัดลอกข้อมูลสเปกเรียบร้อยแล้ว! สามารถกดวาง (Paste) ส่งให้ทีมขาย JLED ทาง LINE OA ได้ทันที
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+          <button id="copy-spec-btn" type="button" class="py-2.5 px-4 rounded-xl bg-[#00E5FF] hover:bg-[#00c4db] text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-lg">
+            <span>📋</span> คัดลอกข้อความสรุปสเปก (Copy Spec)
+          </button>
+          <button id="line-oa-btn" type="button" class="py-2.5 px-4 rounded-xl bg-[#06C755] hover:bg-[#05b34c] text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-lg">
+            <span>💬</span> คัดลอก &amp; ติดต่อ LINE OA (@JLED)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden video element for custom uploaded video playback -->
+  <video id="custom-video-el" loop muted playsinline crossorigin="anonymous" class="hidden"></video>
+
+  <!-- ================= APPLICATION & THREE.JS LOGIC ================= -->
+  <script>
+    (function () {
+      // ---------- 1. STATE CONFIGURATION ----------
+      const state = {
+        sceneType: 'boardroom',      // 'boardroom' | 'exhibition' | 'outdoor'
+        mountType: 'wall',           // 'wall' | 'truss' | 'hanging'
+        pitch: 2.5,                  // 1.25, 1.5, 1.8, 2, 2.5, 3, 4, 5, 6, 8, 10
+        viewingDistance: 5.0,        // 1.0 to 30.0 meters
+        width: 4.0,                  // 1.0 to 20.0 meters
+        height: 2.5,                 // 1.0 to 12.0 meters
+        showHuman: true,             // 1.70m human reference model
+        showGrid: true,              // Cabinet grid overlay
+        contentType: 'tech',         // 'tech' | 'conference' | 'promo' | 'custom-image' | 'custom-video'
+        customImage: null,
+        customVideoReady: false
+      };
+
+      const SCENE_NAMES_TH = {
+        boardroom: 'ห้องประชุมผู้บริหาร (Boardroom - Indoor)',
+        exhibition: 'บูธแสดงสินค้า / โถงห้าง (Exhibition / Mall - Indoor)',
+        outdoor: 'ป้ายหน้าอาคารริมถนน (Outdoor Billboard)'
+      };
+
+      const MOUNT_NAMES_TH = {
+        wall: 'ยึดติดผนัง (Wall Mount)',
+        truss: 'ขาตั้งพื้น / โครงถัก (Ground Stack / Truss)',
+        hanging: 'แขวนสลิงบนเพดาน/คาน (Hanging Rig)'
+      };
+
+      // ---------- 2. DYNAMIC 2D CANVAS LED MATRIX & CONTENT ENGINE ----------
+      // Main Screen Texture Canvas
+      const screenCanvas = document.createElement('canvas');
+      screenCanvas.width = 1024;
+      screenCanvas.height = 576;
+      const screenCtx = screenCanvas.getContext('2d');
+
+      // Source Content Buffer Canvas (clean content before pixelation)
+      const sourceCanvas = document.createElement('canvas');
+      sourceCanvas.width = 512;
+      sourceCanvas.height = 288;
+      const sourceCtx = sourceCanvas.getContext('2d');
+
+      // Low-res Sample Canvas for authentic sub-sampling when pitch is coarse & viewer is close
+      const sampleCanvas = document.createElement('canvas');
+      const sampleCtx = sampleCanvas.getContext('2d');
+
+      // Loupe Magnifier Canvas (Top-right HUD)
+      const loupeCanvas = document.getElementById('loupe-canvas');
+      const loupeCtx = loupeCanvas.getContext('2d');
+
+      // Draw animated preset content onto sourceCtx
+      function drawSourceContent(timeSec) {
+        const w = sourceCanvas.width;
+        const h = sourceCanvas.height;
+        sourceCtx.save();
+
+        if (state.contentType === 'custom-image' && state.customImage) {
+          sourceCtx.fillStyle = '#000';
+          sourceCtx.fillRect(0, 0, w, h);
+          sourceCtx.drawImage(state.customImage, 0, 0, w, h);
+        } else if (state.contentType === 'custom-video' && state.customVideoReady) {
+          const vid = document.getElementById('custom-video-el');
+          sourceCtx.drawImage(vid, 0, 0, w, h);
+        } else if (state.contentType === 'tech') {
+          // Preset 1: JLED 3D Motion Cyber Ad (High contrast + fine text for testing pitch clarity)
+          const grad = sourceCtx.createLinearGradient(0, 0, w, h);
+          grad.addColorStop(0, '#040B1E');
+          grad.addColorStop(0.5, '#091E3A');
+          grad.addColorStop(1, '#1A0B2E');
+          sourceCtx.fillStyle = grad;
+          sourceCtx.fillRect(0, 0, w, h);
+
+          // Moving perspective cyber grid
+          sourceCtx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
+          sourceCtx.lineWidth = 1.5;
+          const offset = (timeSec * 40) % 32;
+          for (let x = -w; x < w * 2; x += 32) {
+            sourceCtx.beginPath();
+            sourceCtx.moveTo(x + offset, 0);
+            sourceCtx.lineTo(x - 120 + offset, h);
+            sourceCtx.stroke();
+          }
+          for (let y = 0; y < h; y += 28) {
+            sourceCtx.beginPath();
+            sourceCtx.moveTo(0, (y + offset) % h);
+            sourceCtx.lineTo(w, (y + offset) % h);
+            sourceCtx.stroke();
+          }
+
+          // Animated glowing orbs
+          for (let i = 0; i < 4; i++) {
+            const ox = w * 0.5 + Math.cos(timeSec * 1.3 + i * 1.6) * (w * 0.32);
+            const oy = h * 0.5 + Math.sin(timeSec * 1.7 + i * 1.4) * (h * 0.28);
+            const r = 45 + Math.sin(timeSec * 2 + i) * 12;
+            const radGrad = sourceCtx.createRadialGradient(ox, oy, 2, ox, oy, r);
+            if (i % 2 === 0) {
+              radGrad.addColorStop(0, 'rgba(0, 229, 255, 0.85)');
+              radGrad.addColorStop(1, 'rgba(0, 229, 255, 0)');
+            } else {
+              radGrad.addColorStop(0, 'rgba(255, 107, 0, 0.85)');
+              radGrad.addColorStop(1, 'rgba(255, 107, 0, 0)');
+            }
+            sourceCtx.fillStyle = radGrad;
+            sourceCtx.beginPath();
+            sourceCtx.arc(ox, oy, r, 0, Math.PI * 2);
+            sourceCtx.fill();
+          }
+
+          // Center Hero Badge & Crisp Typography
+          sourceCtx.fillStyle = 'rgba(5, 12, 26, 0.78)';
+          sourceCtx.strokeStyle = '#00E5FF';
+          sourceCtx.lineWidth = 2;
+          const boxW = w * 0.76;
+          const boxH = h * 0.54;
+          const boxX = (w - boxW) / 2;
+          const boxY = (h - boxH) / 2;
+          sourceCtx.fillRect(boxX, boxY, boxW, boxH);
+          sourceCtx.strokeRect(boxX, boxY, boxW, boxH);
+
+          sourceCtx.textAlign = 'center';
+          sourceCtx.fillStyle = '#00E5FF';
+          sourceCtx.font = 'bold 15px Kanit, sans-serif';
+          sourceCtx.fillText('ULTRA HIGH REFRESH RATE 3840Hz', w / 2, boxY + 34);
+
+          sourceCtx.fillStyle = '#FFFFFF';
+          sourceCtx.font = '800 42px Inter, sans-serif';
+          sourceCtx.fillText(`JLED P${state.pitch}`, w / 2, boxY + 84);
+
+          sourceCtx.fillStyle = '#FFB800';
+          sourceCtx.font = '600 18px Kanit, sans-serif';
+          sourceCtx.fillText(`${state.width.toFixed(1)}m × ${state.height.toFixed(1)}m  |  ระยะยืนดู ${state.viewingDistance.toFixed(1)} เมตร`, w / 2, boxY + 118);
+
+          // Color calibration bars at bottom
+          const colors = ['#FF1744', '#FF9100', '#FFEA00', '#00E676', '#00E5FF', '#2979FF', '#D500F9'];
+          const barW = boxW / colors.length;
+          colors.forEach((c, idx) => {
+            sourceCtx.fillStyle = c;
+            sourceCtx.fillRect(boxX + idx * barW, boxY + boxH - 14, barW, 14);
+          });
+
+        } else if (state.contentType === 'conference') {
+          // Preset 2: Executive Keynote / Seminar Dashboard
+          const grad = sourceCtx.createLinearGradient(0, 0, w, h);
+          grad.addColorStop(0, '#0F172A');
+          grad.addColorStop(1, '#1E293B');
+          sourceCtx.fillStyle = grad;
+          sourceCtx.fillRect(0, 0, w, h);
+
+          // Top Banner
+          sourceCtx.fillStyle = '#0077FF';
+          sourceCtx.fillRect(0, 0, w, 42);
+          sourceCtx.fillStyle = '#FFFFFF';
+          sourceCtx.font = 'bold 16px Kanit, sans-serif';
+          sourceCtx.textAlign = 'left';
+          sourceCtx.fillText('  JLED ENTERPRISE SUMMIT 2026 — EXECUTIVE KEYNOTE', 14, 27);
+
+          // Animated Bar Chart on Left
+          const bars = [0.45, 0.68, 0.55, 0.85, 0.94];
+          const labels = ['Q1', 'Q2', 'Q3', 'Q4', '2026E'];
+          const chartX = 36;
+          const chartBottom = h - 42;
+          const chartH = 155;
+
+          sourceCtx.fillStyle = '#94A3B8';
+          sourceCtx.font = '600 13px Inter, sans-serif';
+          sourceCtx.fillText('REVENUE GROWTH & DISPLAY ROI (%)', chartX, 72);
+
+          bars.forEach((val, idx) => {
+            const animVal = val * (0.88 + 0.12 * Math.sin(timeSec * 2.5 + idx));
+            const bh = animVal * chartH;
+            const bx = chartX + idx * 44;
+            const by = chartBottom - bh;
+
+            const bGrad = sourceCtx.createLinearGradient(bx, by, bx, chartBottom);
+            bGrad.addColorStop(0, '#00E5FF');
+            bGrad.addColorStop(1, '#0055FF');
+            sourceCtx.fillStyle = bGrad;
+            sourceCtx.fillRect(bx, by, 28, bh);
+
+            sourceCtx.fillStyle = '#E2E8F0';
+            sourceCtx.font = 'bold 11px Inter, sans-serif';
+            sourceCtx.textAlign = 'center';
+            sourceCtx.fillText(labels[idx], bx + 14, chartBottom + 18);
+          });
+
+          // Right Side Speaker Card & KPI
+          sourceCtx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+          sourceCtx.strokeStyle = 'rgba(0, 229, 255, 0.45)';
+          sourceCtx.lineWidth = 1.5;
+          sourceCtx.fillRect(280, 62, 204, 185);
+          sourceCtx.strokeRect(280, 62, 204, 185);
+
+          sourceCtx.textAlign = 'left';
+          sourceCtx.fillStyle = '#00E676';
+          sourceCtx.font = 'bold 14px Kanit, sans-serif';
+          sourceCtx.fillText('● LIVE PRESENTATION', 298, 90);
+
+          sourceCtx.fillStyle = '#FFFFFF';
+          sourceCtx.font = 'bold 28px Inter, sans-serif';
+          sourceCtx.fillText('+248.5%', 298, 130);
+
+          sourceCtx.fillStyle = '#CBD5E1';
+          sourceCtx.font = '14px Kanit, sans-serif';
+          sourceCtx.fillText('ความคมชัดระดับ 4K Ultra HD', 298, 160);
+          sourceCtx.fillText('ตัวอักษรคมกริบ อ่านง่ายทุกมุมมอง', 298, 182);
+
+          sourceCtx.fillStyle = '#FF6B00';
+          sourceCtx.font = 'bold 13px Inter, sans-serif';
+          sourceCtx.fillText(`Model: JLED-P${state.pitch} PRO`, 298, 220);
+
+        } else {
+          // Preset 3: Vibrant Retail / Grand Sale Promotion
+          const grad = sourceCtx.createLinearGradient(0, 0, w, h);
+          grad.addColorStop(0, '#FF1744');
+          grad.addColorStop(0.5, '#FF6B00');
+          grad.addColorStop(1, '#FFB800');
+          sourceCtx.fillStyle = grad;
+          sourceCtx.fillRect(0, 0, w, h);
+
+          // Animated sunburst rays
+          sourceCtx.save();
+          sourceCtx.translate(w * 0.78, h * 0.5);
+          sourceCtx.rotate(timeSec * 0.4);
+          sourceCtx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+          for (let i = 0; i < 12; i++) {
+            sourceCtx.beginPath();
+            sourceCtx.moveTo(0, 0);
+            sourceCtx.arc(0, 0, 360, (i * Math.PI) / 6, (i * Math.PI) / 6 + 0.22);
+            sourceCtx.closePath();
+            sourceCtx.fill();
+          }
+          sourceCtx.restore();
+
+          // Promo Badges
+          sourceCtx.fillStyle = '#060911';
+          sourceCtx.fillRect(28, 30, 175, 36);
+          sourceCtx.fillStyle = '#00E5FF';
+          sourceCtx.font = 'bold 16px Kanit, sans-serif';
+          sourceCtx.textAlign = 'center';
+          sourceCtx.fillText('GRAND OPENING SALE', 28 + 87, 54);
+
+          sourceCtx.textAlign = 'left';
+          sourceCtx.fillStyle = '#FFFFFF';
+          sourceCtx.font = '900 54px Inter, sans-serif';
+          sourceCtx.fillText('SUPER DEAL', 28, 125);
+
+          sourceCtx.fillStyle = '#060911';
+          sourceCtx.font = 'bold 26px Kanit, sans-serif';
+          sourceCtx.fillText('สีสันสดใส สู้แสงแดด 6500 Nits', 30, 165);
+
+          // Pulsing Discount Circle
+          const scale = 1 + Math.sin(timeSec * 5) * 0.05;
+          sourceCtx.save();
+          sourceCtx.translate(w - 105, h / 2);
+          sourceCtx.scale(scale, scale);
+          sourceCtx.fillStyle = '#060911';
+          sourceCtx.beginPath();
+          sourceCtx.arc(0, 0, 68, 0, Math.PI * 2);
+          sourceCtx.fill();
+          sourceCtx.lineWidth = 4;
+          sourceCtx.strokeStyle = '#FFFFFF';
+          sourceCtx.stroke();
+
+          sourceCtx.fillStyle = '#FFB800';
+          sourceCtx.textAlign = 'center';
+          sourceCtx.font = '900 34px Inter, sans-serif';
+          sourceCtx.fillText('70%', 0, 6);
+          sourceCtx.fillStyle = '#FFFFFF';
+          sourceCtx.font = 'bold 14px Inter, sans-serif';
+          sourceCtx.fillText('OFF TODAY', 0, 28);
+          sourceCtx.restore();
+        }
+
+        sourceCtx.restore();
+      }
+
+      // Calculate Visual Pixelation Factor from Pitch + Viewing Distance
+      function getPixelSimulationMetrics() {
+        const optimalDist = +(state.pitch * 1.2).toFixed(2);
+        const ratio = state.viewingDistance / optimalDist;
+        // When ratio < 1.0 (viewer is closer than optimal distance), pixelation increases sharply
+        // Also higher P values have inherently larger physical LED spacing
+        let severity = 0;
+        if (ratio < 1.0) {
+          severity = Math.min(1.0, (1.0 - ratio) * 1.35 + (state.pitch / 18));
+        } else {
+          // Beyond optimal distance, image blends smoothly
+          severity = Math.max(0, (state.pitch / 22) * (1 / Math.pow(ratio, 1.4)));
+        }
+        return {
+          optimalDist,
+          ratio,
+          isOptimal: state.viewingDistance >= optimalDist,
+          severity // 0.0 (perfectly smooth) to 1.0 (heavily pixelated LED matrix)
+        };
+      }
+
+      // Render the LED Matrix Effect onto screenCanvas & Top-Right Loupe
+      function updateLEDMatrixTexture(timeSec) {
+        drawSourceContent(timeSec);
+
+        const cw = screenCanvas.width;
+        const ch = screenCanvas.height;
+        const metrics = getPixelSimulationMetrics();
+
+        // Determine effective cell size (in canvas pixels) for the LED simulation
+        // If severity is high (e.g. P8/P10 at 1.5m), cellSize goes up to 24px so individual LED lamps are unmistakable
+        const rawCell = 1 + Math.pow(metrics.severity, 1.35) * (5 + state.pitch * 2.1);
+        const cellSize = Math.max(1, Math.min(28, Math.round(rawCell)));
+
+        screenCtx.clearRect(0, 0, cw, ch);
+
+        if (cellSize <= 2) {
+          // Crisp, seamless high-res display when at/beyond optimal distance or P1.25
+          screenCtx.imageSmoothingEnabled = true;
+          screenCtx.drawImage(sourceCanvas, 0, 0, cw, ch);
+        } else {
+          // Downsample onto sampleCanvas then draw pixelated LED diodes
+          const cols = Math.max(16, Math.floor(cw / cellSize));
+          const rows = Math.max(9, Math.floor(ch / cellSize));
+          sampleCanvas.width = cols;
+          sampleCanvas.height = rows;
+          sampleCtx.imageSmoothingEnabled = false;
+          sampleCtx.drawImage(sourceCanvas, 0, 0, cols, rows);
+
+          // Draw blocky sub-sampled base first
+          screenCtx.fillStyle = '#050508';
+          screenCtx.fillRect(0, 0, cw, ch);
+
+          screenCtx.imageSmoothingEnabled = false;
+          screenCtx.drawImage(sampleCanvas, 0, 0, cols, rows, 0, 0, cw, ch);
+
+          // Overlay realistic black PCB mask & circular LED diode holes when close enough
+          const gapAlpha = Math.min(0.88, metrics.severity * 0.95);
+          screenCtx.strokeStyle = `rgba(4, 6, 12, ${gapAlpha})`;
+          screenCtx.lineWidth = Math.max(1, cellSize * 0.28);
+
+          // Horizontal & vertical LED matrix mask lines
+          screenCtx.beginPath();
+          for (let x = 0; x <= cw; x += cellSize) {
+            screenCtx.moveTo(x, 0);
+            screenCtx.lineTo(x, ch);
+          }
+          for (let y = 0; y <= ch; y += cellSize) {
+            screenCtx.moveTo(0, y);
+            screenCtx.lineTo(cw, y);
+          }
+          screenCtx.stroke();
+
+          // If very coarse (cellSize >= 7), add corner vignette per pixel to mimic discrete SMD LED lamps
+          if (cellSize >= 7) {
+            screenCtx.strokeStyle = 'rgba(0, 0, 0, 0.65)';
+            screenCtx.lineWidth = Math.max(1.5, cellSize * 0.22);
+            screenCtx.beginPath();
+            for (let x = 0; x <= cw; x += cellSize) {
+              screenCtx.moveTo(x, 0);
+              screenCtx.lineTo(x, ch);
+            }
+            for (let y = 0; y <= ch; y += cellSize) {
+              screenCtx.moveTo(0, y);
+              screenCtx.lineTo(cw, y);
+            }
+            screenCtx.stroke();
+          }
+        }
+
+        // Draw Cabinet Grid Overlay if enabled
+        if (state.showGrid) {
+          const cabSize = state.pitch >= 5 ? 0.96 : 0.5;
+          const cols = Math.max(1, Math.round(state.width / cabSize));
+          const rows = Math.max(1, Math.round(state.height / cabSize));
+
+          screenCtx.save();
+          screenCtx.strokeStyle = 'rgba(0, 229, 255, 0.32)';
+          screenCtx.lineWidth = 1.5;
+          screenCtx.setLineDash([6, 4]);
+
+          for (let i = 1; i < cols; i++) {
+            const gx = (i / cols) * cw;
+            screenCtx.beginPath();
+            screenCtx.moveTo(gx, 0);
+            screenCtx.lineTo(gx, ch);
+            screenCtx.stroke();
+          }
+          for (let j = 1; j < rows; j++) {
+            const gy = (j / rows) * ch;
+            screenCtx.beginPath();
+            screenCtx.moveTo(0, gy);
+            screenCtx.lineTo(cw, gy);
+            screenCtx.stroke();
+          }
+          screenCtx.restore();
+        }
+
+        // Update Top-Right Loupe Magnifier (always shows a zoomed crop of the center of the screen)
+        if (loupeCtx) {
+          const lw = loupeCanvas.width;
+          const lh = loupeCanvas.height;
+          loupeCtx.fillStyle = '#04060C';
+          loupeCtx.fillRect(0, 0, lw, lh);
+
+          // Loupe dot pitch visualization
+          const loupeDotStep = Math.max(3, Math.min(22, Math.round(2.5 + state.pitch * 1.8 / Math.sqrt(state.viewingDistance * 0.45))));
+          const cropW = 140;
+          const cropH = 105;
+          const sx = (sourceCanvas.width - cropW) / 2;
+          const sy = (sourceCanvas.height - cropH) / 2;
+
+          if (loupeDotStep <= 4 && metrics.isOptimal) {
+            loupeCtx.imageSmoothingEnabled = true;
+            loupeCtx.drawImage(sourceCanvas, sx, sy, cropW, cropH, 0, 0, lw, lh);
+          } else {
+            const lCols = Math.max(6, Math.floor(lw / loupeDotStep));
+            const lRows = Math.max(5, Math.floor(lh / loupeDotStep));
+            sampleCanvas.width = lCols;
+            sampleCanvas.height = lRows;
+            sampleCtx.drawImage(sourceCanvas, sx, sy, cropW, cropH, 0, 0, lCols, lRows);
+            const imgData = sampleCtx.getImageData(0, 0, lCols, lRows).data;
+
+            const radius = Math.max(1.2, (loupeDotStep * 0.42));
+            for (let r = 0; r < lRows; r++) {
+              for (let c = 0; c < lCols; c++) {
+                const idx = (r * lCols + c) * 4;
+                const red = imgData[idx];
+                const green = imgData[idx + 1];
+                const blue = imgData[idx + 2];
+                const cx = c * loupeDotStep + loupeDotStep / 2;
+                const cy = r * loupeDotStep + loupeDotStep / 2;
+
+                loupeCtx.fillStyle = `rgb(${red},${green},${blue})`;
+                loupeCtx.beginPath();
+                loupeCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+                loupeCtx.fill();
+              }
+            }
+          }
+        }
+
+        if (screenTexture) {
+          screenTexture.needsUpdate = true;
+        }
+      }
+
+      // ---------- 3. THREE.JS 3D SCENE SETUP ----------
+      const container = document.getElementById('three-container');
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x070b14);
+      scene.fog = new THREE.FogExp2(0x070b14, 0.018);
+
+      const camera = new THREE.PerspectiveCamera(
+        50,
+        container.clientWidth / container.clientHeight,
+        0.1,
+        150
+      );
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      container.appendChild(renderer.domElement);
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.06;
+      controls.maxPolarAngle = Math.PI / 2 - 0.01; // Prevent going under floor
+      controls.minDistance = 0.8;
+      controls.maxDistance = 45;
+
+      // Screen Texture
+      const screenTexture = new THREE.CanvasTexture(screenCanvas);
+      screenTexture.minFilter = THREE.LinearFilter;
+      screenTexture.magFilter = THREE.NearestFilter;
+
+      // Scene Groups
+      const environmentGroup = new THREE.Group();
+      const mountGroup = new THREE.Group();
+      const screenGroup = new THREE.Group();
+      const humanGroup = new THREE.Group();
+      scene.add(environmentGroup);
+      scene.add(mountGroup);
+      scene.add(screenGroup);
+      scene.add(humanGroup);
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.45);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.65);
+      dirLight.position.set(8, 16, 12);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 1024;
+      dirLight.shadow.mapSize.height = 1024;
+      scene.add(dirLight);
+
+      // Dynamic LED Screen Glow Light (casts colored bounce light onto floor & furniture)
+      const screenGlowLight = new THREE.PointLight(0x00e5ff, 1.6, 22, 1.5);
+      scene.add(screenGlowLight);
+
+      const screenFloorBounceLight = new THREE.SpotLight(0x00aaff, 1.8, 25, Math.PI / 2.2, 0.7, 1.5);
+      scene.add(screenFloorBounceLight);
+      scene.add(screenFloorBounceLight.target);
+
+      // Helper to dispose meshes cleanly when rebuilding groups
+      function clearGroup(group) {
+        while (group.children.length > 0) {
+          const child = group.children[0];
+          group.remove(child);
+          if (child.geometry) child.geometry.dispose();
+        }
+      }
+
+      // Build the 3D LED Screen & Bezel
+      let screenMesh = null;
+      let screenCenterY = 2.4;
+
+      function buildScreenAndMount() {
+        clearGroup(screenGroup);
+        clearGroup(mountGroup);
+
+        const w = state.width;
+        const h = state.height;
+
+        // Calculate bottom elevation depending on scene and mount
+        let bottomY = 1.0;
+        if (state.sceneType === 'boardroom') {
+          bottomY = 0.95;
+        } else if (state.sceneType === 'exhibition') {
+          bottomY = 0.85;
+        } else if (state.sceneType === 'outdoor') {
+          bottomY = state.mountType === 'truss' ? 2.2 : 1.8;
+        }
+        screenCenterY = bottomY + h / 2;
+
+        // LED Cabinet Housing (Black Aluminum Frame)
+        const depth = state.pitch >= 5 ? 0.14 : 0.08;
+        const housingGeo = new THREE.BoxGeometry(w + 0.08, h + 0.08, depth);
+        const housingMat = new THREE.MeshStandardMaterial({
+          color: 0x0f172a,
+          roughness: 0.4,
+          metalness: 0.75
+        });
+        const housingMesh = new THREE.Mesh(housingGeo, housingMat);
+        housingMesh.position.set(0, screenCenterY, -depth / 2);
+        housingMesh.castShadow = true;
+        housingMesh.receiveShadow = true;
+        screenGroup.add(housingMesh);
+
+        // Glowing Front LED Emissive Surface
+        const panelGeo = new THREE.PlaneGeometry(w, h);
+        const panelMat = new THREE.MeshBasicMaterial({
+          map: screenTexture
+        });
+        screenMesh = new THREE.Mesh(panelGeo, panelMat);
+        screenMesh.position.set(0, screenCenterY, 0.005);
+        screenGroup.add(screenMesh);
+
+        // Subtle cyan LED status rim glow behind housing
+        const rimGeo = new THREE.PlaneGeometry(w + 0.25, h + 0.25);
+        const rimMat = new THREE.MeshBasicMaterial({
+          color: 0x00e5ff,
+          transparent: true,
+          opacity: 0.12,
+          side: THREE.DoubleSide
+        });
+        const rimMesh = new THREE.Mesh(rimGeo, rimMat);
+        rimMesh.position.set(0, screenCenterY, -depth - 0.01);
+        screenGroup.add(rimMesh);
+
+        // Update Screen Glow Lights
+        screenGlowLight.position.set(0, screenCenterY, 1.2);
+        screenGlowLight.intensity = Math.min(3.0, 0.9 + (w * h) * 0.04);
+        screenGlowLight.distance = Math.max(15, w * 2.5);
+
+        screenFloorBounceLight.position.set(0, screenCenterY, 0.3);
+        screenFloorBounceLight.target.position.set(0, 0, Math.min(8, w * 0.9));
+
+        // Build Mounting Structure (Wall Mount / Ground Truss / Hanging)
+        const steelMat = new THREE.MeshStandardMaterial({
+          color: 0x334155,
+          metalness: 0.85,
+          roughness: 0.25
+        });
+        const darkSteelMat = new THREE.MeshStandardMaterial({
+          color: 0x1e293b,
+          metalness: 0.8,
+          roughness: 0.3
+        });
+
+        if (state.mountType === 'wall') {
+          // Wall Mount brackets behind screen
+          const bracketCount = Math.max(2, Math.ceil(w / 2.5));
+          for (let i = 0; i < bracketCount; i++) {
+            const bx = -w / 2 + 0.3 + (i / Math.max(1, bracketCount - 1)) * (w - 0.6);
+            const bGeo = new THREE.BoxGeometry(0.12, h * 0.85, 0.18);
+            const bMesh = new THREE.Mesh(bGeo, darkSteelMat);
+            bMesh.position.set(bx, screenCenterY, -depth - 0.09);
+            mountGroup.add(bMesh);
+          }
+        } else if (state.mountType === 'truss') {
+          // Ground Stack / Truss System (Vertical goalposts + baseplates + horizontal truss)
+          const postOffset = w / 2 + 0.22;
+          const totalH = bottomY + h + 0.35;
+
+          [-postOffset, postOffset].forEach((px) => {
+            // Vertical Truss Column
+            const colGeo = new THREE.BoxGeometry(0.28, totalH, 0.28);
+            const colMesh = new THREE.Mesh(colGeo, steelMat);
+            colMesh.position.set(px, totalH / 2, -depth / 2);
+            colMesh.castShadow = true;
+            mountGroup.add(colMesh);
+
+            // Heavy Ground Baseplate & Outriggers
+            const baseGeo = new THREE.BoxGeometry(0.9, 0.08, 1.4);
+            const baseMesh = new THREE.Mesh(baseGeo, darkSteelMat);
+            baseMesh.position.set(px, 0.04, -depth / 2);
+            mountGroup.add(baseMesh);
+          });
+
+          // Top & Bottom Horizontal Truss Beams
+          const topBeamGeo = new THREE.BoxGeometry(w + 0.8, 0.26, 0.26);
+          const topBeam = new THREE.Mesh(topBeamGeo, steelMat);
+          topBeam.position.set(0, totalH - 0.13, -depth / 2);
+          mountGroup.add(topBeam);
+
+          const botBeamGeo = new THREE.BoxGeometry(w + 0.6, 0.22, 0.24);
+          const botBeam = new THREE.Mesh(botBeamGeo, steelMat);
+          botBeam.position.set(0, bottomY - 0.12, -depth / 2);
+          mountGroup.add(botBeam);
+
+          // Support legs under bottom beam
+          const legCount = Math.max(2, Math.floor(w / 2));
+          for (let i = 0; i < legCount; i++) {
+            const lx = -w / 2 + 0.4 + (i / Math.max(1, legCount - 1)) * (w - 0.8);
+            const legGeo = new THREE.CylinderGeometry(0.05, 0.05, bottomY, 12);
+            const leg = new THREE.Mesh(legGeo, darkSteelMat);
+            leg.position.set(lx, bottomY / 2, -depth / 2);
+            mountGroup.add(leg);
+          }
+
+        } else if (state.mountType === 'hanging') {
+          // Overhead Rigging Truss Bar + Steel Hoist Cables
+          const rigBarY = bottomY + h + 0.55;
+          const ceilingY = rigBarY + 3.5;
+
+          // Overhead Horizontal Rigging Truss
+          const rigGeo = new THREE.BoxGeometry(w + 0.4, 0.25, 0.25);
+          const rigMesh = new THREE.Mesh(rigGeo, steelMat);
+          rigMesh.position.set(0, rigBarY, -depth / 2);
+          mountGroup.add(rigMesh);
+
+          // Suspension cables & electric chain hoists
+          const cableCount = Math.max(2, Math.ceil(w / 2.2) + 1);
+          for (let i = 0; i < cableCount; i++) {
+            const cx = -w / 2 + 0.2 + (i / (cableCount - 1)) * (w - 0.4);
+
+            // Shackle connector between screen top and rig bar
+            const linkGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.55, 8);
+            const linkMesh = new THREE.Mesh(linkGeo, steelMat);
+            linkMesh.position.set(cx, bottomY + h + 0.27, -depth / 2);
+            mountGroup.add(linkMesh);
+
+            // Wire rope up to ceiling
+            const wireGeo = new THREE.CylinderGeometry(0.012, 0.012, ceilingY - rigBarY, 8);
+            const wireMesh = new THREE.Mesh(wireGeo, steelMat);
+            wireMesh.position.set(cx, rigBarY + (ceilingY - rigBarY) / 2, -depth / 2);
+            mountGroup.add(wireMesh);
+          }
+        }
+      }
+
+      // Build the 3 Scene Environments (Boardroom, Exhibition, Outdoor)
+      function buildEnvironment() {
+        clearGroup(environmentGroup);
+
+        if (state.sceneType === 'boardroom') {
+          scene.background = new THREE.Color(0x080d1a);
+          scene.fog = new THREE.FogExp2(0x080d1a, 0.016);
+          ambientLight.intensity = 0.5;
+          dirLight.intensity = 0.55;
+
+          // Polished Dark Wood/Carpet Floor
+          const floorGeo = new THREE.PlaneGeometry(50, 50);
+          const floorMat = new THREE.MeshStandardMaterial({
+            color: 0x111827,
+            roughness: 0.25,
+            metalness: 0.2
+          });
+          const floor = new THREE.Mesh(floorGeo, floorMat);
+          floor.rotation.x = -Math.PI / 2;
+          floor.receiveShadow = true;
+          environmentGroup.add(floor);
+
+          // Executive Feature Wall behind LED screen
+          const wallGeo = new THREE.BoxGeometry(28, 12, 0.3);
+          const wallMat = new THREE.MeshStandardMaterial({
+            color: 0x1e293b,
+            roughness: 0.6,
+            metalness: 0.1
+          });
+          const wall = new THREE.Mesh(wallGeo, wallMat);
+          wall.position.set(0, 6, -0.32);
+          wall.receiveShadow = true;
+          environmentGroup.add(wall);
+
+          // Wood Acoustic Slats on Left & Right of Wall
+          const slatMat = new THREE.MeshStandardMaterial({ color: 0x3b2618, roughness: 0.5 });
+          for (let s = -12; s <= 12; s += 0.4) {
+            if (Math.abs(s) < 3.5) continue;
+            const slat = new THREE.Mesh(new THREE.BoxGeometry(0.15, 10, 0.08), slatMat);
+            slat.position.set(s, 5, -0.15);
+            environmentGroup.add(slat);
+          }
+
+          // Long Executive Conference Table (starts at z = 2.4m to z = 8.4m)
+          const tableTopGeo = new THREE.BoxGeometry(2.2, 0.08, 6.2);
+          const tableTopMat = new THREE.MeshStandardMaterial({
+            color: 0x271911,
+            roughness: 0.2,
+            metalness: 0.15
+          });
+          const tableTop = new THREE.Mesh(tableTopGeo, tableTopMat);
+          tableTop.position.set(0, 0.76, 5.5);
+          tableTop.castShadow = true;
+          tableTop.receiveShadow = true;
+          environmentGroup.add(tableTop);
+
+          // Table Pedestal Legs
+          const legMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.7, roughness: 0.3 });
+          [3.4, 7.6].forEach((lz) => {
+            const leg = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.74, 0.35), legMat);
+            leg.position.set(0, 0.37, lz);
+            environmentGroup.add(leg);
+          });
+
+          // Executive Chairs along both sides of the table
+          const chairMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
+          for (let cz = 3.2; cz <= 7.8; cz += 1.15) {
+            [-1.38, 1.38].forEach((cx) => {
+              const chairGroup = new THREE.Group();
+              const seat = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.07, 0.52), chairMat);
+              seat.position.y = 0.48;
+              const back = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.58, 0.5), chairMat);
+              back.position.set(cx < 0 ? -0.22 : 0.22, 0.78, 0);
+              const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.46, 8), legMat);
+              post.position.y = 0.23;
+              chairGroup.add(seat, back, post);
+              chairGroup.position.set(cx, 0, cz);
+              environmentGroup.add(chairGroup);
+            });
+          }
+
+        } else if (state.sceneType === 'exhibition') {
+          scene.background = new THREE.Color(0x090d16);
+          scene.fog = new THREE.FogExp2(0x090d16, 0.012);
+          ambientLight.intensity = 0.55;
+          dirLight.intensity = 0.75;
+
+          // Glossy Mall / Exhibition Hall Floor
+          const floorGeo = new THREE.PlaneGeometry(70, 70);
+          const floorMat = new THREE.MeshStandardMaterial({
+            color: 0x182234,
+            roughness: 0.18,
+            metalness: 0.35
+          });
+          const floor = new THREE.Mesh(floorGeo, floorMat);
+          floor.rotation.x = -Math.PI / 2;
+          floor.receiveShadow = true;
+          environmentGroup.add(floor);
+
+          // Floor Grid Helper for Scale
+          const grid = new THREE.GridHelper(60, 60, 0x00e5ff, 0x1e293b);
+          grid.position.y = 0.01;
+          grid.material.opacity = 0.25;
+          grid.material.transparent = true;
+          environmentGroup.add(grid);
+
+          // Raised Exhibition Stage Platform under Screen
+          const stageW = Math.max(8, state.width + 3);
+          const stageGeo = new THREE.BoxGeometry(stageW, 0.3, 3.6);
+          const stageMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3, metalness: 0.4 });
+          const stage = new THREE.Mesh(stageGeo, stageMat);
+          stage.position.set(0, 0.15, 0.5);
+          stage.receiveShadow = true;
+          environmentGroup.add(stage);
+
+          // Neon Cyan Stage Edge Strip
+          const stripGeo = new THREE.BoxGeometry(stageW + 0.02, 0.04, 0.04);
+          const stripMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
+          const strip = new THREE.Mesh(stripGeo, stripMat);
+          strip.position.set(0, 0.28, 2.31);
+          environmentGroup.add(strip);
+
+          // Exhibition Backdrop Frame & Side Pillars
+          const backW = Math.max(10, state.width + 2.5);
+          const backH = Math.max(6, state.height + 2.5);
+          const backWall = new THREE.Mesh(
+            new THREE.BoxGeometry(backW, backH, 0.25),
+            new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 })
+          );
+          backWall.position.set(0, backH / 2, -0.35);
+          environmentGroup.add(backWall);
+
+          // Reception Podium Counter at side
+          const counter = new THREE.Mesh(
+            new THREE.BoxGeometry(1.6, 1.05, 0.7),
+            new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 })
+          );
+          counter.position.set(stageW / 2 - 1.2, 0.82, 1.5);
+          environmentGroup.add(counter);
+
+        } else if (state.sceneType === 'outdoor') {
+          scene.background = new THREE.Color(0x03060c);
+          scene.fog = new THREE.FogExp2(0x03060c, 0.01);
+          ambientLight.intensity = 0.28;
+          dirLight.intensity = 0.35;
+
+          // Asphalt Road & Sidewalk
+          const groundGeo = new THREE.PlaneGeometry(100, 100);
+          const groundMat = new THREE.MeshStandardMaterial({
+            color: 0x0b0f17,
+            roughness: 0.7,
+            metalness: 0.1
+          });
+          const ground = new THREE.Mesh(groundGeo, groundMat);
+          ground.rotation.x = -Math.PI / 2;
+          ground.receiveShadow = true;
+          environmentGroup.add(ground);
+
+          // Road Lane Markings in front
+          const roadLineMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+          for (let rx = -35; rx <= 35; rx += 5) {
+            const dash = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.18), roadLineMat);
+            dash.rotation.x = -Math.PI / 2;
+            dash.position.set(rx, 0.02, 10);
+            environmentGroup.add(dash);
+          }
+
+          // Building Facade / Steel Billboard Structure behind screen
+          const bldgW = Math.max(16, state.width + 6);
+          const bldgH = Math.max(14, state.height + 6);
+          const bldgGeo = new THREE.BoxGeometry(bldgW, bldgH, 4);
+          const bldgMat = new THREE.MeshStandardMaterial({
+            color: 0x111827,
+            roughness: 0.65,
+            metalness: 0.3
+          });
+          const bldg = new THREE.Mesh(bldgGeo, bldgMat);
+          bldg.position.set(0, bldgH / 2, -2.35);
+          environmentGroup.add(bldg);
+
+          // Glowing City Windows on Surrounding Building
+          const winMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+          for (let wy = 2.5; wy < bldgH - 1.5; wy += 2.2) {
+            for (let wx = -bldgW / 2 + 1.5; wx <= bldgW / 2 - 1.5; wx += 2.4) {
+              if (Math.abs(wx) < state.width / 2 + 0.8 && wy < state.height + 3) continue;
+              const win = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.3), winMat);
+              win.position.set(wx, wy, -0.33);
+              environmentGroup.add(win);
+            }
+          }
+
+          // Night Stars / Distant Streetlights
+          const poleMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8 });
+          [-10, 10].forEach((px) => {
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 7.5, 8), poleMat);
+            pole.position.set(px, 3.75, 6);
+            const lamp = new THREE.Mesh(
+              new THREE.SphereGeometry(0.28, 12, 12),
+              new THREE.MeshBasicMaterial({ color: 0xffedd5 })
+            );
+            lamp.position.set(px, 7.6, 6);
+            environmentGroup.add(pole, lamp);
+          });
+        }
+      }
+
+      // Build 1.70m Human Scale Reference Model
+      function buildHumanModel() {
+        clearGroup(humanGroup);
+
+        const bodyMat = new THREE.MeshStandardMaterial({
+          color: 0x00e5ff,
+          roughness: 0.3,
+          metalness: 0.2,
+          emissive: 0x003344,
+          emissiveIntensity: 0.5
+        });
+        const suitMat = new THREE.MeshStandardMaterial({
+          color: 0x1e293b,
+          roughness: 0.5,
+          metalness: 0.2
+        });
+
+        // Standing Pedestal Ring on Floor
+        const ringGeo = new THREE.RingGeometry(0.32, 0.38, 32);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.y = 0.015;
+        humanGroup.add(ring);
+
+        // Legs (0.0m to 0.82m)
+        [-0.11, 0.11].forEach((lx) => {
+          const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.06, 0.82, 12), suitMat);
+          leg.position.set(lx, 0.41, 0);
+          leg.castShadow = true;
+          humanGroup.add(leg);
+        });
+
+        // Torso (0.82m to 1.40m)
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.58, 0.22), suitMat);
+        torso.position.set(0, 1.11, 0);
+        torso.castShadow = true;
+        humanGroup.add(torso);
+
+        // Arms
+        [-0.24, 0.24].forEach((ax) => {
+          const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.048, 0.56, 10), suitMat);
+          arm.position.set(ax, 1.10, 0);
+          humanGroup.add(arm);
+        });
+
+        // Head (tops out at exactly 1.70m)
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.115, 16, 16), bodyMat);
+        head.position.set(0, 1.585, 0);
+        head.castShadow = true;
+        humanGroup.add(head);
+
+        // Height Marker Line at 1.70m
+        const markerGeo = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0.3, 0, 0),
+          new THREE.Vector3(0.3, 1.7, 0),
+          new THREE.Vector3(0.18, 1.7, 0)
+        ]);
+        const markerLine = new THREE.Line(
+          markerGeo,
+          new THREE.LineBasicMaterial({ color: 0x00e5ff })
+        );
+        humanGroup.add(markerLine);
+
+        updateHumanPosition();
+      }
+
+      function updateHumanPosition() {
+        humanGroup.visible = state.showHuman;
+        // Place human figure slightly to the left of center so it doesn't block center text, at a realistic scale reference position
+        const humanZ = Math.min(Math.max(1.5, state.viewingDistance * 0.55), 8.0);
+        const humanX = -Math.min(2.2, state.width * 0.28);
+        const baseStageOffset = state.sceneType === 'exhibition' && humanZ < 2.2 ? 0.3 : 0;
+        humanGroup.position.set(humanX, baseStageOffset, humanZ);
+      }
+
+      // Smoothly move camera to match Viewing Distance Slider
+      function syncCameraToViewingDistance(angleMode) {
+        const d = state.viewingDistance;
+        const targetY = screenCenterY;
+        controls.target.set(0, targetY, 0);
+
+        if (angleMode === 'angle45') {
+          camera.position.set(d * 0.65, targetY + d * 0.12, d * 0.76);
+        } else if (angleMode === 'humanEye') {
+          camera.position.set(0, 1.65, d);
+          controls.target.set(0, screenCenterY, 0);
+        } else {
+          // Default straight front view at viewingDistance
+          camera.position.set(0, targetY, d);
+        }
+        controls.update();
+      }
+
+      // ---------- 4. LIVE SPEC CALCULATOR & UI UPDATER ----------
+      function getQualityBadge(resW, resH) {
+        if (resW >= 3840 || resH >= 2160) return { label: '4K ULTRA HD', color: 'from-[#FF6B00] to-[#FFB800]' };
+        if (resW >= 2560 || resH >= 1440) return { label: '2K QHD', color: 'from-[#00E5FF] to-[#0077FF]' };
+        if (resW >= 1920 || resH >= 1080) return { label: 'FULL HD 1080p', color: 'from-emerald-400 to-cyan-500' };
+        if (resW >= 1280 || resH >= 720) return { label: 'HD READY 720p', color: 'from-sky-400 to-blue-500' };
+        return { label: 'STANDARD SD', color: 'from-slate-400 to-slate-500' };
+      }
+
+      function updateDashboardAndUI() {
+        const w = state.width;
+        const h = state.height;
+        const area = w * h;
+        const p = state.pitch;
+
+        // Cabinet Calculation (0.5x0.5m for Indoor <= P4, 0.96x0.96m for Outdoor >= P5)
+        const isOutdoorPitch = p >= 5;
+        const cabSize = isOutdoorPitch ? 0.96 : 0.5;
+        const cabCols = Math.max(1, Math.round(w / cabSize));
+        const cabRows = Math.max(1, Math.round(h / cabSize));
+        const totalCabinets = cabCols * cabRows;
+
+        // Resolution Calculation: (meters * 1000) / Pitch
+        const resW = Math.round((w * 1000) / p);
+        const resH = Math.round((h * 1000) / p);
+        const totalPixelsM = ((resW * resH) / 1000000).toFixed(2);
+
+        // Viewing Distance Calculation: Optimal = Pitch * 1.2 meters
+        const metrics = getPixelSimulationMetrics();
+        const optimalDist = metrics.optimalDist;
+
+        // Power Consumption Estimation (kW)
+        // Indoor averages ~190W/sqm avg, 580W/sqm max; Outdoor averages ~290W/sqm avg, 850W/sqm max
+        const avgWattsPerSqm = isOutdoorPitch ? 290 : 195;
+        const maxWattsPerSqm = isOutdoorPitch ? 850 : 580;
+        const powerAvgKW = ((area * avgWattsPerSqm) / 1000).toFixed(2);
+        const powerMaxKW = ((area * maxWattsPerSqm) / 1000).toFixed(2);
+
+        // Update Top-Left & Loupe HUD
+        document.getElementById('hud-pitch-label').textContent = `P${p}`;
+        document.getElementById('hud-dist-label').textContent = `${state.viewingDistance.toFixed(1)} ม.`;
+        document.getElementById('selected-pitch-pill').textContent = `P${p}`;
+        document.getElementById('loupe-pitch-tag').textContent = `P${p}`;
+        document.getElementById('loupe-caption').innerHTML = `จำลองความถี่เม็ดไฟที่ระยะ <span class="text-white font-semibold">${state.viewingDistance.toFixed(1)}m</span>`;
+
+        const hudBadge = document.getElementById('hud-distance-badge');
+        const hudDot = document.getElementById('hud-status-dot');
+        const hudText = document.getElementById('hud-status-text');
+        const loupeTag = document.getElementById('loupe-overlay-tag');
+
+        const alertBox = document.getElementById('panel-viewing-alert');
+        const alertIcon = document.getElementById('panel-alert-icon');
+        const alertTitle = document.getElementById('panel-alert-title');
+        const alertDesc = document.getElementById('panel-alert-desc');
+
+        if (metrics.isOptimal) {
+          hudBadge.className = 'glass-panel px-3.5 py-2 rounded-xl flex items-center gap-2.5 border-l-4 border-l-emerald-400 pointer-events-auto transition-all duration-300';
+          hudDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping';
+          hudText.className = 'text-xs font-semibold text-emerald-400';
+          hudText.textContent = 'ภาพเนียนคมชัดเหมาะสม (Optimal)';
+
+          loupeTag.className = 'absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-black/75 text-emerald-400 border border-emerald-500/30';
+          loupeTag.textContent = 'Optimal';
+
+          alertBox.className = 'p-2.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 flex items-start gap-2.5 transition-all';
+          alertIcon.textContent = '✅';
+          alertTitle.className = 'font-bold text-emerald-300';
+          alertTitle.textContent = 'ภาพเนียนคมชัดเหมาะสม (Optimal)';
+          alertDesc.textContent = `ที่ระยะยืนดู ${state.viewingDistance.toFixed(1)} ม. (แนะนำ ≥ ${optimalDist.toFixed(1)} ม.) สำหรับจอ P${p} เม็ดพิกเซลจะผสานกันเนียนสนิท ภาพคมชัดสมจริง`;
+        } else {
+          hudBadge.className = 'glass-panel px-3.5 py-2 rounded-xl flex items-center gap-2.5 border-l-4 border-l-[#FF6B00] pointer-events-auto transition-all duration-300';
+          hudDot.className = 'w-2.5 h-2.5 rounded-full bg-[#FF6B00] animate-ping';
+          hudText.className = 'text-xs font-semibold text-[#FF6B00]';
+          hudText.textContent = 'ใกล้เกินไป เห็นเม็ดพิกเซล (Too Close)';
+
+          loupeTag.className = 'absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-black/80 text-[#FF6B00] border border-[#FF6B00]/40';
+          loupeTag.textContent = 'Too Close!';
+
+          alertBox.className = 'p-2.5 rounded-lg border border-[#FF6B00]/50 bg-[#FF6B00]/15 flex items-start gap-2.5 transition-all';
+          alertIcon.textContent = '⚠️';
+          alertTitle.className = 'font-bold text-[#FF6B00]';
+          alertTitle.textContent = 'ใกล้เกินไป เห็นเม็ดพิกเซล (Too Close)';
+          alertDesc.textContent = `ระยะ ${state.viewingDistance.toFixed(1)} ม. ใกล้กว่าระยะแนะนำของ P${p} (≥ ${optimalDist.toFixed(1)} ม.) แนะนำให้ถอยระยะยืนดู หรือลดค่า P ลง (เช่น P1.5 - P2.5)`;
+        }
+
+        // Update Sliders & Labels
+        document.getElementById('distance-val-display').textContent = state.viewingDistance.toFixed(1);
+        document.getElementById('optimal-marker-label').textContent = `★ แนะนำ ≥ ${optimalDist.toFixed(1)}m`;
+        document.getElementById('width-val').textContent = w.toFixed(2);
+        document.getElementById('height-val').textContent = h.toFixed(2);
+
+        // Aspect Ratio Tag
+        const ratioVal = w / h;
+        let ratioLabel = `${(w / h).toFixed(2)} : 1 Custom`;
+        if (Math.abs(ratioVal - 16 / 9) < 0.12) ratioLabel = '16:9 Widescreen';
+        else if (Math.abs(ratioVal - 21 / 9) < 0.15) ratioLabel = '21:9 Ultra Banner';
+        else if (Math.abs(ratioVal - 9 / 16) < 0.1) ratioLabel = '9:16 Vertical Poster';
+        document.getElementById('aspect-tag').textContent = ratioLabel;
+
+        // Environment Badge
+        const envBadge = document.getElementById('env-badge');
+        if (state.sceneType === 'outdoor') {
+          envBadge.textContent = 'Outdoor IP65 (6500 Nits)';
+          envBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-300 border border-orange-500/30';
+        } else {
+          envBadge.textContent = 'Indoor Pro (1000 Nits)';
+          envBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20';
+        }
+
+        // Spec Dashboard Values
+        document.getElementById('spec-dimensions').textContent = `${w.toFixed(2)} × ${h.toFixed(2)} m`;
+        document.getElementById('spec-area').textContent = area.toFixed(2);
+        document.getElementById('spec-cabinets-total').textContent = `${totalCabinets.toLocaleString()} ตู้`;
+        document.getElementById('spec-cabinets-grid').textContent = `${cabCols} คอลัมน์ × ${cabRows} แถว (${cabSize}×${cabSize}m)`;
+        document.getElementById('spec-resolution').textContent = `${resW.toLocaleString()} × ${resH.toLocaleString()} px`;
+        document.getElementById('spec-total-pixels').textContent = `รวม ${totalPixelsM} ล้านพิกเซล`;
+        document.getElementById('spec-rec-distance').textContent = `เริ่มต้น ≥ ${optimalDist.toFixed(1)} เมตร`;
+        document.getElementById('spec-pitch-detail').textContent = `คำนวณจาก P${p} × 1.2m`;
+        document.getElementById('spec-power-avg').textContent = `${powerAvgKW} kW`;
+        document.getElementById('spec-power-max').textContent = `${powerMaxKW} kW`;
+
+        const qBadge = getQualityBadge(resW, resH);
+        const resBadgeEl = document.getElementById('res-quality-badge');
+        resBadgeEl.textContent = qBadge.label;
+        resBadgeEl.className = `px-2 py-0.5 rounded text-[10px] font-extrabold bg-gradient-to-r ${qBadge.color} text-slate-950`;
+      }
+
+      // Generate Formatted Thai Quotation Spec Text
+      function generateQuotationSummaryText() {
+        const w = state.width;
+        const h = state.height;
+        const area = (w * h).toFixed(2);
+        const p = state.pitch;
+        const isOutdoorPitch = p >= 5;
+        const cabSize = isOutdoorPitch ? 0.96 : 0.5;
+        const cabCols = Math.max(1, Math.round(w / cabSize));
+        const cabRows = Math.max(1, Math.round(h / cabSize));
+        const totalCabinets = cabCols * cabRows;
+        const resW = Math.round((w * 1000) / p);
+        const resH = Math.round((h * 1000) / p);
+        const qBadge = getQualityBadge(resW, resH).label;
+        const optimalDist = (p * 1.2).toFixed(1);
+        const avgWattsPerSqm = isOutdoorPitch ? 290 : 195;
+        const maxWattsPerSqm = isOutdoorPitch ? 850 : 580;
+        const powerAvgKW = ((w * h * avgWattsPerSqm) / 1000).toFixed(2);
+        const powerMaxKW = ((w * h * maxWattsPerSqm) / 1000).toFixed(2);
+
+        return [
+          `📋 ใบสรุปสเปกจอ LED แบรนด์ JLED (3D Configurator)`,
+          `==========================================`,
+          `• รุ่นความละเอียด (Pixel Pitch): JLED P${p} (${isOutdoorPitch ? 'Outdoor กันน้ำ IP65' : 'Indoor High Refresh'})`,
+          `• สถานที่ติดตั้ง: ${SCENE_NAMES_TH[state.sceneType]}`,
+          `• รูปแบบโครงสร้าง: ${MOUNT_NAMES_TH[state.mountType]}`,
+          `• ขนาดหน้าจอรวม: กว้าง ${w.toFixed(2)} ม. × สูง ${h.toFixed(2)} ม. (พื้นที่ ${area} ตร.ม.)`,
+          `• จำนวนตู้ Cabinet: ${totalCabinets} ตู้ (${cabCols} คอลัมน์ × ${cabRows} แถว | ตู้ขนาด ${cabSize}×${cabSize} ม.)`,
+          `• ความละเอียดภาพ (Resolution): ${resW.toLocaleString()} × ${resH.toLocaleString()} px [${qBadge}]`,
+          `• ระยะการมองเห็นที่แนะนำ: เริ่มต้นที่ ${optimalDist} เมตรขึ้นไป (ระยะจำลองลูกค้า: ${state.viewingDistance.toFixed(1)} ม.)`,
+          `• อัตรากินไฟโดยประมาณ: เฉลี่ย ${powerAvgKW} kW | สูงสุด ${powerMaxKW} kW`,
+          `==========================================`,
+          `สนใจขอใบเสนอราคาพิเศษ / นัดหมายดูหน้างาน ติดต่อทีมวิศวกรฝ่ายขาย JLED`
+        ].join('\n');
+      }
+
+      // ---------- 5. EVENT LISTENERS & INTERACTIVE CONTROLS ----------
+      // Scene Switcher
+      document.querySelectorAll('.scene-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.scene-btn').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.sceneType = btn.getAttribute('data-scene');
+          buildEnvironment();
+          buildScreenAndMount();
+          updateHumanPosition();
+          syncCameraToViewingDistance();
+          updateDashboardAndUI();
+        });
+      });
+
+      // Installation Mount Type Switcher
+      document.querySelectorAll('.mount-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.mount-btn').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.mountType = btn.getAttribute('data-mount');
+          buildScreenAndMount();
+          updateDashboardAndUI();
+        });
+      });
+
+      // Pixel Pitch Buttons (P1.25 to P10)
+      document.querySelectorAll('.pitch-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.pitch-btn').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.pitch = parseFloat(btn.getAttribute('data-pitch'));
+          buildScreenAndMount();
+          updateDashboardAndUI();
+        });
+      });
+
+      // Viewing Distance Slider (1m - 30m) -> Automatically zooms 3D camera
+      const distanceSlider = document.getElementById('distance-slider');
+      distanceSlider.addEventListener('input', (e) => {
+        state.viewingDistance = parseFloat(e.target.value);
+        updateHumanPosition();
+        syncCameraToViewingDistance();
+        updateDashboardAndUI();
+      });
+
+      // Screen Width & Height Sliders
+      const widthSlider = document.getElementById('width-slider');
+      const heightSlider = document.getElementById('height-slider');
+
+      widthSlider.addEventListener('input', (e) => {
+        state.width = parseFloat(e.target.value);
+        buildEnvironment();
+        buildScreenAndMount();
+        updateHumanPosition();
+        updateDashboardAndUI();
+      });
+
+      heightSlider.addEventListener('input', (e) => {
+        state.height = parseFloat(e.target.value);
+        buildEnvironment();
+        buildScreenAndMount();
+        updateHumanPosition();
+        updateDashboardAndUI();
+      });
+
+      // Aspect Ratio Presets
+      function applyDimensions(w, h) {
+        state.width = w;
+        state.height = h;
+        widthSlider.value = w;
+        heightSlider.value = h;
+        buildEnvironment();
+        buildScreenAndMount();
+        updateHumanPosition();
+        updateDashboardAndUI();
+      }
+
+      document.getElementById('preset-16-9').addEventListener('click', () => applyDimensions(4.0, 2.25));
+      document.getElementById('preset-21-9').addEventListener('click', () => applyDimensions(7.0, 3.0));
+      document.getElementById('preset-9-16').addEventListener('click', () => applyDimensions(2.0, 3.5));
+
+      // Content Preset Buttons
+      document.querySelectorAll('.content-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.content-btn').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.contentType = btn.getAttribute('data-content');
+          document.getElementById('media-status-tag').textContent = 'Live Canvas 60fps';
+        });
+      });
+
+      // Custom Image / Video File Upload
+      const uploadBtn = document.getElementById('upload-media-btn');
+      const fileInput = document.getElementById('custom-media-input');
+      const fileNameLabel = document.getElementById('uploaded-file-name');
+      const customVideoEl = document.getElementById('custom-video-el');
+
+      uploadBtn.addEventListener('click', () => fileInput.click());
+
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        const url = URL.createObjectURL(file);
+        fileNameLabel.textContent = `กำลังแสดงไฟล์: ${file.name}`;
+        fileNameLabel.classList.remove('hidden');
+        document.querySelectorAll('.content-btn').forEach((b) => b.classList.remove('active'));
+
+        if (file.type.startsWith('video/')) {
+          customVideoEl.src = url;
+          customVideoEl.play().then(() => {
+            state.customVideoReady = true;
+            state.contentType = 'custom-video';
+            document.getElementById('media-status-tag').textContent = 'Custom Video';
+          }).catch(() => {
+            state.customVideoReady = false;
+          });
+        } else {
+          const img = new Image();
+          img.onload = () => {
+            state.customImage = img;
+            state.contentType = 'custom-image';
+            document.getElementById('media-status-tag').textContent = 'Custom Image';
+          };
+          img.src = url;
+        }
+      });
+
+      // Bottom Bar Camera Angle Buttons
+      document.getElementById('cam-front-btn').addEventListener('click', () => {
+        syncCameraToViewingDistance('front');
+      });
+      document.getElementById('cam-angle-btn').addEventListener('click', () => {
+        syncCameraToViewingDistance('angle45');
+      });
+      document.getElementById('cam-human-btn').addEventListener('click', () => {
+        syncCameraToViewingDistance('humanEye');
+      });
+      document.getElementById('cam-closeup-btn').addEventListener('click', () => {
+        state.viewingDistance = 1.5;
+        distanceSlider.value = 1.5;
+        syncCameraToViewingDistance('front');
+        updateDashboardAndUI();
+      });
+
+      // Toggle Human Scale Model (1.70m)
+      document.getElementById('toggle-human-btn').addEventListener('click', () => {
+        state.showHuman = !state.showHuman;
+        updateHumanPosition();
+        const txt = document.getElementById('human-status-txt');
+        txt.textContent = state.showHuman ? 'เปิด' : 'ปิด';
+        txt.className = state.showHuman ? 'text-[#00E5FF]' : 'text-slate-400';
+      });
+
+      // Toggle Cabinet Grid Overlay
+      document.getElementById('toggle-grid-btn').addEventListener('click', () => {
+        state.showGrid = !state.showGrid;
+        const txt = document.getElementById('grid-status-txt');
+        txt.textContent = state.showGrid ? 'เปิด' : 'ปิด';
+        txt.className = state.showGrid ? 'text-[#00E5FF]' : 'text-slate-400';
+      });
+
+      // Reset Default Button
+      document.getElementById('reset-default-btn').addEventListener('click', () => {
+        state.sceneType = 'boardroom';
+        state.mountType = 'wall';
+        state.pitch = 2.5;
+        state.viewingDistance = 5.0;
+        state.width = 4.0;
+        state.height = 2.5;
+        state.showHuman = true;
+        state.showGrid = true;
+        state.contentType = 'tech';
+
+        distanceSlider.value = 5.0;
+        widthSlider.value = 4.0;
+        heightSlider.value = 2.5;
+
+        document.querySelectorAll('.scene-btn').forEach((b) => {
+          b.classList.toggle('active', b.getAttribute('data-scene') === 'boardroom');
+        });
+        document.querySelectorAll('.mount-btn').forEach((b) => {
+          b.classList.toggle('active', b.getAttribute('data-mount') === 'wall');
+        });
+        document.querySelectorAll('.pitch-btn').forEach((b) => {
+          b.classList.toggle('active', parseFloat(b.getAttribute('data-pitch')) === 2.5);
+        });
+        document.querySelectorAll('.content-btn').forEach((b) => {
+          b.classList.toggle('active', b.getAttribute('data-content') === 'tech');
+        });
+
+        document.getElementById('human-status-txt').textContent = 'เปิด';
+        document.getElementById('grid-status-txt').textContent = 'เปิด';
+
+        buildEnvironment();
+        buildScreenAndMount();
+        updateHumanPosition();
+        syncCameraToViewingDistance('front');
+        updateDashboardAndUI();
+      });
+
+      // Quotation Modal & Clipboard Copy
+      const quoteModal = document.getElementById('quote-modal');
+      const quoteSummaryText = document.getElementById('quote-summary-text');
+      const copyBanner = document.getElementById('copy-success-banner');
+
+      function copySpecToClipboard() {
+        const text = generateQuotationSummaryText();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+        } else {
+          fallbackCopy(text);
+        }
+        copyBanner.classList.remove('hidden');
+      }
+
+      function fallbackCopy(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+        } catch (err) {
+          // Ignore clipboard errors in restricted frames
+        }
+        document.body.removeChild(ta);
+      }
+
+      document.getElementById('open-quote-modal-btn').addEventListener('click', () => {
+        quoteSummaryText.textContent = generateQuotationSummaryText();
+        copyBanner.classList.add('hidden');
+        quoteModal.classList.remove('hidden');
+        quoteModal.classList.add('flex');
+      });
+
+      document.getElementById('close-quote-modal-btn').addEventListener('click', () => {
+        quoteModal.classList.add('hidden');
+        quoteModal.classList.remove('flex');
+      });
+
+      quoteModal.addEventListener('click', (e) => {
+        if (e.target === quoteModal) {
+          quoteModal.classList.add('hidden');
+          quoteModal.classList.remove('flex');
+        }
+      });
+
+      document.getElementById('copy-spec-btn').addEventListener('click', () => {
+        copySpecToClipboard();
+      });
+
+      document.getElementById('line-oa-btn').addEventListener('click', () => {
+        copySpecToClipboard();
+        copyBanner.innerHTML = '✅ คัดลอกสเปกเรียบร้อย! พร้อมส่งให้ทีมงาน <strong>LINE OA: @JLED</strong> เพื่อรับใบเสนอราคาทันที';
+      });
+
+      // Handle Window Resize
+      window.addEventListener('resize', () => {
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        if (w > 0 && h > 0) {
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setSize(w, h);
+        }
+      });
+
+      // ---------- 6. INITIALIZE & START RENDER LOOP ----------
+      buildEnvironment();
+      buildScreenAndMount();
+      buildHumanModel();
+      syncCameraToViewingDistance('front');
+      updateDashboardAndUI();
+
+      let startTime = performance.now();
+      function animate(now) {
+        requestAnimationFrame(animate);
+        const elapsedSec = (now - startTime) / 1000;
+
+        updateLEDMatrixTexture(elapsedSec);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      requestAnimationFrame(animate);
+    })();
+  </script>
+</body>
+</html>
