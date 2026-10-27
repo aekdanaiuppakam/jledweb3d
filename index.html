@@ -128,6 +128,254 @@
       color: #060911;
       font-weight: 700;
     }
+    /* Studio refinement: restrained surfaces, legible controls, and a clear viewport. */
+    body {
+      background: #0b1119;
+      color: #e9eef4;
+    }
+    #viewport-wrapper { background: #101923; }
+    #three-container canvas { display: block; }
+    .glass-panel {
+      background: rgba(15, 22, 31, 0.95);
+      border-color: rgba(154, 177, 197, 0.17);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .glass-card {
+      background: #151e29;
+      border-color: #2a3644;
+      transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+    }
+    .glass-card:hover { border-color: #3b5063; }
+    .neon-cyan-glow, .neon-orange-glow { box-shadow: none; }
+    .viewport-header {
+      width: calc(100% - 24px);
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+    .brand-panel { min-height: 58px; max-width: 100%; }
+    .brand-mark { background: #345c74 !important; box-shadow: none !important; }
+    .brand-mark > div { background: #111923; }
+    .version-label { color: #a8c7d9; background: #1b3242; border-color: #36566a; }
+    .mode-switch { background: #0e151e; border-color: #314052; white-space: nowrap; }
+    .mode-switch button { min-height: 30px; padding: 5px 10px; }
+    .mode-switch button.bg-\[\#00E5FF\] { background: #427d9d !important; color: #fff !important; }
+    #hud-distance-badge {
+      min-height: 58px;
+      border-left-width: 2px;
+      border-radius: 12px;
+    }
+    #hud-status-dot { animation: none !important; box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.12); }
+    .viewport-toolbar {
+      top: calc(100% + 9px) !important;
+      left: 0 !important;
+      right: auto !important;
+      transform: none !important;
+      max-width: min(100%, 760px);
+    }
+    .viewport-toolbar > .glass-panel {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      scrollbar-width: thin;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.2);
+    }
+    .viewport-toolbar .lighting-preset-btn,
+    .camera-toolbar button {
+      min-height: 30px;
+      border-radius: 7px;
+    }
+    .viewport-toolbar .lighting-preset-btn.active {
+      background: #315a73 !important;
+      border: 1px solid #4d92b3 !important;
+      color: #eef8ff !important;
+    }
+    .viewport-toolbar .secondary-light { color: #8796a6; }
+    .viewport-loupe { box-shadow: 0 8px 25px rgba(0,0,0,.24); }
+    .camera-toolbar { min-height: 45px; max-width: calc(100% - 132px); scrollbar-width: thin; }
+    .camera-toolbar button { padding: 6px 10px; }
+    .camera-toolbar button.is-active { background: #315a73; color: #f1f8fc; border-color: #4d92b3; }
+    .viewport-overlays { position: relative; min-width: 114px; }
+    .viewport-overlays > summary,
+    .tools-menu > summary,
+    .scene-picker > summary,
+    .advanced-disclosure > summary { list-style: none; cursor: pointer; }
+    .viewport-overlays > summary::-webkit-details-marker,
+    .tools-menu > summary::-webkit-details-marker,
+    .scene-picker > summary::-webkit-details-marker,
+    .advanced-disclosure > summary::-webkit-details-marker { display: none; }
+    .viewport-overlays > summary { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 5px 8px; font-size: 12px; color: #d0dbe5; white-space: nowrap; }
+    .viewport-overlays[open] > summary span,
+    .tools-menu[open] > summary span,
+    .scene-picker[open] > summary span:last-child,
+    .advanced-disclosure[open] > summary span { transform: rotate(180deg); }
+    .viewport-overlays > summary span,
+    .tools-menu > summary span,
+    .scene-picker > summary span:last-child,
+    .advanced-disclosure > summary span { transition: transform 180ms ease; }
+    .viewport-overlays:not([open]) .overlay-controls,
+    .tools-menu:not([open]) .tools-menu-content,
+    .scene-picker:not([open]) .scene-picker-content,
+    .advanced-disclosure:not([open]) .advanced-disclosure-content { display: none; }
+    .overlay-controls {
+      position: absolute;
+      bottom: calc(100% + 9px);
+      right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      width: 240px;
+      padding: 10px;
+      border: 1px solid #344656;
+      border-radius: 11px;
+      background: #151f2a;
+      box-shadow: 0 14px 32px rgba(0,0,0,.35);
+    }
+    .overlay-controls button { justify-content: space-between; min-height: 32px; border-color: #40576a; background: #1b2a37; }
+    .overlay-controls > div { display: none; }
+    .config-panel {
+      background: #101720;
+      border-color: #304052;
+      box-shadow: -10px 0 30px rgba(0,0,0,.14);
+    }
+    .config-header {
+      position: relative;
+      z-index: 40;
+      min-height: 64px;
+      gap: 12px;
+      background: #111a24;
+      border-color: #2d3c4b;
+    }
+    .config-header-actions { flex: none; }
+    .config-header-actions > button,
+    .tools-menu > summary {
+      min-height: 33px;
+      padding: 6px 9px;
+      border: 1px solid #344758;
+      border-radius: 8px;
+      background: #1b2936;
+      color: #d8e5ef;
+      font-size: 12px;
+      line-height: 1.3;
+    }
+    .tools-menu { position: relative; }
+    .tools-menu > summary { display: flex; align-items: center; gap: 8px; }
+    .tools-menu-content {
+      position: absolute;
+      top: calc(100% + 7px);
+      right: 0;
+      z-index: 50;
+      display: grid;
+      gap: 4px;
+      width: 190px;
+      padding: 8px;
+      border: 1px solid #344656;
+      border-radius: 11px;
+      background: #18232f;
+      box-shadow: 0 15px 35px rgba(0,0,0,.38);
+    }
+    .tools-menu-content button { width: 100%; justify-content: flex-start; min-height: 34px; border-color: transparent; background: transparent; color: #d6e3ed; font-size: 12px; }
+    .tools-menu-content button:hover { background: #253849; border-color: #405d72; }
+    .config-scroll { padding-top: 16px; padding-bottom: 20px; }
+    .config-section { padding: 16px; border-left-width: 1px; border-radius: 12px; }
+    .config-section > div:first-child h3 { color: #f0f4f8; font-size: 12px; letter-spacing: .035em; line-height: 1.45; }
+    .section-step { display: inline-flex; width: 24px; height: 24px; align-items: center; justify-content: center; border: 1px solid #3d6176; border-radius: 7px; color: #a7cee3; background: #1b3342; font: 600 10px 'Inter', sans-serif; }
+    .config-panel [class*="text-[9px]"] { font-size: 11px; }
+    .config-panel [class*="text-[10px]"] { font-size: 11px; }
+    .config-panel [class*="text-[11px]"] { font-size: 12px; }
+    .config-section label { color: #aebdcb; line-height: 1.5; }
+    .config-section button { min-height: 30px; }
+    .config-section .option-btn,
+    .config-section .shape-btn,
+    .config-section .pitch-btn { background: #1b2733; border-color: #3b4d5f; }
+    .config-section .option-btn:hover,
+    .config-section .shape-btn:hover,
+    .config-section .pitch-btn:hover,
+    .scene-card:hover { border-color: #5a879e; background: #213443; }
+    .config-section .option-btn.active,
+    .config-section .shape-btn.active,
+    .config-section .pitch-btn.active,
+    .config-section .filter-tab.active {
+      background: #28485d;
+      border-color: #5b9bbb;
+      color: #f3faff;
+      box-shadow: none;
+    }
+    .scene-picker > summary,
+    .advanced-disclosure > summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 9px;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 1px solid #3b5062;
+      border-radius: 9px;
+      background: #1b2936;
+      color: #c6d4df;
+      font-size: 12px;
+    }
+    .scene-picker > summary strong { margin-left: auto; color: #edf5fa; font-weight: 600; }
+    .scene-picker-content { padding-top: 10px; }
+    #scene-cards-container { gap: 8px; max-height: 240px; }
+    .scene-card { min-height: 53px; background: #1c2935; border-color: #394b5d; }
+    .scene-card.active { background: #28495d !important; border-color: #67a6c3 !important; box-shadow: inset 3px 0 0 #81bdd8; }
+    .scene-card.active div div:first-child { color: #edf8ff !important; }
+    .scene-card .group-hover\:scale-110:hover { transform: none; }
+    .advanced-disclosure-content { padding-top: 12px; }
+    .spec-section { background: #172331; border-color: #425a6c; }
+    .spec-section > .grid > div { background: #1d2a37; border-color: #35495a; padding: 12px; }
+    .spec-section > .grid > div > div:nth-child(2) { font-size: 15px; line-height: 1.5; }
+    #res-quality-badge { background: #6c92a8 !important; color: #081620 !important; box-shadow: none; }
+    #selected-pitch-pill { background: #5a382c; border-color: #a86745; color: #ffb681; }
+    #env-badge { background: #243e4b; border-color: #42667a; color: #bfdbeb; }
+    input[type="range"] { height: 5px; background: #2c3d4d; border: 0; }
+    input[type="range"]::-webkit-slider-thumb { width: 17px; height: 17px; background: #7bb4ce; border: 3px solid #152431; box-shadow: 0 0 0 1px #91c7df; }
+    input[type="range"].orange-slider::-webkit-slider-thumb { background: #e59563; box-shadow: 0 0 0 1px #e3a37d; }
+    input[type="range"]::-moz-range-thumb { width: 15px; height: 15px; border-radius: 50%; background: #7bb4ce; border: 2px solid #152431; }
+    #open-quote-modal-btn { background: #e78b4d !important; color: #17202a; box-shadow: 0 5px 14px rgba(0,0,0,.18); letter-spacing: 0; }
+    #open-quote-modal-btn:hover { background: #f19c61 !important; }
+    .config-panel > div:last-child { background: #111a24; border-color: #2d3c4b; }
+    [id$="-modal"] > div { box-shadow: 0 26px 75px rgba(0,0,0,.5); }
+    button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible {
+      outline: 2px solid #8bc9e7;
+      outline-offset: 2px;
+    }
+    @media (max-width: 1400px) and (min-width: 1024px) {
+      .viewport-loupe { display: none !important; }
+    }
+    @media (max-width: 1023px) {
+      .viewport-header { width: calc(100% - 24px); }
+      .viewport-loupe { top: 85px; }
+      .config-panel { box-shadow: 0 -7px 26px rgba(0,0,0,.16); }
+    }
+    @media (max-width: 640px) {
+      .brand-panel { gap: 7px; padding: 8px 9px; }
+      .brand-panel h1 { font-size: 13px; }
+      .brand-panel p, .version-label { display: none; }
+      .brand-mark { width: 31px; height: 31px; }
+      .mode-switch { margin-left: 0; }
+      .mode-switch button { padding: 4px 7px; font-size: 11px; }
+      #hud-distance-badge { min-height: 42px; padding: 5px 9px; }
+      #hud-status-text { display: none; }
+      .viewport-toolbar { max-width: 100%; }
+      .viewport-toolbar > .glass-panel { padding: 5px 7px; }
+      .viewport-toolbar .secondary-light { display: none; }
+      .camera-toolbar { max-width: calc(100% - 118px); }
+      .camera-toolbar button { min-height: 34px; }
+      .viewport-overlays { min-width: 104px; }
+      .config-header { padding: 10px 12px; }
+      .config-scroll { padding: 12px; }
+      .config-section { padding: 13px; }
+      .config-section > div:first-child h3 { font-size: 11px; }
+      #scene-cards-container { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
   </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex flex-col lg:flex-row relative bg-[#060911]">
@@ -152,10 +400,10 @@
     <div id="three-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
 
     <!-- Top-Left Brand Header & Live Status Overlay -->
-    <div class="absolute top-3 left-3 right-3 lg:right-auto z-20 flex flex-wrap items-center justify-between lg:justify-start gap-2.5 pointer-events-none">
+    <div class="viewport-header absolute top-3 left-3 right-3 lg:right-auto z-20 flex flex-wrap items-center justify-between lg:justify-start gap-2.5 pointer-events-none">
       <!-- Brand Badge -->
-      <div class="glass-panel px-3.5 py-2 rounded-xl flex items-center gap-3 pointer-events-auto">
-        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-[#00E5FF] via-[#0077FF] to-[#FF6B00] p-0.5 flex items-center justify-center shadow-lg">
+      <div class="brand-panel glass-panel px-3.5 py-2 rounded-xl flex items-center gap-3 pointer-events-auto">
+        <div class="brand-mark w-9 h-9 rounded-lg bg-gradient-to-br from-[#00E5FF] via-[#0077FF] to-[#FF6B00] p-0.5 flex items-center justify-center shadow-lg">
           <div class="w-full h-full bg-[#060911] rounded-[6px] flex items-center justify-center font-extrabold text-sm tracking-tighter text-white">
             J<span class="text-[#00E5FF]">LED</span>
           </div>
@@ -163,29 +411,30 @@
         <div>
           <div class="flex items-center gap-2">
             <h1 class="font-bold text-sm sm:text-base tracking-wide text-white leading-none">JLED DESIGN STUDIO</h1>
-            <span class="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30">PRO v4.1</span>
+            <span class="version-label text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30">PRO v4.1</span>
           </div>
           <p class="text-[11px] text-slate-400 leading-tight mt-0.5">ระบบจำลองการติดตั้งจอ LED และคำนวณสเปกเชิงวิศวกรรมแม่นยำ</p>
         </div>
         <!-- Mode Switcher Pill (Phase 08) -->
-        <div class="flex items-center rounded-xl bg-slate-900/90 p-0.5 border border-slate-700/80 text-[11px] ml-2">
-          <button id="mode-customer-btn" type="button" class="px-2 py-1 rounded-lg font-semibold transition text-slate-400 hover:text-white">👤 ลูกค้า</button>
-          <button id="mode-sales-btn" type="button" class="px-2 py-1 rounded-lg font-semibold transition bg-[#00E5FF] text-slate-950 font-bold">🛠️ วิศวกร</button>
+        <div class="mode-switch flex items-center rounded-xl bg-slate-900/90 p-0.5 border border-slate-700/80 text-[11px] ml-2" role="group" aria-label="โหมดการตั้งค่า">
+          <button id="mode-customer-btn" type="button" class="px-2 py-1 rounded-lg font-semibold transition text-slate-400 hover:text-white" title="โหมดทั่วไปสำหรับลูกค้า">แบบง่าย</button>
+          <button id="mode-sales-btn" type="button" class="px-2 py-1 rounded-lg font-semibold transition bg-[#00E5FF] text-slate-950 font-bold" title="โหมดขั้นสูงสำหรับวิศวกร">ขั้นสูง</button>
         </div>
       </div>
 
       <!-- Viewport Floating Studio Toolbar: Lighting, Showcase 360°, Quality, Fullscreen (v4.1) -->
-      <div class="hidden md:flex absolute top-3 left-1/2 -translate-x-1/2 z-20 items-center pointer-events-auto">
+      <div class="viewport-toolbar flex absolute top-3 left-1/2 -translate-x-1/2 z-20 items-center pointer-events-auto">
         <div class="glass-panel px-3 py-1.5 rounded-xl flex items-center gap-2 border border-slate-700/80 shadow-2xl text-xs">
           <!-- Lighting Preset Selector -->
           <div class="flex items-center gap-1">
             <span class="text-[11px] text-slate-400 font-medium">💡 แสง:</span>
             <div class="flex items-center rounded-lg bg-slate-900/90 p-0.5 border border-slate-800">
-              <button type="button" data-lighting="daylight" class="lighting-preset-btn px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="กลางวัน (Daylight)">☀️ กลางวัน</button>
-              <button type="button" data-lighting="sunset" class="lighting-preset-btn px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="อัสดง (Sunset)">🌅 อัสดง</button>
-              <button type="button" data-lighting="night" class="lighting-preset-btn px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="กลางคืน (Night)">🌙 กลางคืน</button>
-              <button type="button" data-lighting="warm" class="lighting-preset-btn px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="วอร์ม 3000K (Warm)">🕯️ วอร์ม</button>
-              <button type="button" data-lighting="cool" class="lighting-preset-btn active px-2 py-0.5 rounded text-[10px] font-semibold bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/40 transition" title="คูลไวท์ 5000K (Cool)">💡 คูล</button>
+              <button type="button" data-lighting="daylight" class="lighting-preset-btn px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="Day lighting">Day</button>
+              <button type="button" data-lighting="warm" class="lighting-preset-btn px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="Warm interior lighting">Warm</button>
+              <button type="button" data-lighting="cool" class="lighting-preset-btn active px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="Cool interior lighting">Cool</button>
+              <button type="button" data-lighting="presentation" class="lighting-preset-btn px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="Presentation lighting">Present</button>
+              <button type="button" data-lighting="sunset" class="lighting-preset-btn secondary-light px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="Sunset lighting">Sunset</button>
+              <button type="button" data-lighting="night" class="lighting-preset-btn secondary-light px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition" title="Night lighting">Night</button>
             </div>
           </div>
           <div class="w-px h-4 bg-slate-700/80"></div>
@@ -229,7 +478,7 @@
     </div>
 
     <!-- Top-Right Loupe: Real-time LED Matrix Magnifier (Zoomed Pixel Preview) -->
-    <div class="hidden sm:flex absolute top-20 lg:top-3 right-3 z-20 glass-panel p-2.5 rounded-xl flex-col items-center gap-1.5 w-40 pointer-events-auto">
+    <div class="viewport-loupe hidden sm:flex absolute top-20 lg:top-3 right-3 z-20 glass-panel p-2.5 rounded-xl flex-col items-center gap-1.5 w-40 pointer-events-auto">
       <div class="w-full flex items-center justify-between text-[10px] text-slate-300 font-medium px-0.5">
         <span class="flex items-center gap-1">
           <span class="w-1.5 h-1.5 rounded-full bg-[#FF6B00]"></span>
@@ -251,30 +500,32 @@
     <!-- Bottom Status & Camera Control Bar -->
     <div class="absolute bottom-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
       <!-- Camera Preset Views -->
-      <div class="glass-panel px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 pointer-events-auto overflow-x-auto max-w-full">
+      <div class="camera-toolbar glass-panel px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 pointer-events-auto overflow-x-auto max-w-full" role="group" aria-label="มุมกล้อง">
         <span class="text-[11px] text-slate-400 px-1.5 hidden sm:inline font-medium">มุมกล้อง:</span>
-        <button id="cam-front-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/40 hover:bg-[#00E5FF]/25 transition flex items-center gap-1 whitespace-nowrap">
-          <span>🎯</span> มุมตรง
+        <button id="cam-front-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-slate-200 border border-slate-700 hover:border-[#00E5FF]/50 transition flex items-center gap-1 whitespace-nowrap">
+          <span>▣</span> Front
         </button>
         <button id="cam-angle-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-slate-200 border border-slate-700 hover:border-[#00E5FF]/50 transition flex items-center gap-1 whitespace-nowrap">
-          <span>📐</span> เฉียง 45°
+          <span>◩</span> Hero
         </button>
         <button id="cam-human-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-slate-200 border border-slate-700 hover:border-[#00E5FF]/50 transition flex items-center gap-1 whitespace-nowrap">
-          <span>👁️</span> สายตาคน (1.65m)
+          <span>◉</span> Human Eye
         </button>
         <button id="cam-top-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-slate-200 border border-slate-700 hover:border-[#00E5FF]/50 transition flex items-center gap-1 whitespace-nowrap">
-          <span>🛸</span> มุมบน Bird-Eye
+          <span>⌗</span> Technical
         </button>
         <button id="cam-side-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-slate-200 border border-slate-700 hover:border-[#00E5FF]/50 transition flex items-center gap-1 whitespace-nowrap">
-          <span>📏</span> มุมข้าง Side 90°
+          <span>↔</span> Side
         </button>
         <button id="cam-closeup-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/80 text-amber-300 border border-amber-500/30 hover:border-amber-400 transition flex items-center gap-1 whitespace-nowrap">
-          <span>🔍</span> ซูมเม็ดไฟ (1.2m)
+          <span>⊕</span> Detail
         </button>
       </div>
 
       <!-- Quick Scene Toggles (Human Reference, Cabinet Grid, 3D Measurements) -->
-      <div class="glass-panel px-2.5 py-1.5 rounded-xl flex items-center gap-2 pointer-events-auto">
+      <details class="viewport-overlays glass-panel px-2.5 py-1.5 rounded-xl pointer-events-auto">
+        <summary>View overlays <span aria-hidden="true">⌃</span></summary>
+        <div class="overlay-controls flex items-center gap-2">
         <button id="toggle-measure-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#00E5FF]/20 text-white border border-[#00E5FF] transition flex items-center gap-1.5">
           <span>📏</span> เส้นวัด 3D: <strong id="measure-status-txt" class="text-[#00E5FF]">เปิด</strong>
         </button>
@@ -287,23 +538,30 @@
         <div class="hidden xl:flex items-center gap-1.5 text-[11px] text-slate-400 pl-2 border-l border-slate-700">
           <span>🖱️ คลิกซ้ายหมุน • คลิกขวาเลื่อน • ลูกกลิ้งซูม</span>
         </div>
-      </div>
+        </div>
+      </details>
     </div>
   </div>
 
   <!-- ================= RIGHT: CONTROL PANEL & LIVE SPEC DASHBOARD ================= -->
-  <aside class="w-full lg:w-[440px] xl:w-[480px] h-[48vh] lg:h-full glass-panel border-t lg:border-t-0 lg:border-l border-slate-800/90 flex flex-col z-30 shrink-0">
+  <aside class="config-panel w-full lg:w-[440px] xl:w-[480px] h-[48vh] lg:h-full glass-panel border-t lg:border-t-0 lg:border-l border-slate-800/90 flex flex-col z-30 shrink-0">
     
     <!-- Control Panel Navigation Header with Phase 02 Tools -->
-    <div class="px-4 pt-3 pb-2 border-b border-slate-800/80 flex items-center justify-between bg-slate-950/50">
+    <div class="config-header px-4 pt-3 pb-2 border-b border-slate-800/80 flex items-center justify-between bg-slate-950/50">
       <div class="flex items-center gap-2">
-        <span class="w-2 h-5 rounded-full bg-gradient-to-b from-[#00E5FF] to-[#FF6B00]"></span>
-        <h2 class="text-sm font-bold tracking-wide text-white uppercase">แผงควบคุมและสเปกจอ JLED</h2>
+        <span class="w-1 h-5 rounded-full bg-[#FF6B00]"></span>
+        <div>
+          <div class="text-[10px] uppercase tracking-widest text-slate-500">Configuration</div>
+          <h2 class="text-sm font-semibold tracking-wide text-white">ออกแบบจอ LED</h2>
+        </div>
       </div>
-      <div class="flex items-center gap-1.5 flex-wrap">
+      <div class="config-header-actions flex items-center gap-1.5">
         <button id="open-project-store-btn" type="button" title="บันทึก / เปิดโครงการ (.jled.json)" class="text-[11px] text-sky-300 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-sky-500/40 hover:border-sky-400">
           <span>💾</span> โครงการ
         </button>
+        <details class="tools-menu">
+          <summary aria-label="เครื่องมือเพิ่มเติม">เครื่องมือ <span aria-hidden="true">⌄</span></summary>
+          <div class="tools-menu-content">
         <button id="export-snapshot-btn" type="button" title="บันทึกภาพถ่าย 3D Snapshot PNG" class="text-[11px] text-violet-300 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-violet-500/40 hover:border-violet-400">
           <span>📸</span> ภาพ 3D
         </button>
@@ -320,26 +578,30 @@
           <span>⚙️</span> Catalog
         </button>
         <button id="reset-default-btn" type="button" title="รีเซ็ตค่าเริ่มต้น" class="text-[11px] text-slate-400 hover:text-[#00E5FF] transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-slate-800">
-          <span>↺</span>
+          <span>↺</span> ค่าเริ่มต้น
         </button>
+          </div>
+        </details>
       </div>
     </div>
 
     <!-- Scrollable Controls & Spec Body -->
-    <div class="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+    <div class="config-scroll flex-1 overflow-y-auto px-4 py-3 space-y-4">
 
       <!-- SECTION 1: SCENE & INSTALLATION (v4.1: 12 Interactive 3D Environments) -->
-      <div class="glass-card rounded-xl p-3.5 space-y-3">
+      <div class="glass-card config-section rounded-xl p-3.5 space-y-3">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold uppercase tracking-wider text-[#00E5FF] flex items-center gap-1.5">
-            <span>🏢</span> 1. สถานที่และรูปแบบการติดตั้ง
+            <span class="section-step">01</span> สถานที่และรูปแบบการติดตั้ง
           </h3>
           <span id="env-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Indoor Pro</span>
         </div>
 
         <!-- Category Filter Tabs: All, Indoor, Outdoor, Event -->
-        <div>
-          <label class="block text-[11px] text-slate-400 mb-1.5">เลือกสถานที่จำลอง 3D (12 Realistic Environments):</label>
+        <details id="scene-picker" class="scene-picker">
+          <summary><span>สถานที่จำลอง 3D</span><strong id="selected-scene-name">Executive Boardroom</strong><span aria-hidden="true">⌄</span></summary>
+          <div class="scene-picker-content">
+          <label class="block text-[11px] text-slate-400 mb-1.5">เลือกสถานที่จำลอง 3D:</label>
           <div class="flex items-center gap-1 p-0.5 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px] mb-2">
             <button type="button" data-scene-filter="all" class="scene-filter-tab flex-1 py-1 rounded font-semibold text-center transition bg-[#00E5FF] text-slate-950">🌐 ทั้งหมด (12)</button>
             <button type="button" data-scene-filter="indoor" class="scene-filter-tab flex-1 py-1 rounded font-semibold text-center transition text-slate-400 hover:text-white">🏢 ในอาคาร (4)</button>
@@ -448,7 +710,8 @@
               </div>
             </button>
           </div>
-        </div>
+          </div>
+        </details>
 
         <!-- 3 Installation Types -->
         <div>
@@ -474,15 +737,17 @@
       </div>
 
       <!-- SECTION 1.5: 3D SPATIAL CONTROLS & MEASUREMENTS (PHASE 04) -->
-      <div class="glass-card rounded-xl p-3.5 space-y-3 border-l-2 border-l-[#FF6B00]">
+      <div class="glass-card config-section rounded-xl p-3.5 space-y-3 border-l-2 border-l-[#FF6B00]">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-            <span>📐</span> ตำแหน่ง &amp; ความสูงจอ 3D (Spatial)
+            <span class="section-step">02</span> ตำแหน่งจอ 3D
           </h3>
           <button id="reset-spatial-btn" type="button" class="text-[10px] text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800 transition">↺ กึ่งกลาง</button>
         </div>
 
-        <div class="space-y-2.5 text-xs">
+        <details class="advanced-disclosure engineer-only">
+          <summary>ปรับระดับ ความลึก และมุมจอ <span aria-hidden="true">⌄</span></summary>
+        <div class="space-y-2.5 text-xs advanced-disclosure-content">
           <!-- Elevation Slider -->
           <div>
             <div class="flex items-center justify-between">
@@ -535,13 +800,14 @@
             <button id="toggle-measure-panel-btn" type="button" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/40">เปิดใช้งาน</button>
           </div>
         </div>
+        </details>
       </div>
 
       <!-- SECTION 2: PRODUCT CATALOG & PIXEL PITCH -->
-      <div class="glass-card rounded-xl p-3.5 space-y-3 border-l-2 border-l-[#00E5FF]">
+      <div class="glass-card config-section rounded-xl p-3.5 space-y-3 border-l-2 border-l-[#00E5FF]">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold uppercase tracking-wider text-[#00E5FF] flex items-center gap-1.5">
-            <span>📦</span> 2. รุ่นสินค้า (Product SKU) &amp; ความละเอียด
+            <span class="section-step">03</span> รุ่นสินค้าและความละเอียด
           </h3>
           <div class="flex items-center gap-1.5">
             <span id="product-status-pill" class="text-[9px] px-1.5 py-0.5 rounded uppercase font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Verified</span>
@@ -643,10 +909,10 @@
       </div>
 
       <!-- SECTION 3: SCREEN DIMENSIONS & ASPECT RATIO (PHASE 03 ENGINE) -->
-      <div class="glass-card rounded-xl p-3.5 space-y-3">
+      <div class="glass-card config-section rounded-xl p-3.5 space-y-3">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold uppercase tracking-wider text-[#00E5FF] flex items-center gap-1.5">
-            <span>📐</span> 3. ขนาดหน้าจอ &amp; การเรียงตู้ (Cabinet Layout)
+            <span class="section-step">04</span> ขนาดหน้าจอและการเรียงตู้
           </h3>
           <span id="aspect-tag" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">16:9 Widescreen</span>
         </div>
@@ -818,10 +1084,10 @@
       </div>
 
       <!-- SECTION 4: CUSTOM MEDIA PREVIEW -->
-      <div class="glass-card rounded-xl p-3.5 space-y-2.5">
+      <div class="glass-card config-section rounded-xl p-3.5 space-y-2.5">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold uppercase tracking-wider text-[#00E5FF] flex items-center gap-1.5">
-            <span>🎬</span> 4. คอนเทนต์จำลองบนจอ (Media Preview)
+            <span class="section-step">05</span> ภาพบนหน้าจอ
           </h3>
           <span id="media-status-tag" class="text-[10px] text-emerald-400 font-medium">Live Canvas</span>
         </div>
@@ -903,10 +1169,10 @@
       </div>
 
       <!-- SECTION 5: LIVE SPEC DASHBOARD -->
-      <div class="glass-card rounded-xl p-3.5 space-y-3 border border-[#00E5FF]/30 bg-gradient-to-b from-slate-900/90 to-slate-950/95">
+      <div class="glass-card config-section spec-section rounded-xl p-3.5 space-y-3 border border-[#00E5FF]/30 bg-gradient-to-b from-slate-900/90 to-slate-950/95">
         <div class="flex items-center justify-between border-b border-slate-800 pb-2">
           <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-            <span>📋</span> สรุปสเปกจอเชิงวิศวกรรม (Engineering Spec)
+            <span class="section-step">06</span> สรุปสเปกจอ
           </h3>
           <span id="res-quality-badge" class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-gradient-to-r from-sky-400 to-blue-500 text-slate-950">
             HD READY 720p
@@ -1404,7 +1670,7 @@
     import { globalStateStore } from './src/core/state.js';
     import { disposeHierarchy, globalMediaTracker } from './src/core/disposal.js';
     import { LightingSystem } from './src/3d/lighting-system.js';
-    import { CinematicCameraManager } from './src/3d/cinematic-camera.js';
+    import { CinematicCameraManager, getSceneFramingDistance } from './src/3d/cinematic-camera.js';
     import { buildEnvironment as buildModularEnvironment, getCanonicalSceneId } from './src/3d/environment-builder.js';
 
     (function() {
@@ -1463,14 +1729,26 @@
       controls.enableDamping = true;
       controls.dampingFactor = 0.06;
       controls.maxPolarAngle = Math.PI / 2 - 0.01;
-      controls.minDistance = 1.0;
+      controls.minDistance = 0.75;
       controls.maxDistance = 30.0;
 
       let isInternalCameraSync = false;
       let syncTimeout = null;
+      let activeCameraPreset = 'hero';
+      let isUserOrbiting = false;
+
+      controls.addEventListener('start', () => {
+        isUserOrbiting = true;
+        isInternalCameraSync = false;
+        if (syncTimeout) clearTimeout(syncTimeout);
+        cameraManager.isAnimating = false;
+        activeCameraPreset = null;
+        updateCameraButtonState(null);
+      });
+      controls.addEventListener('end', () => { isUserOrbiting = false; });
 
       controls.addEventListener('change', () => {
-        if (isInternalCameraSync) return;
+        if (isInternalCameraSync || !isUserOrbiting) return;
         const camDist = camera.position.distanceTo(controls.target);
         const rounded = Math.round(Math.max(1.0, Math.min(30.0, camDist)) * 10) / 10;
         const currentDist = globalStateStore.getState().viewingDistanceM;
@@ -1503,10 +1781,10 @@
       dirLight.shadow.mapSize.height = 1024;
       scene.add(dirLight);
 
-      const screenGlowLight = new THREE.PointLight(0x00e5ff, 1.6, 22, 1.5);
+      const screenGlowLight = new THREE.PointLight(0xa9c3e0, 0.16, 5.5, 2);
       scene.add(screenGlowLight);
 
-      const screenFloorBounceLight = new THREE.SpotLight(0x00aaff, 1.8, 25, Math.PI / 2.2, 0.7, 1.5);
+      const screenFloorBounceLight = new THREE.SpotLight(0x9db8d8, 0.07, 5.5, Math.PI / 5, 0.9, 2);
       scene.add(screenFloorBounceLight, screenFloorBounceLight.target);
 
       const lightingSystem = new LightingSystem(scene, renderer);
@@ -1515,6 +1793,13 @@
       const cameraManager = new CinematicCameraManager(camera, controls);
 
       let screenCenterY = 2.4;
+
+      // Older saved projects contain percentage values; the current state stores a 0.5–1.5 multiplier.
+      function getScreenBrightnessPercent(state) {
+        const value = Number(state.screenBrightness);
+        if (!Number.isFinite(value)) return 100;
+        return value <= 1.5 ? Math.round(value * 100) : Math.round(value);
+      }
 
       // 4. Content Drawer
       function drawSourceContent(timeSec, state, specs) {
@@ -1846,7 +2131,7 @@
         }
 
         // Screen Content Brightness Preview & Boot Scanline Sequence (v4.1)
-        const brightness = state.screenBrightness != null ? state.screenBrightness : 100;
+        const brightness = getScreenBrightnessPercent(state);
         if (brightness < 100) {
           const dimAlpha = ((100 - brightness) / 100) * 0.75;
           screenCtx.fillStyle = `rgba(0, 0, 0, ${dimAlpha})`;
@@ -2060,19 +2345,18 @@
           screenGroup.add(screenMesh);
         }
 
-        // Subtle Cyan Status Glow
+        // Restrained display edge. The LED panel remains a separate object.
         const rimGeo = new THREE.PlaneGeometry(w + 0.25, h + 0.25);
-        const rimMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.12, side: THREE.DoubleSide });
+        const rimMat = new THREE.MeshBasicMaterial({ color: 0x6c94c2, transparent: true, opacity: 0.035, side: THREE.DoubleSide });
         const rimMesh = new THREE.Mesh(rimGeo, rimMat);
         rimMesh.position.set(0, screenCenterY, -depth - 0.01);
         screenGroup.add(rimMesh);
 
-        screenGlowLight.position.set(0, screenCenterY, 1.2);
-        screenGlowLight.intensity = Math.min(3.0, 0.9 + (w * h) * 0.04);
-        screenGlowLight.distance = Math.max(15, w * 2.5);
-
-        screenFloorBounceLight.position.set(0, screenCenterY, 0.3);
-        screenFloorBounceLight.target.position.set(0, 0, Math.min(8, w * 0.9));
+        const facingX = Math.sin(rotYRad);
+        const facingZ = Math.cos(rotYRad);
+        screenGlowLight.position.set(posX + facingX * 0.45, screenCenterY, posZ + facingZ * 0.45);
+        screenFloorBounceLight.position.set(posX + facingX * 0.32, screenCenterY, posZ + facingZ * 0.32);
+        screenFloorBounceLight.target.position.set(posX + facingX * 2.8, 0, posZ + facingZ * 2.8);
 
         // Mounts
         const steelMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.85, roughness: 0.25 });
@@ -2099,7 +2383,8 @@
 
             const baseGeo = new THREE.BoxGeometry(0.9, 0.08, 1.4);
             const baseMesh = new THREE.Mesh(baseGeo, darkSteelMat);
-            baseMesh.position.set(px, 0.04, -depth / 2);
+            // The foot projects toward the audience, clear of the rear wall.
+            baseMesh.position.set(px, 0.04, 0.7 - Math.min(depth / 2, 0.12));
             mountGroup.add(baseMesh);
           });
 
@@ -2120,7 +2405,12 @@
           }
         } else if (state.mountType === 'hanging') {
           const rigBarY = bottomY + h + 0.55;
-          const ceilingY = rigBarY + 3.5;
+          const sceneCeiling = environmentGroup.userData.sceneBounds?.height
+            ?? environmentGroup.userData.boardroomBounds?.height
+            ?? environmentGroup.userData.mountCeilingY;
+          const ceilingY = sceneCeiling != null
+            ? Math.max(rigBarY + 0.15, sceneCeiling - 0.06)
+            : rigBarY + 3.5;
           const rigMesh = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.25, 0.25), steelMat);
           rigMesh.position.set(0, rigBarY, -depth / 2);
           mountGroup.add(rigMesh);
@@ -2141,6 +2431,23 @@
 
       function buildEnvironment(state, specs) {
         buildModularEnvironment(environmentGroup, state, specs, lightingSystem, sharedResources);
+        const sceneId = getCanonicalSceneId(state.sceneType);
+        const room = sceneId === 'boardroom'
+          ? environmentGroup.userData.boardroomBounds : environmentGroup.userData.sceneBounds;
+        if (room) {
+          cameraManager.setRoomBounds({
+            minX: -room.width / 2, maxX: room.width / 2,
+            minY: 0.85, maxY: room.height - 0.25,
+            minZ: room.frontZ + 0.85, maxZ: room.depth - 0.35,
+            kind: sceneId === 'boardroom' ? 'boardroom' : 'venue'
+          });
+          controls.maxDistance = Math.max(8, Math.min(sceneId === 'boardroom' ? 18 : 30, room.depth + 1));
+        } else {
+          cameraManager.setRoomBounds(null);
+          controls.maxDistance = 30;
+        }
+        lightingSystem.setEnvironment(sceneId, room || {});
+        lightingSystem.applyPreset(state.lightingPreset || 'cool', 0);
       }
 
       function buildHumanModel(state, specs) {
@@ -2149,15 +2456,13 @@
 
         if (humanGroup.children.length === 0) {
           const bodyMat = new THREE.MeshStandardMaterial({
-            color: 0x00e5ff,
-            roughness: 0.3,
-            metalness: 0.2,
-            emissive: 0x003344,
-            emissiveIntensity: 0.5
+            color: 0x9c8c82,
+            roughness: 0.92,
+            metalness: 0
           });
-          const suitMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.2 });
+          const suitMat = new THREE.MeshStandardMaterial({ color: 0x34404c, roughness: 0.82, metalness: 0.02 });
 
-          const ring = new THREE.Mesh(new THREE.RingGeometry(0.32, 0.38, 32), new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide }));
+          const ring = new THREE.Mesh(new THREE.RingGeometry(0.32, 0.36, 32), new THREE.MeshBasicMaterial({ color: 0x8495a6, side: THREE.DoubleSide, transparent: true, opacity: 0.42 }));
           ring.rotation.x = -Math.PI / 2;
           ring.position.y = 0.015;
           humanGroup.add(ring);
@@ -2180,7 +2485,7 @@
             humanGroup.add(arm);
           });
 
-          const head = new THREE.Mesh(new THREE.SphereGeometry(0.115, 16, 16), bodyMat);
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.105, 16, 16), bodyMat);
           head.position.set(0, 1.585, 0);
           head.castShadow = true;
           humanGroup.add(head);
@@ -2190,16 +2495,28 @@
             new THREE.Vector3(0.3, 1.7, 0),
             new THREE.Vector3(0.18, 1.7, 0)
           ]);
-          const markerLine = new THREE.Line(markerGeo, new THREE.LineBasicMaterial({ color: 0x00e5ff }));
+          const markerLine = new THREE.Line(markerGeo, new THREE.LineBasicMaterial({ color: 0x9fb0c1, transparent: true, opacity: 0.55 }));
           humanGroup.add(markerLine);
         }
 
         const posX = (state.positionXMm || 0) / 1000;
         const posZ = (state.positionZMm || 0) / 1000;
-        const humanZ = posZ + Math.min(Math.max(1.5, state.viewingDistanceM * 0.55), 8.0);
-        const humanX = posX - Math.min(2.2, specs.actualWidthM * 0.28);
+        const humanZ = posZ + Math.min(Math.max(1.2, state.viewingDistanceM * 0.36), 5.5);
+        const humanX = posX - Math.min(2.8, specs.actualWidthM * 0.62);
         const baseStageOffset = state.sceneType === 'exhibition' && humanZ < 2.2 ? 0.3 : 0;
         humanGroup.position.set(humanX, baseStageOffset, humanZ);
+      }
+
+      function updateCameraButtonState(preset) {
+        const ids = {
+          front: 'cam-front-btn', hero: 'cam-angle-btn', humanEye: 'cam-human-btn',
+          technical: 'cam-top-btn', side: 'cam-side-btn', detail: 'cam-closeup-btn'
+        };
+        document.querySelectorAll('.camera-toolbar button[id^="cam-"]').forEach((button) => {
+          const active = ids[preset] === button.id;
+          button.classList.toggle('is-active', active);
+          button.setAttribute('aria-pressed', String(active));
+        });
       }
 
       function syncCameraToViewingDistance(angleMode = 'maintain', duration = 750) {
@@ -2207,48 +2524,37 @@
         if (syncTimeout) clearTimeout(syncTimeout);
 
         const state = globalStateStore.getState();
-        const d = state.viewingDistanceM;
-        const targetY = screenCenterY;
+        const specs = globalStateStore.getSpecs();
         const posX = (state.positionXMm || 0) / 1000;
         const posZ = (state.positionZMm || 0) / 1000;
-        const targetLookAt = [posX, targetY, posZ];
+        const viewSpec = {
+          widthM: specs.actualWidthM,
+          heightM: specs.actualHeightM,
+          center: [posX, screenCenterY, posZ],
+          viewingDistanceM: state.viewingDistanceM
+        };
+        const presetAliases = { angle45: 'hero', topDown: 'technical', closeup: 'detail' };
+        const preset = angleMode === 'maintain' ? activeCameraPreset : (presetAliases[angleMode] || angleMode);
 
-        let targetCam;
-        if (angleMode === 'angle45') {
-          targetCam = [posX + d * 0.65, targetY + d * 0.18, posZ + d * 0.76];
-        } else if (angleMode === 'humanEye') {
-          targetCam = [posX, 1.65, posZ + d];
-        } else if (angleMode === 'topDown') {
-          targetCam = [posX, targetY + d * 1.25, posZ + 0.05];
-        } else if (angleMode === 'side') {
-          targetCam = [posX + d * 1.1, targetY, posZ];
-        } else if (angleMode === 'front') {
-          targetCam = [posX, targetY, posZ + d];
+        cameraManager.toggleShowcase(false);
+        if (preset) {
+          activeCameraPreset = preset;
+          cameraManager.applyViewPreset(preset, viewSpec, duration);
         } else {
-          // 'maintain': preserve current camera viewing direction vector and scale to distance d
+          // Preserve a manually chosen orbit direction when the distance slider moves.
           const dir = camera.position.clone().sub(controls.target);
           if (dir.lengthSq() < 0.001) {
             dir.set(0, 0, 1);
           } else {
             dir.normalize();
           }
-          const endPos = controls.target.clone().addScaledVector(dir, d);
-          targetCam = [endPos.x, endPos.y, endPos.z];
+          const target = new THREE.Vector3(...viewSpec.center);
+          const endPos = target.clone().addScaledVector(dir, state.viewingDistanceM);
+          cameraManager.glideTo([endPos.x, endPos.y, endPos.z], viewSpec.center, duration);
         }
+        updateCameraButtonState(activeCameraPreset);
 
-        if (cameraManager && angleMode !== 'maintain' && duration > 0) {
-          cameraManager.glideTo(targetCam, targetLookAt, duration);
-          syncTimeout = setTimeout(() => {
-            isInternalCameraSync = false;
-          }, duration + 50);
-        } else {
-          controls.target.set(...targetLookAt);
-          camera.position.set(...targetCam);
-          controls.update();
-          syncTimeout = setTimeout(() => {
-            isInternalCameraSync = false;
-          }, 120);
-        }
+        syncTimeout = setTimeout(() => { isInternalCameraSync = false; }, Math.max(120, duration + 50));
       }
 
       // 6. UI Synchronizer & Dynamic Catalog
@@ -2278,6 +2584,11 @@
       }
 
       function updateDOM(state, specs, compatibility) {
+        document.querySelectorAll('.mount-btn').forEach((button) => {
+          const active = button.getAttribute('data-mount') === state.mountType;
+          button.classList.toggle('active', active);
+          button.setAttribute('aria-pressed', String(active));
+        });
         document.getElementById('hud-pitch-label').textContent = `P${state.pitchMm}`;
         document.getElementById('hud-dist-label').textContent = `${state.viewingDistanceM.toFixed(1)} ม.`;
         document.getElementById('selected-pitch-pill').textContent = `P${state.pitchMm}`;
@@ -2648,6 +2959,11 @@
 
         // ================= v4.1: SCENE CARDS & LIGHTING PRESETS =================
         const canonicalScene = getCanonicalSceneId(state.sceneType);
+        const selectedSceneName = document.getElementById('selected-scene-name');
+        if (selectedSceneName) {
+          const sceneDef = SCENE_DEFINITIONS[canonicalScene] || SCENE_DEFINITIONS.boardroom;
+          selectedSceneName.textContent = sceneDef.nameEn || canonicalScene;
+        }
         document.querySelectorAll('.scene-card').forEach((c) => {
           const match = c.getAttribute('data-scene') === canonicalScene || c.getAttribute('data-scene') === state.sceneType;
           c.classList.toggle('active', match);
@@ -2669,15 +2985,11 @@
         document.querySelectorAll('.lighting-preset-btn').forEach((btn) => {
           const isActive = btn.getAttribute('data-lighting') === activeLight;
           btn.classList.toggle('active', isActive);
-          if (isActive) {
-            btn.className = 'lighting-preset-btn active px-2 py-0.5 rounded text-[10px] font-semibold bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/40 transition';
-          } else {
-            btn.className = 'lighting-preset-btn px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-white transition';
-          }
+          btn.setAttribute('aria-pressed', String(isActive));
         });
 
         // Sync Screen Brightness Slider
-        const brightness = state.screenBrightness != null ? state.screenBrightness : 100;
+        const brightness = getScreenBrightnessPercent(state);
         const bSlider = document.getElementById('screen-brightness-slider');
         const bVal = document.getElementById('screen-brightness-val');
         if (bSlider && parseInt(bSlider.value, 10) !== brightness) {
@@ -2727,21 +3039,24 @@
       function transitionToScene(sceneId) {
         const canonicalId = getCanonicalSceneId(sceneId);
         const def = SCENE_DEFINITIONS[canonicalId] || SCENE_DEFINITIONS[sceneId] || SCENE_DEFINITIONS.boardroom;
+        const specs = globalStateStore.getSpecs();
+        const sceneDistance = canonicalId === 'boardroom'
+          ? (def.defaultViewingDistanceM || 4.5)
+          : getSceneFramingDistance({ defaultDistanceM: def.defaultViewingDistanceM,
+            widthM: specs.actualWidthM, heightM: specs.actualHeightM });
 
-        if (cameraManager) {
-          cameraManager.triggerPowerOn();
-          if (def.camera && def.camera.pos && def.camera.target) {
-            cameraManager.glideTo(def.camera.pos, def.camera.target, 900);
-          }
-        }
+        cameraManager.triggerPowerOn();
+        activeCameraPreset = null;
+        updateCameraButtonState(activeCameraPreset);
 
         globalStateStore.update({
           sceneType: canonicalId,
           mountType: def.recommendedMount || 'wall',
           elevationMm: Math.round((def.defaultElevationM || 1.0) * 1000),
-          viewingDistanceM: def.defaultViewingDistanceM || 5.0,
+          viewingDistanceM: sceneDistance,
           lightingPreset: def.defaultLighting || 'cool'
         });
+        syncCameraToViewingDistance('hero', 900);
       }
 
       document.querySelectorAll('.scene-card, .scene-btn').forEach((btn) => {
@@ -2776,9 +3091,6 @@
       document.querySelectorAll('.lighting-preset-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
           const presetId = btn.getAttribute('data-lighting');
-          if (lightingSystem) {
-            lightingSystem.applyPreset(presetId);
-          }
           globalStateStore.update({ lightingPreset: presetId });
         });
       });
@@ -2847,7 +3159,7 @@
         screenBrightnessSlider.addEventListener('input', (e) => {
           const val = parseInt(e.target.value, 10) || 100;
           if (screenBrightnessVal) screenBrightnessVal.textContent = val;
-          globalStateStore.update({ screenBrightness: val });
+          globalStateStore.update({ screenBrightness: val / 100 });
         });
       }
 
@@ -3043,15 +3355,11 @@
       });
 
       document.getElementById('cam-front-btn').addEventListener('click', () => syncCameraToViewingDistance('front', 750));
-      document.getElementById('cam-angle-btn').addEventListener('click', () => syncCameraToViewingDistance('angle45', 750));
+      document.getElementById('cam-angle-btn').addEventListener('click', () => syncCameraToViewingDistance('hero', 750));
       document.getElementById('cam-human-btn').addEventListener('click', () => syncCameraToViewingDistance('humanEye', 750));
-      document.getElementById('cam-top-btn').addEventListener('click', () => syncCameraToViewingDistance('topDown', 750));
+      document.getElementById('cam-top-btn').addEventListener('click', () => syncCameraToViewingDistance('technical', 750));
       document.getElementById('cam-side-btn').addEventListener('click', () => syncCameraToViewingDistance('side', 750));
-      document.getElementById('cam-closeup-btn').addEventListener('click', () => {
-        distanceSlider.value = 1.2;
-        globalStateStore.update({ viewingDistanceM: 1.2 });
-        syncCameraToViewingDistance('front', 750);
-      });
+      document.getElementById('cam-closeup-btn').addEventListener('click', () => syncCameraToViewingDistance('detail', 750));
 
       // Phase 04: Spatial Controls Event Listeners
       const elevSlider = document.getElementById('elevation-slider');
@@ -3138,7 +3446,7 @@
 
         document.getElementById('human-status-txt').textContent = 'เปิด';
         document.getElementById('grid-status-txt').textContent = 'เปิด';
-        syncCameraToViewingDistance('front');
+        syncCameraToViewingDistance('hero');
       });
 
       // ================= PHASE 02: COMPARE MODAL =================
@@ -4311,10 +4619,12 @@
       let prevEnvKey = '';
       let prevLightingKey = '';
       let prevScreenKey = '';
+      let prevFrameKey = '';
 
       globalStateStore.subscribe((state, specs, compatibility) => {
         const canonicalScene = getCanonicalSceneId(state.sceneType);
-        const envKey = `${canonicalScene}`;
+        const isOutdoorScene = ['billboard', 'school-entrance', 'gov-building', 'building-facade'].includes(canonicalScene);
+        const envKey = `${canonicalScene}_${specs.actualWidthM}_${specs.actualHeightM}_${state.elevationMm}_${state.mountType}_${isOutdoorScene ? state.positionXMm : 0}_${isOutdoorScene ? state.positionZMm : 0}`;
         if (envKey !== prevEnvKey) {
           buildEnvironment(state, specs);
           prevEnvKey = envKey;
@@ -4326,10 +4636,16 @@
           prevLightingKey = state.lightingPreset;
         }
 
-        const screenKey = `${state.productId}_${specs.actualWidthM}_${specs.actualHeightM}_${state.mountType}_${state.shapeType}_${state.elevationMm}_${state.positionXMm}_${state.positionZMm}_${state.rotationYDeg}`;
+        const screenKey = `${canonicalScene}_${state.productId}_${specs.actualWidthM}_${specs.actualHeightM}_${state.mountType}_${state.shapeType}_${state.elevationMm}_${state.positionXMm}_${state.positionZMm}_${state.rotationYDeg}`;
         if (screenKey !== prevScreenKey) {
           buildScreenAndMount(state, specs);
           prevScreenKey = screenKey;
+        }
+
+        const frameKey = `${canonicalScene}_${specs.actualWidthM}_${specs.actualHeightM}_${state.elevationMm}_${state.positionXMm}_${state.positionZMm}`;
+        if (frameKey !== prevFrameKey) {
+          if (prevFrameKey && activeCameraPreset) syncCameraToViewingDistance('maintain', 500);
+          prevFrameKey = frameKey;
         }
 
         buildMeasurements(state, specs);
@@ -4346,27 +4662,41 @@
       buildScreenAndMount(initialState, initialSpecs);
       buildMeasurements(initialState, initialSpecs);
       buildHumanModel(initialState, initialSpecs);
-      syncCameraToViewingDistance('front', 0);
+      syncCameraToViewingDistance('hero', 0);
       updateDOM(initialState, initialSpecs, initialCompat);
 
       let startTime = performance.now();
+      let lastMediaFrame = -Infinity;
+      let lastVisualKey = '';
+      let lastBootProgress = 1;
       function animate(now) {
         requestAnimationFrame(animate);
 
         if (!isTabVisible) return;
 
         const camInfo = cameraManager ? cameraManager.update(now) : { bootProgress: 1.0 };
+        lightingSystem.update(now);
         const elapsedSec = (now - startTime) / 1000;
         const state = globalStateStore.getState();
         const specs = globalStateStore.getSpecs();
 
-        // Modulate point/bounce light by bootProgress and screenBrightness
+        // Restrained display spill follows the visual dimmer, without changing electrical specs.
         const boot = camInfo.bootProgress != null ? camInfo.bootProgress : 1.0;
-        const brightnessMult = ((state.screenBrightness != null ? state.screenBrightness : 100) / 100) * boot;
-        screenGlowLight.intensity = 1.6 * brightnessMult;
-        screenFloorBounceLight.intensity = 1.8 * brightnessMult;
+        const brightnessMult = (getScreenBrightnessPercent(state) / 100) * boot;
+        screenGlowLight.intensity = 0.16 * brightnessMult;
+        screenFloorBounceLight.intensity = getCanonicalSceneId(state.sceneType) === 'boardroom'
+          ? 0.07 * brightnessMult : 0;
 
-        updateLEDMatrixTexture(elapsedSec, state, specs, boot);
+        // Animated media needs 30 updates/s; still images and calibration patterns upload only on change.
+        const visualKey = `${state.contentType}_${state.customImage?.src || ''}_${state.testPattern || ''}_${state.mediaFitMode}_${state.pitchMm}_${state.viewingDistanceM}_${state.showGrid}_${state.screenBrightness}_${specs.actualWidthM}_${specs.actualHeightM}`;
+        const staticContent = !!state.testPattern || state.contentType === 'custom-image'
+          || (cameraManager.prefersReducedMotion && state.contentType !== 'custom-video');
+        if (boot < 1 || lastBootProgress < 1 || visualKey !== lastVisualKey || (!staticContent && now - lastMediaFrame >= 1000 / 30)) {
+          updateLEDMatrixTexture(staticContent ? 0 : elapsedSec, state, specs, boot);
+          lastMediaFrame = now;
+          lastVisualKey = visualKey;
+        }
+        lastBootProgress = boot;
         controls.update();
         renderer.render(scene, camera);
       }

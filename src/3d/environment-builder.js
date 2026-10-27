@@ -42,6 +42,9 @@ export function buildEnvironment(environmentGroup, state, specs, lightingSystem 
 
   // 1. Dispose previous environment objects cleanly
   disposeHierarchy(environmentGroup, { sharedResources });
+  delete environmentGroup.userData.boardroomBounds;
+  delete environmentGroup.userData.sceneBounds;
+  delete environmentGroup.userData.mountCeilingY;
 
   const sceneId = getCanonicalSceneId(state.sceneType);
   const sceneDef = SCENE_DEFINITIONS[state.sceneType] || SCENE_DEFINITIONS[sceneId] || SCENE_DEFINITIONS.boardroom;

@@ -9,17 +9,18 @@
  * @param {THREE.Material|Array<THREE.Material>} material 
  * @param {Set<any>} [sharedResources] Optional set of shared textures/materials to protect from disposal
  */
-export function disposeMaterial(material, sharedResources = null) {
+export function disposeMaterial(material, sharedResources = null, disposed = new Set()) {
   if (!material) return;
 
   if (Array.isArray(material)) {
-    material.forEach((mat) => disposeMaterial(mat, sharedResources));
+    material.forEach((mat) => disposeMaterial(mat, sharedResources, disposed));
     return;
   }
 
-  if (sharedResources && sharedResources.has(material)) {
+  if ((sharedResources && sharedResources.has(material)) || disposed.has(material)) {
     return; // Do not dispose shared material
   }
+  disposed.add(material);
 
   // Iterate all texture properties of standard Three.js materials
   const textureSlots = [
@@ -30,7 +31,8 @@ export function disposeMaterial(material, sharedResources = null) {
   for (const slot of textureSlots) {
     const tex = material[slot];
     if (tex && typeof tex.dispose === 'function') {
-      if (!sharedResources || !sharedResources.has(tex)) {
+      if ((!sharedResources || !sharedResources.has(tex)) && !disposed.has(tex)) {
+        disposed.add(tex);
         tex.dispose();
       }
     }
@@ -51,6 +53,7 @@ export function disposeMaterial(material, sharedResources = null) {
 export function disposeHierarchy(root, options = {}) {
   if (!root) return;
   const shared = options.sharedResources || null;
+  const disposed = new Set();
 
   const toDispose = [];
   root.traverse((child) => {
@@ -61,13 +64,14 @@ export function disposeHierarchy(root, options = {}) {
 
   for (const node of toDispose) {
     if (node.geometry && typeof node.geometry.dispose === 'function') {
-      if (!shared || !shared.has(node.geometry)) {
+      if ((!shared || !shared.has(node.geometry)) && !disposed.has(node.geometry)) {
+        disposed.add(node.geometry);
         node.geometry.dispose();
       }
     }
 
     if (node.material) {
-      disposeMaterial(node.material, shared);
+      disposeMaterial(node.material, shared, disposed);
     }
 
     if (node.parent && node !== root) {

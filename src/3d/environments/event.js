@@ -1,382 +1,371 @@
 /**
- * JLED DESIGN STUDIO v4.1 — Event & Specialty 3D Environments (4 Environments)
- * 9. Mega Concert Stage
- * 10. Exhibition Trade Booth
- * 11. Retail Store / Transparent LED
- * 12. Corporate Lobby / LED Kiosk
+ * Event and specialty environments. Dimensions use metres; the LED assembly is
+ * built independently at z = 0. All scene structures leave its face clear.
  */
 
-/**
- * 9. Mega Concert Stage (Arena / Festival Rock Stage)
- */
+function makeBox(group, material, size, position, options = {}) {
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
+  mesh.position.set(...position);
+  mesh.castShadow = !!options.cast;
+  mesh.receiveShadow = options.receive !== false;
+  if (options.rotationY) mesh.rotation.y = options.rotationY;
+  group.add(mesh);
+  return mesh;
+}
+
+function makeCylinder(group, material, topRadius, bottomRadius, height, position, segments = 16) {
+  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(topRadius, bottomRadius, height, segments), material);
+  mesh.position.set(...position);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  group.add(mesh);
+  return mesh;
+}
+
+function floorMaterial(kind) {
+  const shades = {
+    concrete: ['#40444a', '#353a40', '#484d53'],
+    carpet: ['#51565a', '#4c5156', '#5a5e60'],
+    timber: ['#98785c', '#8b6c53', '#a58262'],
+    stone: ['#a4a39e', '#999b98', '#adaaa4']
+  };
+  const colors = shades[kind] || shades.concrete;
+  let texture = null;
+  if (typeof document !== 'undefined') {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = colors[0];
+      ctx.fillRect(0, 0, 256, 256);
+      if (kind === 'timber') {
+        for (let y = 0; y < 256; y += 32) {
+          ctx.fillStyle = colors[(y / 32) % 3];
+          ctx.fillRect(0, y + 1, 256, 30);
+          ctx.strokeStyle = 'rgba(48,33,24,.28)';
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(256, y);
+          ctx.moveTo((y / 32 % 2) * 128, y);
+          ctx.lineTo((y / 32 % 2) * 128, y + 32);
+          ctx.stroke();
+        }
+      } else if (kind === 'stone') {
+        ctx.strokeStyle = 'rgba(68,70,71,.23)';
+        ctx.lineWidth = 2;
+        for (let x = 0; x <= 256; x += 64) {
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 256); ctx.stroke();
+        }
+        for (let y = 0; y <= 256; y += 64) {
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(256, y); ctx.stroke();
+        }
+        ctx.strokeStyle = 'rgba(240,240,230,.12)';
+        for (let i = 0; i < 9; i++) {
+          ctx.beginPath();
+          ctx.moveTo((i * 79) % 256, 0);
+          ctx.lineTo((i * 79 + 44) % 256, 256);
+          ctx.stroke();
+        }
+      } else {
+        for (let y = 0; y < 256; y += 16) {
+          ctx.strokeStyle = kind === 'carpet' ? 'rgba(200,205,205,.035)' : 'rgba(10,12,14,.14)';
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(256, y); ctx.stroke();
+        }
+      }
+      texture = new THREE.CanvasTexture(canvas);
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(4, 5);
+      texture.encoding = THREE.sRGBEncoding;
+    }
+  }
+  return new THREE.MeshStandardMaterial({
+    color: texture ? 0xffffff : colors[0],
+    map: texture,
+    roughness: kind === 'stone' ? 0.58 : 0.86,
+    metalness: kind === 'stone' ? 0.05 : 0
+  });
+}
+
+function addFloor(group, width, depth, kind, zCenter = depth / 2 - 0.3) {
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(width, depth), floorMaterial(kind));
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.set(0, 0, zCenter);
+  floor.receiveShadow = true;
+  group.add(floor);
+}
+
+function screenDimensions(state, specs) {
+  const width = Math.max(1, Number(specs.actualWidthM) || 4);
+  const height = Math.max(1, Number(specs.actualHeightM) || 2.5);
+  const elevation = Math.max(0, (Number(state.elevationMm) || 0) / 1000);
+  return { width, height, elevation, top: elevation + height };
+}
+
+function addPlant(group, x, z, scale = 1, baseY = 0) {
+  const potMat = new THREE.MeshStandardMaterial({ color: 0x3e4647, roughness: 0.83 });
+  const stemMat = new THREE.MeshStandardMaterial({ color: 0x67523e, roughness: 0.95 });
+  const foliageMat = new THREE.MeshStandardMaterial({ color: 0x526c54, roughness: 0.94 });
+  makeCylinder(group, potMat, 0.27 * scale, 0.21 * scale, 0.45 * scale, [x, baseY + 0.225 * scale, z]);
+  makeCylinder(group, stemMat, 0.035 * scale, 0.045 * scale, 1.25 * scale, [x, baseY + 1.02 * scale, z], 8);
+  for (const [dx, dy, dz, radius] of [
+    [0, 1.75, 0, 0.48], [-0.3, 1.48, 0.08, 0.36],
+    [0.3, 1.53, -0.05, 0.38], [-0.12, 1.98, -0.12, 0.34],
+    [0.16, 1.92, 0.12, 0.36]
+  ]) {
+    const crown = new THREE.Mesh(new THREE.SphereGeometry(radius * scale, 12, 8), foliageMat);
+    crown.position.set(x + dx * scale, baseY + dy * scale, z + dz * scale);
+    crown.scale.set(1, 0.83, 0.82);
+    crown.castShadow = true;
+    group.add(crown);
+  }
+}
+
+function addLinearLight(group, x, y, z, length, metal, diffuser) {
+  makeBox(group, metal, [length, 0.055, 0.14], [x, y, z]);
+  makeBox(group, diffuser, [length - 0.08, 0.012, 0.07], [x, y - 0.035, z]);
+}
+
+function addTubeBetween(group, material, start, end, radius = 0.025) {
+  const a = new THREE.Vector3(...start);
+  const b = new THREE.Vector3(...end);
+  const direction = b.clone().sub(a);
+  const tube = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, direction.length(), 6), material);
+  tube.position.copy(a.add(b).multiplyScalar(0.5));
+  tube.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+  group.add(tube);
+}
+
+/** Concert stage, with rigging and loudspeakers outside the screen silhouette. */
 export function buildConcertStage(group, state, specs) {
   if (typeof THREE === 'undefined') return;
+  const { width, elevation, top } = screenDimensions(state, specs);
+  const stageWidth = Math.max(9.5, width + 5);
+  const stageDepth = 7.4;
+  const stageStart = state.mountType === 'truss' ? 1.45 : 0.3;
+  const rigHeight = Math.max(5.3, top + 1.65);
+  group.userData.mountCeilingY = rigHeight;
+  const deckHeight = Math.max(0.02, Math.min(0.75, elevation - 0.1));
+  const dark = new THREE.MeshStandardMaterial({ color: 0x24282c, roughness: 0.88 });
+  const deck = new THREE.MeshStandardMaterial({ color: 0x303239, roughness: 0.78 });
+  const fascia = new THREE.MeshStandardMaterial({ color: 0x171b1e, roughness: 0.88 });
+  const metal = new THREE.MeshStandardMaterial({ color: 0x6e777b, roughness: 0.42, metalness: 0.68 });
+  const speaker = new THREE.MeshStandardMaterial({ color: 0x202529, roughness: 0.84 });
+  const grille = new THREE.MeshStandardMaterial({ color: 0x30383c, roughness: 0.94 });
+  const lens = new THREE.MeshStandardMaterial({ color: 0xc5c8c2, emissive: 0x8d8c7e, emissiveIntensity: 0.26, roughness: 0.6 });
 
-  // Festival Arena Ground Floor
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(85, 85),
-    new THREE.MeshStandardMaterial({ color: 0x050811, roughness: 0.85 })
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  group.add(floor);
-
-  // Heavy Black Concert Stage Deck
-  const stageW = Math.max(16, specs.actualWidthM + 6);
-  const stageD = 9.5;
-  const stageH = 1.6;
-
-  const stage = new THREE.Mesh(
-    new THREE.BoxGeometry(stageW, stageH, stageD),
-    new THREE.MeshStandardMaterial({ color: 0x0b0f19, roughness: 0.6, metalness: 0.3 })
-  );
-  stage.position.set(0, stageH / 2, stageD / 2 - 1.2);
-  stage.receiveShadow = true;
-  group.add(stage);
-
-  // Heavy Aluminum Box-Truss Superstructure Grid
-  const trussMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.3, metalness: 0.9, wireframe: true });
-  const trussH = 14;
-
-  // 4 Main Vertical Corner Truss Pillars
-  [
-    [-stageW / 2 + 0.6, -1.0],
-    [stageW / 2 - 0.6, -1.0],
-    [-stageW / 2 + 0.6, stageD - 1.5],
-    [stageW / 2 - 0.6, stageD - 1.5]
-  ].forEach(([tx, tz]) => {
-    const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.85, trussH, 0.85), trussMat);
-    pillar.position.set(tx, trussH / 2, tz);
-    group.add(pillar);
-  });
-
-  // Overhead Box-Truss Roof Grid
-  const roofTruss = new THREE.Mesh(new THREE.BoxGeometry(stageW + 1.2, 0.85, stageD + 0.8), trussMat);
-  roofTruss.position.set(0, trussH, (stageD - 2.5) / 2);
-  group.add(roofTruss);
-
-  // Subwoofer Bass Speaker Stacks (Left & Right)
-  const subMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.7 });
-  [-stageW / 2 + 1.8, stageW / 2 - 1.8].forEach((sx) => {
-    for (let sy = 0; sy < 3; sy++) {
-      const sub = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.85, 1.2), subMat);
-      sub.position.set(sx, stageH + 0.45 + sy * 0.9, 0.8);
-      sub.castShadow = true;
-      group.add(sub);
+  addFloor(group, Math.max(stageWidth + 12, 24), 25, 'concrete', 9);
+  // The deck starts in front of the screen plane and never crosses it.
+  makeBox(group, deck, [stageWidth, deckHeight, stageDepth], [0, deckHeight / 2, stageDepth / 2 + stageStart], { cast: true });
+  makeBox(group, fascia, [stageWidth, Math.max(0.03, deckHeight * 0.82), 0.08],
+    [0, Math.max(0.015, deckHeight * 0.41), stageDepth + stageStart + 0.04]);
+  makeBox(group, dark, [stageWidth, rigHeight, 0.18], [0, rigHeight / 2, -0.34]);
+  const sideX = width / 2 + 1.15;
+  for (const side of [-1, 1]) {
+    const x = side * sideX;
+    // Four tube uprights and alternating braces read as a real box truss.
+    for (const dx of [-0.17, 0.17]) {
+      for (const dz of [-0.15, 0.15]) {
+        addTubeBetween(group, metal, [x + dx, 0, dz - 0.1], [x + dx, rigHeight, dz - 0.1]);
+      }
     }
-  });
-
-  // Hanging Line-Array Speaker Curve Arrays
-  [-stageW / 2 - 0.6, stageW / 2 + 0.6].forEach((lax) => {
-    for (let i = 0; i < 5; i++) {
-      const box = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.45, 0.7), subMat);
-      box.rotation.x = (i * Math.PI) / 36; // J-curve tilt
-      box.position.set(lax, trussH - 2.0 - i * 0.65, 3.5 + i * 0.15);
-      group.add(box);
+    for (let y = 0.4; y < rigHeight - 0.35; y += 0.7) {
+      addTubeBetween(group, metal, [x - 0.17, y, 0.05], [x + 0.17, Math.min(y + 0.7, rigHeight), 0.05], 0.017);
+      addTubeBetween(group, metal, [x - 0.17, y, 0.05], [x + 0.17, y, 0.05], 0.017);
     }
-  });
-
-  // Moving Head Stage Lights & Colored Volumetric Cones
-  const beamColors = [0x00e5ff, 0xa855f7, 0xff0055, 0x00e5ff, 0xffb800];
-  for (let b = 0; b < 5; b++) {
-    const bx = -stageW / 2 + 2.5 + b * ((stageW - 5) / 4);
-    const color = beamColors[b];
-
-    // Fixture Head
-    const head = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.18, 0.22, 0.45, 10),
-      new THREE.MeshStandardMaterial({ color: 0x020617, metalness: 0.8 })
-    );
-    head.position.set(bx, trussH - 0.6, 2.5);
-    group.add(head);
-
-    // Translucent Colored Light Beam Cone
-    const cone = new THREE.Mesh(
-      new THREE.ConeGeometry(1.8, 11, 16, 1, true),
-      new THREE.MeshBasicMaterial({
-        color: color,
-        transparent: true,
-        opacity: 0.22,
-        side: THREE.DoubleSide,
-        depthWrite: false
-      })
-    );
-    cone.position.set(bx, (trussH - 0.6) / 2, 2.5);
-    cone.rotation.z = (b - 2) * 0.08; // Slight fanning
-    group.add(cone);
+    const stackX = side * (width / 2 + 2.0);
+    for (let i = 0; i < 3; i++) {
+      const y = deckHeight + 0.31 + i * 0.62;
+      makeBox(group, speaker, [0.72, 0.62, 0.58], [stackX, y, stageStart + 0.65], { cast: true });
+      makeBox(group, grille, [0.62, 0.52, 0.018], [stackX, y, stageStart + 0.949]);
+    }
+  }
+  for (const dz of [-0.12, 0.16]) {
+    addTubeBetween(group, metal, [-sideX, rigHeight, dz], [sideX, rigHeight, dz]);
+    addTubeBetween(group, metal, [-sideX, rigHeight - 0.34, dz], [sideX, rigHeight - 0.34, dz]);
+  }
+  for (let x = -sideX + 0.7; x <= sideX - 0.6; x += 1.4) {
+    addTubeBetween(group, metal, [x, rigHeight - 0.34, 0.16], [x + 0.7, rigHeight, 0.16], 0.016);
+  }
+  for (let i = -2; i <= 2; i++) {
+    const x = i * Math.min(1.55, stageWidth / 8);
+    makeBox(group, speaker, [0.23, 0.2, 0.26], [x, rigHeight - 0.5, 0.3]);
+    const lamp = makeCylinder(group, lens, 0.075, 0.075, 0.03, [x, rigHeight - 0.62, 0.32], 10);
+    lamp.rotation.x = Math.PI / 2;
+  }
+  // Stage monitors and stairs occupy the wings, leaving the LED sightline open.
+  for (const side of [-1, 1]) {
+    makeBox(group, speaker, [0.72, 0.22, 0.46], [side * (width / 2 + 1.1), deckHeight + 0.11, 5.3], { cast: true });
+    if (deckHeight > 0.2) {
+      makeBox(group, deck, [1.15, deckHeight / 2, 0.7],
+        [side * (stageWidth / 2 - 0.65), deckHeight / 4, stageDepth + stageStart + 0.35]);
+    }
   }
 }
 
-/**
- * 10. Exhibition Booth (20x20 Trade-Show Island Convention Booth)
- */
+/** Exhibition booth with architectural back wall, literature and a reception desk. */
 export function buildExhibitionBooth(group, state, specs) {
   if (typeof THREE === 'undefined') return;
+  const { width, height, top } = screenDimensions(state, specs);
+  const boothWidth = Math.max(9.5, width + 5.4);
+  const wallHeight = Math.max(3.7, top + 0.8);
+  const boothDepth = 7.5;
+  const platformStart = state.mountType === 'truss' ? 1.45 : 0.1;
+  const platformDepth = boothDepth + 0.1 - platformStart;
+  const hallWidth = boothWidth + 10;
+  const hallHeight = wallHeight + 3;
+  const hallDepth = Math.max(15, width * 0.7 + 5, height * 1.55 + 4);
+  group.userData.sceneBounds = { width: hallWidth, height: hallHeight, depth: hallDepth, frontZ: -0.25 };
+  const wall = new THREE.MeshStandardMaterial({ color: 0x38444b, roughness: 0.87 });
+  const panel = new THREE.MeshStandardMaterial({ color: 0x52636a, roughness: 0.8 });
+  const accent = new THREE.MeshStandardMaterial({ color: 0x667f89, roughness: 0.72 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x222a2e, roughness: 0.78 });
+  const pale = new THREE.MeshStandardMaterial({ color: 0xc2c2b9, roughness: 0.74 });
+  const timber = new THREE.MeshStandardMaterial({ color: 0x80654d, roughness: 0.74 });
+  const metal = new THREE.MeshStandardMaterial({ color: 0x657177, roughness: 0.48, metalness: 0.55 });
+  const diffuser = new THREE.MeshStandardMaterial({ color: 0xd6d6c9, emissive: 0x7e8179, emissiveIntensity: 0.16 });
 
-  // Convention Hall Base Floor
-  const hallFloor = new THREE.Mesh(
-    new THREE.PlaneGeometry(60, 60),
-    new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 })
-  );
-  hallFloor.rotation.x = -Math.PI / 2;
-  hallFloor.receiveShadow = true;
-  group.add(hallFloor);
+  addFloor(group, hallWidth, hallDepth + 2, 'concrete', hallDepth / 2);
+  makeBox(group, dark, [hallWidth, 0.15, hallDepth + 0.5], [0, hallHeight + 0.075, hallDepth / 2 - 0.25]);
+  for (const side of [-1, 1]) {
+    makeBox(group, wall, [0.16, hallHeight, hallDepth], [side * (hallWidth / 2 + 0.08), hallHeight / 2, hallDepth / 2]);
+  }
+  makeBox(group, dark, [boothWidth, 0.05, platformDepth], [0, 0.025, platformStart + platformDepth / 2]);
+  const carpet = new THREE.Mesh(new THREE.PlaneGeometry(boothWidth - 0.1, platformDepth - 0.1), floorMaterial('carpet'));
+  carpet.rotation.x = -Math.PI / 2;
+  carpet.position.set(0, 0.052, platformStart + platformDepth / 2);
+  carpet.receiveShadow = true;
+  group.add(carpet);
+  makeBox(group, wall, [boothWidth, wallHeight, 0.22], [0, wallHeight / 2, -0.35]);
+  for (const side of [-1, 1]) {
+    const x = side * (width / 2 + 0.7);
+    makeBox(group, panel, [0.68, wallHeight - 0.28, 0.06], [x, wallHeight / 2, -0.205]);
+    makeBox(group, accent, [0.05, wallHeight - 0.5, 0.06], [side * (width / 2 + 1.1), wallHeight / 2, -0.17]);
+    makeBox(group, wall, [0.15, wallHeight * 0.8, 2.2],
+      [side * (boothWidth / 2 - 0.08), wallHeight * 0.4, 0.9]);
+  }
+  makeBox(group, dark, [boothWidth, 0.22, 0.25], [0, wallHeight - 0.11, -0.18]);
+  addLinearLight(group, 0, wallHeight - 0.28, 0.28, Math.min(boothWidth - 1, 7), metal, diffuser);
 
-  // Booth Platform Floor (Dark Charcoal Needle-Punch Carpet)
-  const boothW = Math.max(10, specs.actualWidthM + 4);
-  const boothD = 8.5;
-  const booth = new THREE.Mesh(
-    new THREE.BoxGeometry(boothW, 0.1, boothD),
-    new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.85 })
-  );
-  booth.position.set(0, 0.05, boothD / 2 - 1.0);
-  booth.receiveShadow = true;
-  group.add(booth);
+  const counterX = boothWidth / 2 - 1.0;
+  makeBox(group, dark, [1.7, 0.08, 0.72], [counterX, 0.09, 4.15]);
+  makeBox(group, pale, [1.7, 0.96, 0.7], [counterX, 0.61, 4.15], { cast: true });
+  makeBox(group, timber, [1.76, 0.065, 0.77], [counterX, 1.125, 4.15]);
+  makeBox(group, accent, [0.045, 0.76, 0.025], [counterX - 0.68, 0.62, 4.51]);
 
-  // Aluminum Transition Beveled Trim around Booth Edge
-  const trimMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.2, metalness: 0.9 });
-  const trim = new THREE.Mesh(new THREE.BoxGeometry(boothW + 0.1, 0.04, boothD + 0.1), trimMat);
-  trim.position.set(0, 0.02, boothD / 2 - 1.0);
-  group.add(trim);
-
-  // Booth Architectural Back Wall behind Screen
-  const wallW = Math.max(8, specs.actualWidthM + 2.5);
-  const wallH = Math.max(5.5, specs.actualHeightM + 2.0);
-  const backWall = new THREE.Mesh(
-    new THREE.BoxGeometry(wallW, wallH, 0.3),
-    new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.4 })
-  );
-  backWall.position.set(0, wallH / 2, -0.4);
-  backWall.receiveShadow = true;
-  group.add(backWall);
-
-  // Sleek Curved Reception Counter with Backlit JLED Cyan Edge
-  const counterW = 2.4;
-  const counter = new THREE.Mesh(
-    new THREE.BoxGeometry(counterW, 1.05, 0.75),
-    new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.25, metalness: 0.1 })
-  );
-  counter.position.set(boothW / 2 - 2.2, 0.55, 3.8);
-  counter.castShadow = true;
-  group.add(counter);
-
-  // Glowing Cyan Backlit Edge Strip
-  const glowStrip = new THREE.Mesh(
-    new THREE.BoxGeometry(counterW + 0.02, 0.06, 0.06),
-    new THREE.MeshBasicMaterial({ color: 0x00e5ff })
-  );
-  glowStrip.position.set(boothW / 2 - 2.2, 0.98, 4.2);
-  group.add(glowStrip);
-
-  // Literature / Brochure Display Rack
-  const rackMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.85 });
-  const rack = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.35, 0.4), rackMat);
-  rack.position.set(-boothW / 2 + 1.8, 0.68, 3.5);
-  rack.castShadow = true;
-  group.add(rack);
-
-  // Overhead 4-Sided Hanging Square Box-Truss Banner
-  const trussMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.3, metalness: 0.9, wireframe: true });
-  const bannerTruss = new THREE.Mesh(new THREE.BoxGeometry(boothW * 0.8, 0.45, boothD * 0.7), trussMat);
-  bannerTruss.position.set(0, 6.8, boothD / 2 - 1.0);
-  group.add(bannerTruss);
-
-  // Hanging Steel Cables
-  const cableMat = new THREE.MeshBasicMaterial({ color: 0x94a3b8 });
-  [
-    [-boothW * 0.38, -0.5],
-    [boothW * 0.38, -0.5],
-    [-boothW * 0.38, boothD - 1.5],
-    [boothW * 0.38, boothD - 1.5]
-  ].forEach(([cx, cz]) => {
-    const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 4.5, 6), cableMat);
-    cable.position.set(cx, 9.05, cz);
-    group.add(cable);
-  });
-}
-
-/**
- * 11. Retail Store / Transparent LED (Luxury Boutique Storefront)
- */
-export function buildRetailStore(group, state, specs) {
-  if (typeof THREE === 'undefined') return;
-
-  // Boutique Chevron Light Oak Parquet Floor
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(35, 35),
-    new THREE.MeshStandardMaterial({ color: 0x3d271d, roughness: 0.35, metalness: 0.1 })
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  group.add(floor);
-
-  // Boutique Ceiling with Track Light Rails
-  const ceiling = new THREE.Mesh(
-    new THREE.PlaneGeometry(35, 35),
-    new THREE.MeshStandardMaterial({ color: 0x0a0d14, roughness: 0.85 })
-  );
-  ceiling.rotation.x = Math.PI / 2;
-  ceiling.position.y = 6.5;
-  group.add(ceiling);
-
-  // Track Light Rails with Spotlights
-  const railMat = new THREE.MeshStandardMaterial({ color: 0x020617, metalness: 0.9 });
-  const spotMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.7 });
-  for (let tz = 1; tz <= 7; tz += 2.8) {
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(22, 0.05, 0.05), railMat);
-    rail.position.set(0, 6.44, tz);
-    group.add(rail);
-
-    for (let sx = -8; sx <= 8; sx += 3.2) {
-      const spot = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, 0.22, 8), spotMat);
-      spot.position.set(sx, 6.32, tz);
-      group.add(spot);
+  const rackX = -boothWidth / 2 + 0.75;
+  for (const dx of [-0.28, 0.28]) {
+    makeBox(group, metal, [0.035, 1.42, 0.035], [rackX + dx, 0.76, 3.75]);
+  }
+  for (let y = 0.38; y <= 1.28; y += 0.3) {
+    makeBox(group, pale, [0.63, 0.035, 0.3], [rackX, y, 3.75]);
+    for (let i = -1; i <= 1; i++) {
+      makeBox(group, panel, [0.12, 0.2, 0.02], [rackX + i * 0.16, y + 0.11, 3.79]);
     }
   }
-
-  // Floor-to-Ceiling Ultra-Clear Glass Storefront Window
-  const glassMat = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff,
-    transmission: 0.92,
-    opacity: 0.35,
-    transparent: true,
-    roughness: 0.05,
-    ior: 1.52,
-    reflectivity: 0.9
-  });
-  const windowGlass = new THREE.Mesh(new THREE.PlaneGeometry(24, 6.5), glassMat);
-  windowGlass.position.set(0, 3.25, 3.5);
-  group.add(windowGlass);
-
-  // Black Architectural Window Frame Mullions
-  const frameMat = new THREE.MeshStandardMaterial({ color: 0x020617, roughness: 0.2, metalness: 0.8 });
-  [-12, 12].forEach((fx) => {
-    const post = new THREE.Mesh(new THREE.BoxGeometry(0.18, 6.5, 0.25), frameMat);
-    post.position.set(fx, 3.25, 3.5);
-    group.add(post);
-  });
-
-  // Minimalist Terrazzo Display Pedestals for Mannequins / Products
-  const pedMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.3 });
-  [-4.5, 4.5].forEach((px) => {
-    const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.65, 20), pedMat);
-    pedestal.position.set(px, 0.325, 1.8);
-    pedestal.castShadow = true;
-    group.add(pedestal);
-
-    // Mannequin Torso Silhouette
-    const torso = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.18, 0.14, 0.75, 12),
-      new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.4 })
-    );
-    torso.position.set(px, 1.05, 1.8);
-    torso.castShadow = true;
-    group.add(torso);
-  });
-
-  // Minimalist Boutique Interior Feature Wall
-  const wallW = Math.max(18, specs.actualWidthM + 6);
-  const backWall = new THREE.Mesh(
-    new THREE.BoxGeometry(wallW, 6.5, 0.3),
-    new THREE.MeshStandardMaterial({ color: 0x182030, roughness: 0.5 })
-  );
-  backWall.position.set(0, 3.25, -0.4);
-  backWall.receiveShadow = true;
-  group.add(backWall);
+  addPlant(group, -boothWidth / 2 + 0.75, 1.8, 0.75, 0.05);
 }
 
-/**
- * 12. Corporate Lobby / LED Kiosk (Double-Height HQ Reception)
- */
+/** Boutique storefront: glazing and merchandising sit outside the screen opening. */
+export function buildRetailStore(group, state, specs) {
+  if (typeof THREE === 'undefined') return;
+  const { width, height, top } = screenDimensions(state, specs);
+  const shopWidth = Math.max(9.5, width + 5.0);
+  const shopHeight = Math.max(3.8, top + 1.2);
+  const depth = Math.max(9, width * 0.7 + 4, height * 1.55 + 3);
+  group.userData.sceneBounds = { width: shopWidth, height: shopHeight, depth, frontZ: -0.25 };
+  const wall = new THREE.MeshStandardMaterial({ color: 0x656661, roughness: 0.9 });
+  const inset = new THREE.MeshStandardMaterial({ color: 0x3d4546, roughness: 0.85 });
+  const cabinetry = new THREE.MeshStandardMaterial({ color: 0x776759, roughness: 0.75 });
+  const shelf = new THREE.MeshStandardMaterial({ color: 0xb8afa0, roughness: 0.77 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x2c3233, roughness: 0.55, metalness: 0.35 });
+  const glass = new THREE.MeshStandardMaterial({ color: 0x9bb4b6, transparent: true, opacity: 0.18, roughness: 0.14, metalness: 0.08, depthWrite: false, side: THREE.DoubleSide });
+  const diffuser = new THREE.MeshStandardMaterial({ color: 0xd7d0bc, emissive: 0xb7a98a, emissiveIntensity: 0.16 });
+
+  addFloor(group, shopWidth, depth + 1.5, 'timber', depth / 2 - 0.1);
+  makeBox(group, wall, [shopWidth, shopHeight, 0.22], [0, shopHeight / 2, -0.34]);
+  makeBox(group, inset, [width + 0.45, Math.min(shopHeight - 0.2, top + 0.3), 0.045],
+    [0, Math.min(shopHeight - 0.2, top + 0.3) / 2 + 0.05, -0.205]);
+  makeBox(group, wall, [shopWidth, 0.16, depth + 0.5], [0, shopHeight + 0.08, depth / 2 - 0.25]);
+  for (const side of [-1, 1]) {
+    const wallX = side * (shopWidth / 2 - 0.06);
+    makeBox(group, wall, [0.12, shopHeight, depth], [wallX, shopHeight / 2, depth / 2]);
+    // Glass belongs to the two outer storefront bays, never across the display.
+    const glassWidth = Math.max(0.6, (shopWidth - width - 1.6) / 2);
+    const glassX = side * (width / 2 + 0.8 + glassWidth / 2);
+    const window = new THREE.Mesh(new THREE.PlaneGeometry(glassWidth, Math.min(3.2, shopHeight - 0.35)), glass);
+    window.position.set(glassX, Math.min(3.2, shopHeight - 0.35) / 2 + 0.1, 0.45);
+    group.add(window);
+    for (const edgeX of [width / 2 + 0.78, shopWidth / 2 - 0.18]) {
+      makeBox(group, dark, [0.055, Math.min(3.4, shopHeight - 0.2), 0.09],
+        [side * edgeX, Math.min(3.4, shopHeight - 0.2) / 2 + 0.05, 0.48]);
+    }
+    const shelfX = side * (shopWidth / 2 - 0.55);
+    makeBox(group, cabinetry, [0.65, 2.2, 2.35], [shelfX, 1.1, 3.1]);
+    for (let y = 0.45; y <= 1.95; y += 0.5) {
+      makeBox(group, shelf, [0.69, 0.035, 2.28], [shelfX, y, 3.1]);
+      for (let z = 2.35; z <= 3.85; z += 0.75) {
+        makeBox(group, dark, [0.15, 0.19, 0.22], [shelfX, y + 0.11, z]);
+      }
+    }
+    makeBox(group, shelf, [0.7, 0.62, 0.7], [side * (width / 2 + 1.35), 0.31, 2.35], { cast: true });
+    makeCylinder(group, cabinetry, 0.17, 0.14, 0.32, [side * (width / 2 + 1.35), 0.79, 2.35]);
+  }
+  for (const z of [2.5, 5.5]) {
+    addLinearLight(group, 0, shopHeight - 0.12, z, shopWidth - 1.1, dark, diffuser);
+  }
+}
+
+/** Corporate reception lobby with side desk, stone flooring and seating. */
 export function buildCorporateLobby(group, state, specs) {
   if (typeof THREE === 'undefined') return;
+  const { width, height, top } = screenDimensions(state, specs);
+  const lobbyWidth = Math.max(12.5, width + 7.6);
+  const lobbyHeight = Math.max(4.6, top + 1.4);
+  const depth = Math.max(11, width * 0.65 + 4, height * 1.55 + 4);
+  group.userData.sceneBounds = { width: lobbyWidth, height: lobbyHeight, depth, frontZ: -0.25 };
+  const wall = new THREE.MeshStandardMaterial({ color: 0x747a78, roughness: 0.82 });
+  const feature = new THREE.MeshStandardMaterial({ color: 0x4e5a5e, roughness: 0.82 });
+  const metal = new THREE.MeshStandardMaterial({ color: 0x777f7c, roughness: 0.4, metalness: 0.6 });
+  const deskMat = new THREE.MeshStandardMaterial({ color: 0xc1b9ac, roughness: 0.62 });
+  const wood = new THREE.MeshStandardMaterial({ color: 0x806756, roughness: 0.72 });
+  const upholstery = new THREE.MeshStandardMaterial({ color: 0x566569, roughness: 0.92 });
+  const black = new THREE.MeshStandardMaterial({ color: 0x2c3438, roughness: 0.65 });
+  const diffuser = new THREE.MeshStandardMaterial({ color: 0xcfcfc4, emissive: 0xa4a38d, emissiveIntensity: 0.16 });
 
-  // Ultra-Luxury Bookmatched Marble Floor
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(55, 55),
-    new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.18, metalness: 0.3 })
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  group.add(floor);
-
-  // Double-Height Lobby Ceiling (8.5m)
-  const ceiling = new THREE.Mesh(
-    new THREE.PlaneGeometry(55, 55),
-    new THREE.MeshStandardMaterial({ color: 0x070b14, roughness: 0.8 })
-  );
-  ceiling.rotation.x = Math.PI / 2;
-  ceiling.position.y = 8.5;
-  group.add(ceiling);
-
-  // Bookmatched Italian Calacatta Marble Feature Wall
-  const wallW = Math.max(24, specs.actualWidthM + 8);
-  const wall = new THREE.Mesh(
-    new THREE.BoxGeometry(wallW, 8.5, 0.45),
-    new THREE.MeshStandardMaterial({ color: 0x1a2436, roughness: 0.25, metalness: 0.2 })
-  );
-  wall.position.set(0, 4.25, -0.5);
-  wall.receiveShadow = true;
-  group.add(wall);
-
-  // Fluted Architectural Columns (Circular with Metallic Trim)
-  const colMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.35, metalness: 0.7 });
-  [-8.5, 8.5].forEach((cx) => {
-    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.65, 8.5, 24), colMat);
-    col.position.set(cx, 4.25, 0.2);
-    col.castShadow = true;
-    group.add(col);
-  });
-
-  // Curved Reception Desk (White Marble with Brushed Brass Kickplate)
-  const deskMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2 });
-  const brassMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.2, metalness: 0.85 });
-
-  const deskGroup = new THREE.Group();
-  const deskBody = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.1, 1.2), deskMat);
-  deskBody.position.y = 0.55;
-  deskBody.castShadow = true;
-
-  const brassTrim = new THREE.Mesh(new THREE.BoxGeometry(4.25, 0.15, 1.25), brassMat);
-  brassTrim.position.y = 0.075;
-
-  deskGroup.add(deskBody, brassTrim);
-  deskGroup.position.set(0, 0, 7.5);
-  group.add(deskGroup);
-
-  // Optical Glass Turnstile Security Gates (4 Speed Gates)
-  const gateMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.15, metalness: 0.9 });
-  const wingGlassMat = new THREE.MeshPhysicalMaterial({
-    color: 0x00e5ff,
-    transmission: 0.9,
-    transparent: true,
-    opacity: 0.6,
-    roughness: 0.05
-  });
-
-  for (let gx = -3.6; gx <= 3.6; gx += 1.8) {
-    const pedestal = new THREE.Mesh(new THREE.BoxGeometry(0.28, 1.05, 1.4), gateMat);
-    pedestal.position.set(gx, 0.525, 11.5);
-    pedestal.castShadow = true;
-
-    // Optical Glowing Swing Glass Barrier
-    const glassWing = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.7, 0.45), wingGlassMat);
-    glassWing.position.set(gx < 0 ? gx + 0.35 : gx - 0.35, 0.75, 11.5);
-
-    group.add(pedestal, glassWing);
+  addFloor(group, lobbyWidth, depth + 0.8, 'stone', depth / 2);
+  makeBox(group, wall, [lobbyWidth, lobbyHeight, 0.22], [0, lobbyHeight / 2, -0.34]);
+  makeBox(group, feature, [width + 0.8, Math.min(lobbyHeight - 0.25, top + 0.45), 0.06],
+    [0, Math.min(lobbyHeight - 0.25, top + 0.45) / 2 + 0.08, -0.205]);
+  makeBox(group, wall, [lobbyWidth, 0.15, depth + 0.5], [0, lobbyHeight + 0.075, depth / 2 - 0.25]);
+  for (const side of [-1, 1]) {
+    const x = side * (lobbyWidth / 2 - 0.06);
+    makeBox(group, wall, [0.12, lobbyHeight, depth], [x, lobbyHeight / 2, depth / 2]);
+    const panelX = side * (width / 2 + 0.8);
+    makeBox(group, wood, [0.85, lobbyHeight - 0.3, 0.055], [panelX, lobbyHeight / 2, -0.205]);
+    for (let offset = -0.3; offset <= 0.31; offset += 0.15) {
+      makeBox(group, black, [0.018, lobbyHeight - 0.5, 0.018], [panelX + offset, lobbyHeight / 2, -0.17]);
+    }
+    addPlant(group, side * (lobbyWidth / 2 - 0.75), 1.5, 0.95);
+  }
+  for (const z of [3, 7]) {
+    addLinearLight(group, 0, lobbyHeight - 0.1, z, lobbyWidth - 1.5, metal, diffuser);
   }
 
-  // Indoor Architectural Ficus Tree Planter
-  const potMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
-  const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.8 });
+  const deskX = lobbyWidth / 2 - 1.65;
+  makeBox(group, black, [2.6, 0.1, 0.9], [deskX, 0.05, 4.1]);
+  makeBox(group, deskMat, [2.6, 0.98, 0.9], [deskX, 0.59, 4.1], { cast: true });
+  makeBox(group, wood, [2.68, 0.06, 0.96], [deskX, 1.11, 4.1]);
+  makeBox(group, metal, [2.35, 0.025, 0.02], [deskX, 0.33, 4.56]);
 
-  [-wallW / 2 + 1.8, wallW / 2 - 1.8].forEach((tx) => {
-    const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.5, 0.9, 16), potMat);
-    pot.position.set(tx, 0.45, 1.8);
-
-    const foliage = new THREE.Mesh(new THREE.SphereGeometry(1.2, 12, 12), foliageMat);
-    foliage.position.set(tx, 2.2, 1.8);
-
-    group.add(pot, foliage);
-  });
+  const seatX = -lobbyWidth / 2 + 1.45;
+  for (const z of [3.5, 5.15]) {
+    makeBox(group, black, [0.92, 0.08, 0.82], [seatX, 0.17, z]);
+    makeBox(group, upholstery, [0.92, 0.29, 0.82], [seatX, 0.37, z], { cast: true });
+    makeBox(group, upholstery, [0.92, 0.5, 0.16], [seatX, 0.72, z - 0.33], { cast: true });
+    for (const dx of [-0.39, 0.39]) {
+      makeBox(group, upholstery, [0.12, 0.32, 0.8], [seatX + dx, 0.57, z]);
+    }
+  }
+  makeCylinder(group, metal, 0.025, 0.025, 0.42, [seatX + 1.35, 0.21, 4.3], 10);
+  makeCylinder(group, wood, 0.48, 0.48, 0.045, [seatX + 1.35, 0.44, 4.3], 24);
 }

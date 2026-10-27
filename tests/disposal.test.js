@@ -75,6 +75,23 @@ describe('Resource Disposal & Memory Management', () => {
     assert.equal(rootGroup.children.length, 0);
   });
 
+  test('disposes shared clone resources once per scene rebuild', () => {
+    const calls = { geometry: 0, material: 0, texture: 0 };
+    const texture = { dispose: () => { calls.texture++; } };
+    const geometry = { dispose: () => { calls.geometry++; } };
+    const material = { map: texture, dispose: () => { calls.material++; } };
+    const root = {
+      children: [],
+      traverse(callback) { callback(this); this.children.forEach(callback); },
+      remove(child) { this.children.splice(this.children.indexOf(child), 1); }
+    };
+    root.children = [0, 1, 2].map(() => ({ geometry, material, parent: root }));
+
+    disposeHierarchy(root);
+    assert.deepEqual(calls, { geometry: 1, material: 1, texture: 1 });
+    assert.equal(root.children.length, 0);
+  });
+
   test('MediaTracker tracks, revokes, and halts video safely', () => {
     const tracker = new MediaTracker();
     const testUrl = 'blob:http://localhost/mock-video-uuid';
