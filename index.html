@@ -263,7 +263,13 @@
         <span class="w-2 h-5 rounded-full bg-gradient-to-b from-[#00E5FF] to-[#FF6B00]"></span>
         <h2 class="text-sm font-bold tracking-wide text-white uppercase">แผงควบคุมและสเปกจอ JLED</h2>
       </div>
-      <div class="flex items-center gap-1.5">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <button id="open-project-store-btn" type="button" title="บันทึก / เปิดโครงการ (.jled.json)" class="text-[11px] text-sky-300 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-sky-500/40 hover:border-sky-400">
+          <span>💾</span> โครงการ
+        </button>
+        <button id="export-snapshot-btn" type="button" title="บันทึกภาพถ่าย 3D Snapshot PNG" class="text-[11px] text-violet-300 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-violet-500/40 hover:border-violet-400">
+          <span>📸</span> ภาพ 3D
+        </button>
         <button id="open-pitch-lab-btn" type="button" title="ห้องทดลองเปรียบเทียบเม็ดพิกเซล (Pitch Comparison Lab)" class="text-[11px] text-emerald-300 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-emerald-500/40 hover:border-emerald-400">
           <span>🔬</span> Pitch Lab
         </button>
@@ -1067,17 +1073,85 @@
     </div>
   </div>
 
-  <!-- ================= QUOTATION & SPEC SUMMARY MODAL ================= -->
-  <div id="quote-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
-    <div class="glass-panel max-w-lg w-full rounded-2xl border border-[#00E5FF]/40 overflow-hidden shadow-2xl">
+  <!-- ================= PROJECT STORE MODAL (PHASE 10) ================= -->
+  <div id="project-store-modal" role="dialog" aria-modal="true" aria-label="จัดการโครงการ JLED" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-panel max-w-xl w-full rounded-2xl border border-sky-500/40 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <!-- Header -->
+      <div class="px-5 py-3.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">💾</span>
+          <div>
+            <h3 class="text-base font-bold text-white leading-tight">จัดการโครงการ JLED (Save / Open Project)</h3>
+            <p class="text-[11px] text-slate-400">บันทึกหรือเปิดไฟล์โครงการ .jled.json และพิมพ์เอกสารข้อเสนอ</p>
+          </div>
+        </div>
+        <button id="close-project-store-btn" type="button" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold">
+          ✕
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-5 space-y-5 overflow-y-auto">
+        <!-- Save Section -->
+        <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-sky-400 uppercase tracking-wide">1. บันทึกโครงการปัจจุบัน (Save Project)</span>
+            <span class="text-[10px] text-slate-500">Schema v4.0.0</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div>
+              <label class="block text-slate-400 text-[11px] mb-1">ชื่อโครงการ</label>
+              <input id="proj-save-name" type="text" value="โครงการ จอ LED JLED" class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white focus:border-[#00E5FF] outline-none" />
+            </div>
+            <div>
+              <label class="block text-slate-400 text-[11px] mb-1">ชื่อลูกค้า / ผู้ติดต่อ</label>
+              <input id="proj-save-client" type="text" placeholder="เช่น คุณสมชาย" class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white focus:border-[#00E5FF] outline-none" />
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-slate-400 text-[11px] mb-1">บริษัท / สถานที่ติดตั้ง</label>
+              <input id="proj-save-company" type="text" placeholder="เช่น บริษัท เอ บี ซี จำกัด (กรุงเทพฯ)" class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white focus:border-[#00E5FF] outline-none" />
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            <button id="proj-download-json-btn" type="button" class="py-2.5 px-3 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-lg">
+              <span>📥</span> ดาวน์โหลด .jled.json
+            </button>
+            <button id="proj-generate-proposal-btn" type="button" class="py-2.5 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition">
+              <span>📄</span> พิมพ์ข้อเสนอ Proposal PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- Open Section -->
+        <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-400 uppercase tracking-wide">2. เปิดโครงการเดิม (Open Project)</span>
+            <span class="text-[10px] text-slate-500">รองรับ .json และ .jled.json</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            เลือกไฟล์โครงการที่เคยบันทึกไว้เพื่อโหลดค่าสเปก ขนาดจอ รุ่นตู้ และตำแหน่งใน 3D กลับคืนมา
+          </p>
+          <input type="file" id="proj-load-file-input" accept=".json,.jled.json" class="hidden" />
+          <button id="proj-trigger-file-btn" type="button" class="w-full py-3 px-4 rounded-xl border-2 border-dashed border-slate-700 hover:border-amber-400/70 bg-slate-900/50 hover:bg-slate-900 text-slate-300 hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition cursor-pointer">
+            <span>📂</span> คลิกเพื่อเลือกไฟล์โครงการ (.jled.json)
+          </button>
+          <div id="proj-feedback-msg" class="hidden p-2.5 rounded-lg text-xs"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= QUOTATION & CRM LEAD MODAL (PHASE 11) ================= -->
+  <div id="quote-modal" role="dialog" aria-modal="true" aria-label="ขอใบเสนอราคาจอ JLED" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-panel max-w-xl w-full rounded-2xl border border-[#00E5FF]/40 overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
       <!-- Modal Header -->
-      <div class="px-5 py-4 bg-gradient-to-r from-slate-900 via-slate-900 to-[#00E5FF]/15 border-b border-slate-800 flex items-center justify-between">
+      <div class="px-5 py-4 bg-gradient-to-r from-slate-900 via-slate-900 to-[#00E5FF]/15 border-b border-slate-800 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-lg bg-[#00E5FF]/20 border border-[#00E5FF] flex items-center justify-center text-[#00E5FF] font-bold">
             J
           </div>
           <div>
-            <h3 class="text-base font-bold text-white leading-tight">สรุปสเปกจอ JLED เพื่อขอใบเสนอราคา</h3>
+            <h3 class="text-base font-bold text-white leading-tight">ขอใบเสนอราคาและสรุปสเปกทางการ</h3>
             <p class="text-[11px] text-slate-400">JLED Official Specification &amp; Quotation Request</p>
           </div>
         </div>
@@ -1086,26 +1160,86 @@
         </button>
       </div>
 
-      <!-- Modal Content -->
-      <div class="p-5 space-y-4">
-        <div class="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 font-mono text-xs text-slate-200 whitespace-pre-line leading-relaxed select-all" id="quote-summary-text"></div>
-
-        <!-- Copy Notification Toast inside modal -->
-        <div id="copy-success-banner" class="hidden p-2.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-medium text-center">
-          ✅ คัดลอกข้อมูลสเปกแล้ว (ยังไม่ได้ส่ง) สามารถกดวาง (Paste) ส่งให้ทีมขาย JLED ทาง LINE OA ได้ทันที
+      <!-- Modal Content (Scrollable) -->
+      <div class="p-5 space-y-4 overflow-y-auto">
+        <!-- Live Spec Badge Banner -->
+        <div class="p-3 rounded-xl bg-gradient-to-r from-slate-950 to-slate-900 border border-[#00E5FF]/30 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div>
+            <span class="text-slate-400">จอที่จัดไว้:</span>
+            <strong id="quote-spec-title" class="text-white ml-1">JLED Standard Indoor P2.5</strong>
+          </div>
+          <div class="flex items-center gap-2 font-mono">
+            <span id="quote-spec-dims" class="px-2 py-0.5 rounded bg-sky-950 border border-sky-500/40 text-sky-300 font-bold">4.80 x 2.70 m</span>
+            <span id="quote-spec-cabs" class="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/40 text-emerald-300 font-bold">72 ตู้</span>
+          </div>
         </div>
 
+        <!-- Customer Lead Form -->
+        <div class="space-y-2.5 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/80">
+          <div class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+            <span>👤</span> ข้อมูลผู้ขอใบเสนอราคา (Customer &amp; Project Info)
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div>
+              <label class="block text-slate-400 text-[11px] mb-1">ชื่อผู้ติดต่อ / ลูกค้า <span class="text-red-400">*</span></label>
+              <input id="lead-name" type="text" placeholder="ระบุชื่อ-นามสกุล" class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white focus:border-[#00E5FF] outline-none" />
+            </div>
+            <div>
+              <label class="block text-slate-400 text-[11px] mb-1">บริษัท / องค์กร</label>
+              <input id="lead-company" type="text" placeholder="ชื่อหน่วยงาน หรือบุคคลทั่วไป" class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white focus:border-[#00E5FF] outline-none" />
+            </div>
+            <div>
+              <label class="block text-slate-400 text-[11px] mb-1">เบอร์โทรศัพท์ <span class="text-red-400">*</span></label>
+              <input id="lead-phone" type="tel" placeholder="เช่น 0812345678" class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white focus:border-[#00E5FF] outline-none" />
+            </div>
+            <div>
+              <label class="block text-slate-400 text-[11px] mb-1">อีเมลติดต่อ <span class="text-red-400">*</span></label>
+              <input id="lead-email" type="email" placeholder="customer@example.com" class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white focus:border-[#00E5FF] outline-none" />
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-slate-400 text-[11px] mb-1">สถานที่ติดตั้ง (จังหวัด / พื้นที่)</label>
+              <input id="lead-location" type="text" placeholder="เช่น กรุงเทพฯ เขตปทุมวัน อาคาร A ชั้น 2" class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white focus:border-[#00E5FF] outline-none" />
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-slate-400 text-[11px] mb-1">หมายเหตุเพิ่มเติม / ข้อกำหนดพิเศษ</label>
+              <textarea id="lead-notes" rows="2" placeholder="เช่น ต้องการโครงขาตั้งล้อเลื่อน, ขอใบรับรองมอก., ต้องการติดตั้งภายในสิ้นเดือน" class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white focus:border-[#00E5FF] outline-none resize-none"></textarea>
+            </div>
+          </div>
+          <!-- Lead Validation Error Display -->
+          <div id="lead-error-box" class="hidden p-2 rounded-lg bg-red-950/70 border border-red-500/50 text-red-300 text-xs"></div>
+        </div>
+
+        <!-- Spec Text Preview & Toggle -->
+        <div>
+          <button id="toggle-spec-preview-btn" type="button" class="text-[11px] text-slate-400 hover:text-cyan-300 flex items-center gap-1 mb-1.5">
+            <span>▶</span> แสดงตัวอย่างข้อความสเปกสรุป (คลิกเพื่อเปิด/ปิด)
+          </button>
+          <div class="hidden p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono text-[11px] text-slate-300 whitespace-pre-line leading-relaxed select-all max-h-36 overflow-y-auto" id="quote-summary-text"></div>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="copy-success-banner" class="hidden p-2.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-medium text-center"></div>
+
+        <!-- Action Button Matrix -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+          <button id="lead-send-line-btn" type="button" class="py-2.5 px-4 rounded-xl bg-[#06C755] hover:bg-[#05b34c] text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-lg">
+            <span>💬</span> ส่งขอใบเสนอราคาทาง LINE OA
+          </button>
           <button id="copy-spec-btn" type="button" class="py-2.5 px-4 rounded-xl bg-[#00E5FF] hover:bg-[#00c4db] text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-lg">
             <span>📋</span> คัดลอกข้อความสรุปสเปก
           </button>
-          <a id="line-oa-btn" href="https://line.me/R/oaMessage/@jled/" target="_blank" rel="noopener noreferrer" class="py-2.5 px-4 rounded-xl bg-[#06C755] hover:bg-[#05b34c] text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-lg">
-            <span>💬</span> เปิด LINE OA (@JLED)
-          </a>
+          <button id="quote-print-proposal-btn" type="button" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-xs transition flex items-center justify-center gap-1.5">
+            <span>📄</span> พิมพ์ข้อเสนอ Proposal PDF
+          </button>
+          <button id="lead-export-crm-btn" type="button" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-xs transition flex items-center justify-center gap-1.5">
+            <span>📦</span> ส่งออกข้อมูล CRM (JSON)
+          </button>
         </div>
-        <p class="text-[10px] text-slate-500 text-center">
-          * เอกสารสรุปการออกแบบเบื้องต้น ไม่ใช่ใบเสนอราคาทางการ — ราคาและการรับรองจะออกโดยฝ่ายขาย/วิศวกร JLED
-        </p>
+
+        <!-- Mandatory Disclaimer -->
+        <div class="p-2.5 rounded-lg bg-amber-950/40 border border-amber-500/40 text-amber-300 text-[11px] leading-relaxed">
+          <strong>⚠️ ประกาศวิศวกรรมและการคิดราคา:</strong> ข้อมูลสเปก ระบบไฟ และโครงสร้างเป็นข้อมูลเบื้องต้นเพื่อประกอบการออกแบบ ไม่ใช่การยืนยันราคาขายหรือการรับรองหน้างานอัตโนมัติ ฝ่ายขายและวิศวกรเทคนิค JLED จะตรวจสอบข้อมูลหน้างานจริงก่อนออกใบเสนอราคาทางการ
+        </div>
       </div>
     </div>
   </div>
@@ -1123,6 +1257,8 @@
     import { comparePixelPitches } from './src/core/pitch-comparison.js';
     import { SHAPE_TYPES, validateShapeCompatibility, calculateLCornerParameters, calculateCurveParameters } from './src/core/shape-engine.js';
     import { calculateMediaTransform, drawTestPattern, FIT_MODES, TEST_PATTERNS } from './src/core/media-pipeline.js';
+    import { createProjectData, validateProjectJson, serializeProject, generateProposalHtml } from './src/core/project-store.js';
+    import { validateLeadContact, generateCrmPayload, generateLineMessage, buildLineDeepLink } from './src/core/lead-crm.js';
     import { globalStateStore } from './src/core/state.js';
     import { disposeHierarchy, globalMediaTracker } from './src/core/disposal.js';
 
@@ -3489,21 +3625,240 @@
         }
       });
 
-      // Quotation Modal
+      // ================= PHASE 10: PROJECT STORE & SNAPSHOT =================
+      const projectStoreModal = document.getElementById('project-store-modal');
+      const projSaveNameInput = document.getElementById('proj-save-name');
+      const projSaveClientInput = document.getElementById('proj-save-client');
+      const projSaveCompanyInput = document.getElementById('proj-save-company');
+      const projFeedbackMsg = document.getElementById('proj-feedback-msg');
+      const projFileInput = document.getElementById('proj-load-file-input');
+
+      function captureSnapshotDataUrl() {
+        try {
+          renderer.render(scene, camera);
+          return renderer.domElement.toDataURL('image/jpeg', 0.85);
+        } catch (err) {
+          return '';
+        }
+      }
+
+      function exportSnapshotPng() {
+        renderer.render(scene, camera);
+        const srcCanvas = renderer.domElement;
+        const bannerH = 68;
+        const outCanvas = document.createElement('canvas');
+        outCanvas.width = srcCanvas.width;
+        outCanvas.height = srcCanvas.height + bannerH;
+        const ctx = outCanvas.getContext('2d');
+
+        // Background
+        ctx.fillStyle = '#060911';
+        ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+
+        // 3D Scene
+        ctx.drawImage(srcCanvas, 0, 0);
+
+        // Footer Branding Bar
+        ctx.fillStyle = '#0b1120';
+        ctx.fillRect(0, srcCanvas.height, outCanvas.width, bannerH);
+        ctx.strokeStyle = '#00E5FF';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, srcCanvas.height);
+        ctx.lineTo(outCanvas.width, srcCanvas.height);
+        ctx.stroke();
+
+        // Branding text
+        const st = globalStateStore.getState();
+        const sp = globalStateStore.getSpecs();
+        const prod = globalStateStore.getProduct();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 16px Kanit, Inter, sans-serif';
+        ctx.fillText('JLED DESIGN STUDIO v4.0', 20, srcCanvas.height + 28);
+
+        ctx.fillStyle = '#00E5FF';
+        ctx.font = 'bold 12px Kanit, Inter, sans-serif';
+        const wM = (sp.buildableWidthMm / 1000).toFixed(2);
+        const hM = (sp.buildableHeightMm / 1000).toFixed(2);
+        ctx.fillText(`${prod?.name || st.productId} (P${st.pitchMm}) • ${wM}m x ${hM}m • ${sp.cabinetCount} Cabinets • ${sp.resolutionX}x${sp.resolutionY}px`, 20, srcCanvas.height + 50);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px Kanit, Inter, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('Official Simulation — LINE: @jled | www.jled.co.th', outCanvas.width - 20, srcCanvas.height + 38);
+
+        const a = document.createElement('a');
+        a.href = outCanvas.toDataURL('image/png');
+        a.download = `JLED_3D_Simulation_${Date.now()}.png`;
+        a.click();
+      }
+
+      function openPrintProposal(customMeta = null) {
+        const st = globalStateStore.getState();
+        const sp = globalStateStore.getSpecs();
+        const prod = globalStateStore.getProduct();
+        const snapshot = captureSnapshotDataUrl();
+
+        const leadName = document.getElementById('lead-name')?.value?.trim() || '';
+        const projName = projSaveNameInput?.value?.trim() || (leadName ? `โครงการ ${leadName}` : 'JLED Display Project');
+
+        const meta = customMeta || {
+          projectName: projName,
+          client: {
+            name: leadName || projSaveClientInput?.value?.trim() || '',
+            company: document.getElementById('lead-company')?.value?.trim() || projSaveCompanyInput?.value?.trim() || '',
+            phone: document.getElementById('lead-phone')?.value?.trim() || '',
+            email: document.getElementById('lead-email')?.value?.trim() || '',
+            siteLocation: document.getElementById('lead-location')?.value?.trim() || '',
+            notes: document.getElementById('lead-notes')?.value?.trim() || ''
+          }
+        };
+
+        const projectData = createProjectData(st, sp, meta);
+        const html = generateProposalHtml(projectData, prod, snapshot);
+
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+          printWindow.document.write(html);
+          printWindow.document.close();
+          printWindow.focus();
+          setTimeout(() => printWindow.print(), 350);
+        }
+      }
+
+      // Snapshot Export Button
+      document.getElementById('export-snapshot-btn')?.addEventListener('click', exportSnapshotPng);
+
+      // Project Store Open/Close
+      document.getElementById('open-project-store-btn')?.addEventListener('click', () => {
+        projFeedbackMsg.classList.add('hidden');
+        projectStoreModal.classList.remove('hidden');
+        projectStoreModal.classList.add('flex');
+      });
+
+      document.getElementById('close-project-store-btn')?.addEventListener('click', () => {
+        projectStoreModal.classList.add('hidden');
+        projectStoreModal.classList.remove('flex');
+      });
+
+      projectStoreModal.addEventListener('click', (e) => {
+        if (e.target === projectStoreModal) {
+          projectStoreModal.classList.add('hidden');
+          projectStoreModal.classList.remove('flex');
+        }
+      });
+
+      // Save Project JSON
+      document.getElementById('proj-download-json-btn')?.addEventListener('click', () => {
+        const st = globalStateStore.getState();
+        const sp = globalStateStore.getSpecs();
+        const pName = projSaveNameInput.value.trim() || 'JLED_Project';
+        const metadata = {
+          projectName: pName,
+          client: {
+            name: projSaveClientInput.value.trim(),
+            company: projSaveCompanyInput.value.trim()
+          }
+        };
+        const jsonStr = serializeProject(st, sp, metadata);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${pName.replace(/[\s\W]+/g, '_')}.jled.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // Generate Proposal from Project Modal
+      document.getElementById('proj-generate-proposal-btn')?.addEventListener('click', () => {
+        openPrintProposal();
+      });
+
+      // Open Project File Picker
+      document.getElementById('proj-trigger-file-btn')?.addEventListener('click', () => {
+        projFileInput.click();
+      });
+
+      projFileInput?.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const content = evt.target?.result;
+          const result = validateProjectJson(content);
+          if (!result.valid) {
+            projFeedbackMsg.className = 'p-2.5 rounded-lg text-xs bg-red-950/80 border border-red-500/50 text-red-300';
+            projFeedbackMsg.textContent = '❌ ' + result.errors.join(' | ');
+            projFeedbackMsg.classList.remove('hidden');
+            return;
+          }
+
+          const proj = result.project;
+          globalStateStore.update(proj.configuration);
+
+          if (proj.project) {
+            if (projSaveNameInput && proj.project.name) projSaveNameInput.value = proj.project.name;
+            if (projSaveClientInput && proj.project.client?.name) projSaveClientInput.value = proj.project.client.name;
+            if (projSaveCompanyInput && proj.project.client?.company) projSaveCompanyInput.value = proj.project.client.company;
+            if (document.getElementById('lead-name') && proj.project.client?.name) document.getElementById('lead-name').value = proj.project.client.name;
+            if (document.getElementById('lead-company') && proj.project.client?.company) document.getElementById('lead-company').value = proj.project.client.company;
+            if (document.getElementById('lead-phone') && proj.project.client?.phone) document.getElementById('lead-phone').value = proj.project.client.phone;
+            if (document.getElementById('lead-email') && proj.project.client?.email) document.getElementById('lead-email').value = proj.project.client.email;
+          }
+
+          projFeedbackMsg.className = 'p-2.5 rounded-lg text-xs bg-emerald-950/80 border border-emerald-500/50 text-emerald-300';
+          projFeedbackMsg.textContent = `✅ โหลดโครงการ "${proj.project?.name || file.name}" สำเร็จ (ขนาด: ${(proj.configuration.requestedWidthMm/1000).toFixed(2)}m x ${(proj.configuration.requestedHeightMm/1000).toFixed(2)}m P${proj.configuration.pitchMm})`;
+          projFeedbackMsg.classList.remove('hidden');
+        };
+        reader.readAsText(file);
+      });
+
+      // ================= PHASE 11: QUOTATION & CRM LEAD MODAL =================
       const quoteModal = document.getElementById('quote-modal');
       const quoteSummaryText = document.getElementById('quote-summary-text');
       const copyBanner = document.getElementById('copy-success-banner');
+      const leadErrorBox = document.getElementById('lead-error-box');
 
-      document.getElementById('open-quote-modal-btn').addEventListener('click', () => {
+      function getLeadContactFromForm() {
+        return {
+          name: document.getElementById('lead-name')?.value?.trim() || '',
+          company: document.getElementById('lead-company')?.value?.trim() || '',
+          phone: document.getElementById('lead-phone')?.value?.trim() || '',
+          email: document.getElementById('lead-email')?.value?.trim() || '',
+          siteLocation: document.getElementById('lead-location')?.value?.trim() || '',
+          notes: document.getElementById('lead-notes')?.value?.trim() || ''
+        };
+      }
+
+      function refreshQuoteModalContent() {
         const st = globalStateStore.getState();
         const sp = globalStateStore.getSpecs();
-        quoteSummaryText.textContent = generateQuotationText(st, sp);
+        const prod = globalStateStore.getProduct();
+        const contact = getLeadContactFromForm();
+
+        const titleEl = document.getElementById('quote-spec-title');
+        const dimsEl = document.getElementById('quote-spec-dims');
+        const cabsEl = document.getElementById('quote-spec-cabs');
+
+        if (titleEl) titleEl.textContent = `${prod?.name || st.productId} (P${st.pitchMm})`;
+        if (dimsEl) dimsEl.textContent = `${(sp.buildableWidthMm/1000).toFixed(2)} x ${(sp.buildableHeightMm/1000).toFixed(2)} m`;
+        if (cabsEl) cabsEl.textContent = `${sp.cabinetCount} ตู้ (${sp.cabinetColumns}x${sp.cabinetRows})`;
+
+        quoteSummaryText.textContent = generateLineMessage(contact, st, sp);
+      }
+
+      document.getElementById('open-quote-modal-btn')?.addEventListener('click', () => {
+        refreshQuoteModalContent();
         copyBanner.classList.add('hidden');
+        leadErrorBox.classList.add('hidden');
         quoteModal.classList.remove('hidden');
         quoteModal.classList.add('flex');
       });
 
-      document.getElementById('close-quote-modal-btn').addEventListener('click', () => {
+      document.getElementById('close-quote-modal-btn')?.addEventListener('click', () => {
         quoteModal.classList.add('hidden');
         quoteModal.classList.remove('flex');
       });
@@ -3515,13 +3870,75 @@
         }
       });
 
-      document.getElementById('copy-spec-btn').addEventListener('click', () => {
+      document.getElementById('toggle-spec-preview-btn')?.addEventListener('click', () => {
+        quoteSummaryText.classList.toggle('hidden');
+      });
+
+      // Send to LINE OA with Contact Validation
+      document.getElementById('lead-send-line-btn')?.addEventListener('click', () => {
+        const contact = getLeadContactFromForm();
+        const validation = validateLeadContact(contact);
+
+        if (!validation.valid) {
+          leadErrorBox.textContent = '⚠️ ' + Object.values(validation.errors).join(' • ');
+          leadErrorBox.classList.remove('hidden');
+          return;
+        }
+
+        leadErrorBox.classList.add('hidden');
+        const st = globalStateStore.getState();
+        const sp = globalStateStore.getSpecs();
+        const deepLink = buildLineDeepLink(contact, st, sp);
+
+        const win = window.open(deepLink, '_blank');
+        if (!win || win.closed || typeof win.closed === 'undefined') {
+          // If popup blocked or desktop fallback
+          const msg = generateLineMessage(contact, st, sp);
+          fallbackCopy(msg);
+          copyBanner.textContent = '📋 คัดลอกข้อมูลขอใบเสนอราคาแล้ว สามารถเปิด LINE OA แล้ววาง (Paste) ส่งได้ทันที';
+          copyBanner.classList.remove('hidden');
+          window.open('https://line.me/R/oaMessage/@jled/', '_blank');
+        } else {
+          copyBanner.textContent = '✅ กำลังเปิด LINE OA (@jled) พร้อมส่งข้อมูลสเปก...';
+          copyBanner.classList.remove('hidden');
+        }
+      });
+
+      // Copy Spec Button
+      document.getElementById('copy-spec-btn')?.addEventListener('click', () => {
+        refreshQuoteModalContent();
         const text = quoteSummaryText.textContent;
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
         } else {
           fallbackCopy(text);
         }
+        copyBanner.textContent = '✅ คัดลอกสรุปสเปกจอแล้ว สามารถนำไปวางส่งทาง LINE OA หรือ Email ได้ทันที';
+        copyBanner.classList.remove('hidden');
+      });
+
+      // Print Proposal from Quote Modal
+      document.getElementById('quote-print-proposal-btn')?.addEventListener('click', () => {
+        openPrintProposal();
+      });
+
+      // Export CRM JSON Payload
+      document.getElementById('lead-export-crm-btn')?.addEventListener('click', () => {
+        const contact = getLeadContactFromForm();
+        const st = globalStateStore.getState();
+        const sp = globalStateStore.getSpecs();
+        const payload = generateCrmPayload(contact, st, sp);
+        const jsonStr = JSON.stringify(payload, null, 2);
+
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `JLED_${payload.leadId}.crm.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        copyBanner.textContent = `📦 บันทึก CRM Lead Payload (${payload.leadId}) สำเร็จ พร้อมเชื่อมต่อระบบขาย`;
         copyBanner.classList.remove('hidden');
       });
 
@@ -3535,6 +3952,26 @@
         try { document.execCommand('copy'); } catch (err) {}
         document.body.removeChild(ta);
       }
+
+      // ================= PHASE 12: ACCESSIBILITY KEYBOARD NAVIGATION =================
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const allModals = [
+            quoteModal,
+            projectStoreModal,
+            document.getElementById('compare-modal'),
+            document.getElementById('catalog-modal'),
+            document.getElementById('mockup-modal'),
+            document.getElementById('pitch-lab-modal')
+          ];
+          for (const m of allModals) {
+            if (m && !m.classList.contains('hidden')) {
+              m.classList.add('hidden');
+              m.classList.remove('flex');
+            }
+          }
+        }
+      });
 
       window.addEventListener('resize', () => {
         const w = container.clientWidth;
